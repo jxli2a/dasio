@@ -1,0 +1,19 @@
+# Byte-compiled / optimized / native build artifacts
+__pycache__/
+*.py[cod]
+*.so
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Test / tooling caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Spec / design / planning documents — never committed (code only)
+docs/superpowers/
+
+# OS / editor cruft
+.DS_Store
