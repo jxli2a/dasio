@@ -92,6 +92,10 @@ def read_data_proc(
         data = data * np.float32(factor)
 
     if convert:
+        # TODO: verify against a real OptaSense Proc file — the module docstring
+        # mentions "strain-rate for legacy OptaSense", so confirm whether
+        # OptaSense-origin Proc (convert=True) stores strain or strain-rate.
+        # Current assumption: "microstrain" (strain scale, not strain-rate).
         units = "microstrain" if system == "OptaSense" else "microstrain/s"
     else:
         units = {"OptaSense": "count", "APSensing": "radian/s"}.get(system, "strain/s")

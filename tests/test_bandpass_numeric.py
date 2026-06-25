@@ -35,5 +35,5 @@ def test_matches_realtimemonitor_reference_bitwise():
     dt = 1.0 / fs
     got = lfilter(data, fmin * dt, order, fmax * dt, order, 1, 1)
     ref = ref_lfilter(data, fmin * dt, order, fmax * dt, order, 1, 1)
-    # Same source -> expect bit-identical (allow 1 ULP float32 slack).
+    # Same source -> expect bit-identical (allow ~8 ULP float32 slack).
     np.testing.assert_allclose(got, ref, rtol=0, atol=1e-6)

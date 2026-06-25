@@ -113,7 +113,7 @@ class DASdata:
         """
         keys = (
             'fs', 'dt', 'nt', 'nx', 'dx', 'begin_time', 'end_time',
-            't0_sec', 'gauge_length_m', 'system',
+            't0_sec', 'gauge_length_m', 'system', 'units',
         )
         return {k: getattr(self, k) for k in keys}
 
@@ -215,12 +215,28 @@ class DASdata:
 
         `data` is multiplied by `physical_factor`, the factor is reset to
         1.0, and `units` is advanced to its physical counterpart
-        (count->strain, radian/s->strain/s). No-op when `physical_factor`
-        is already 1.0. Requires a prior `read(with_factor=True)` to have
-        populated the factor.
+        (count->strain, radian/s->strain/s). When `physical_factor` is
+        already 1.0 and `units` is already physical (e.g. strain/s,
+        microstrain), returns an unchanged copy. When `physical_factor` is
+        1.0 but `units` still requires conversion (count/radian/radian/s),
+        raises `ValueError` — call `DASFile.read(with_factor=True)` first
+        so that the conversion factor is attached.
+
+        Raises
+        ------
+        ValueError
+            If called on non-physical units (count/radian/radian/s) without
+            an attached conversion factor (i.e. `physical_factor == 1.0`).
         """
         if self.physical_factor == 1.0:
-            return replace(self, units=_PHYSICAL_UNIT.get(self.units, self.units))
+            if self.units in _PHYSICAL_UNIT:
+                raise ValueError(
+                    f"to_physical(): units={self.units!r} require a conversion "
+                    f"factor, but physical_factor is 1.0. "
+                    f"Read the file with DASFile.read(with_factor=True) first."
+                )
+            # Units already physical (strain/s, microstrain, etc.) — genuine no-op.
+            return replace(self)
         new_data = (self.data * np.float32(self.physical_factor)).astype(np.float32)
         return replace(
             self, data=new_data, physical_factor=1.0,

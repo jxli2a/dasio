@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 from dasio.dasfile import DASFile
 
 
@@ -33,3 +34,13 @@ def test_to_physical_noop_when_factor_one(asn_file):
     p = d.to_physical()
     assert np.array_equal(p.data, d.data)
     assert p.units == "strain/s"
+
+
+def test_to_physical_raises_without_factor(optasense_file):
+    # OptaSense default read: units="count", physical_factor=1.0 (no factor attached).
+    # Calling to_physical() must raise ValueError rather than silently mislabeling data.
+    d = DASFile(optasense_file).read()
+    assert d.units == "count"
+    assert d.physical_factor == 1.0
+    with pytest.raises(ValueError):
+        d.to_physical()

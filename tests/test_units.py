@@ -14,6 +14,7 @@ def test_normalize_unit():
     assert normalize_unit("strain rate (microstrain/s)") == "microstrain/s"
     assert normalize_unit("MICROSTRAIN/S") == "microstrain/s"
     assert normalize_unit("nonsense") == "unknown"
+    assert normalize_unit("microstrain/sec") == "microstrain/s"
 
 
 def test_reader_units(optasense_file, asn_file, apsensing_file, proc_file, event_file):

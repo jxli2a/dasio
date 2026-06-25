@@ -15,5 +15,8 @@ dist/
 # Spec / design / planning documents — never committed (code only)
 docs/superpowers/
 
+# SDD workspace
+.superpowers/
+
 # OS / editor cruft
 .DS_Store
