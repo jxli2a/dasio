@@ -18,6 +18,20 @@ realTimeMonitor.dasio`` is ~50 ms instead of ~340 ms; ``from … import
 DASdata`` works without numba in scope; first call to ``bandpass``
 (or ``from … import bandpass``) is when numba loads.
 """
+__version__ = "0.1.0"
+
+__all__ = [
+    "DASdata", "DASmeta", "DASFile", "DASinfo",
+    "read_das_data", "read_das_metadata", "factor_raw2strain",
+    "read_data_proc", "read_metadata_proc", "write_data_proc",
+    "read_asn_raw", "read_asn_metadata",
+    "read_optasense_raw", "read_optasense_metadata", "optasense_count2strain_factor",
+    "read_apsensing_raw", "read_apsensing_metadata", "apsensing_radians2strain_factor",
+    "read_event", "read_event_metadata",
+    "detect_data_kind", "detect_origin",
+    "RawWindow",
+]
+
 from pathlib import Path
 from typing import Optional, Union
 

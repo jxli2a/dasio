@@ -1,0 +1,33 @@
+[build-system]
+requires = ["scikit-build-core>=0.8", "pybind11>=2.11"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "dasio"
+version = "0.1.0"
+description = "Lightweight standalone IO + basic processing for DAS (Distributed Acoustic Sensing) data"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=1.23",
+    "h5py>=3",
+    "scipy>=1.9",
+    "numba>=0.57",
+    "pandas>=1.5",
+    "pyarrow>=14",
+    "matplotlib>=3.6",
+    "joblib>=1.2",
+    "tqdm>=4",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7"]
+
+[project.scripts]
+das-desample = "dasio.desample:main"
+das-extract-events = "dasio.extract_events:main"
+
+[tool.scikit-build]
+cmake.version = ">=3.15"
+wheel.packages = ["dasio"]
