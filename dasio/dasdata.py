@@ -11,6 +11,11 @@ VALID_UNITS = frozenset({
     "microstrain", "microstrain/s",
 })
 
+# units after applying physical_factor (count->strain, radian/s->strain/s, ...).
+_PHYSICAL_UNIT = {
+    "count": "strain", "radian": "strain", "radian/s": "strain/s",
+}
+
 # Substring -> canonical, longest patterns first so "microstrain/s" wins over "strain/s".
 _UNIT_PATTERNS = (
     ("microstrain/s", "microstrain/s"),
@@ -86,6 +91,11 @@ class DASdata:
     # ("unknown" = not tagged). Set by the readers; NOT auto-updated by
     # processing (integrate/differentiate change the quantity but not this tag).
     units:           str = "unknown"
+    # Multiply `data` by this to reach physical units: strain (OptaSense
+    # count->strain) or strain/s (AP Sensing radian/s->strain/s; ASN is
+    # already strain/s so the factor is 1.0). Populated by
+    # DASFile.read(with_factor=True); 1.0 otherwise.
+    physical_factor: float = 1.0
 
     # ---- Read-only accessors ----------------------------------------------
 
@@ -198,6 +208,23 @@ class DASdata:
         return replace(
             self, data=new_data, nx=new_nx, nt=new_nt,
             begin_time=new_begin, end_time=new_end, t0_sec=new_t0,
+        )
+
+    def to_physical(self) -> "DASdata":
+        """Return a copy with `physical_factor` applied to `data`.
+
+        `data` is multiplied by `physical_factor`, the factor is reset to
+        1.0, and `units` is advanced to its physical counterpart
+        (count->strain, radian/s->strain/s). No-op when `physical_factor`
+        is already 1.0. Requires a prior `read(with_factor=True)` to have
+        populated the factor.
+        """
+        if self.physical_factor == 1.0:
+            return replace(self, units=_PHYSICAL_UNIT.get(self.units, self.units))
+        new_data = (self.data * np.float32(self.physical_factor)).astype(np.float32)
+        return replace(
+            self, data=new_data, physical_factor=1.0,
+            units=_PHYSICAL_UNIT.get(self.units, self.units),
         )
 
     # ---- OOP-style processing entry points ---------------------------------

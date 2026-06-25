@@ -16,6 +16,7 @@ one-shot call sites.
 """
 from __future__ import annotations
 
+from dataclasses import replace
 from pathlib import Path
 from typing import List, Optional, Union
 
@@ -123,13 +124,15 @@ class DASFile:
 
     # ---- read / metadata / factor -------------------------------------
 
-    def read(self, **kwargs) -> DASdata:
+    def read(self, *, with_factor: bool = False, **kwargs) -> DASdata:
         """Load the payload as a `DASdata`.
 
         Keyword arguments pass through to the vendor reader
         (``min_ch``, ``max_ch``, ``first_sample``, ``n_samples``,
         ``convert``); the Proc reader ignores the first_sample /
         n_samples pair.
+        When with_factor=True, attaches DASFile.factor() as DASdata.physical_factor
+        (one extra file open; default False keeps the desample/dasdb read path unchanged).
         """
         try:
             reader = _DATA_READERS[self.system]
@@ -138,7 +141,10 @@ class DASFile:
                 f'No data reader for system {self.system!r}; '
                 f'known: {sorted(_DATA_READERS)}'
             )
-        return reader(self.path, **kwargs)
+        d = reader(self.path, **kwargs)
+        if with_factor:
+            d = replace(d, physical_factor=self.factor())
+        return d
 
     def metadata(self) -> Union[DASmeta, List[DASmeta]]:
         """Return a `DASmeta` dict (ASN / Proc) or list of them
