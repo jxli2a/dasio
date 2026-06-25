@@ -10,10 +10,9 @@ import numpy as np
 from ..dasdata import DASdata, DASmeta
 
 
-# Constants copied verbatim from
-# src/DAS-utilities/python/DASutils.py::_parse_raw2strain_factor_optasense (line 1451)
-_ETA = 0.78                # photo-elastic scaling factor for longitudinal strain in isotropic material
-_COUNT2PHASE = np.pi / 2 ** 15  # raw count to radians
+# Vendor physics constants live in constants.py; aliased here so the
+# existing _ETA / _COUNT2PHASE references in this module keep working.
+from .constants import OPTASENSE_ETA as _ETA, OPTASENSE_COUNT2PHASE as _COUNT2PHASE
 
 
 def optasense_count2strain_factor(f: h5py.File) -> float:
