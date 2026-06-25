@@ -379,7 +379,7 @@ def desample_and_write_window(
 # --- CLI ---
 
 def main(argv=None):
-    ap = argparse.ArgumentParser(prog='python -m realTimeMonitor.dasio.desample')
+    ap = argparse.ArgumentParser(prog='python -m dasio.desample')
     ap.add_argument('--from', dest='raw_dir', required=True, type=Path)
     ap.add_argument('--to', dest='out_dir', required=True, type=Path)
     ap.add_argument(

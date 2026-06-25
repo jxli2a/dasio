@@ -1,4 +1,4 @@
-"""Entry point for `python -m realTimeMonitor.dasio ...`."""
+"""Entry point for `python -m dasio ...`."""
 import sys
 
 from .desample import main

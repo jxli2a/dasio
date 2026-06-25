@@ -165,7 +165,7 @@ class DASdata:
         )
 
     # ---- OOP-style processing entry points ---------------------------------
-    # Thin shims over `realTimeMonitor.dasio.processing.*`; the functional
+    # Thin shims over `dasio.processing.*`; the functional
     # form remains the source of truth (and the canonical test target).
     # Lazy import here avoids dragging numba + the cpp filter extension
     # into every module that just wants to construct a DASdata — a fresh

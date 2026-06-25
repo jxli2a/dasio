@@ -10,11 +10,11 @@ wrappers around it for one-shot call sites that don't want to hold a
 Symbols are exposed through a module-level ``__getattr__`` lazy
 table when they (a) need to avoid the runpy "found in sys.modules
 before execution" warning when run with ``python -m
-realTimeMonitor.dasio.<mod>`` (DASdb, desample_*) or (b) drag in
+dasio.<mod>`` (DASdb, desample_*) or (b) drag in
 heavy deps that streaming / viewer code shouldn't pay for at module
 load — `processing` / `signal` import numba (~300 ms) and the
 pybind11 filter extension. After the lazy entry, ``import
-realTimeMonitor.dasio`` is ~50 ms instead of ~340 ms; ``from … import
+dasio`` is ~50 ms instead of ~340 ms; ``from … import
 DASdata`` works without numba in scope; first call to ``bandpass``
 (or ``from … import bandpass``) is when numba loads.
 """

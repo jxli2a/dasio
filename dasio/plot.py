@@ -7,7 +7,7 @@ free of the matplotlib startup cost — the load only fires when an
 actual plot is requested.
 
 For richer plot types (cc2d, fk, xcorr) keep using
-`realTimeMonitor.lfdas.DASplot`; this module covers the everyday
+`dasio`'s legacy plotting; this module covers the everyday
 "show me the data" case in ~60 lines without dragging that whole
 library into dasio.
 """

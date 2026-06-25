@@ -725,7 +725,7 @@ class DASdb:
 # --- CLI ---
 
 def main(argv=None):
-    """`python -m realTimeMonitor.dasio.dasdb` — build or update a DASdb catalog.
+    """`python -m dasio.dasdb` — build or update a DASdb catalog.
 
     Format dispatch is by file extension: .parquet/.parq writes
     parquet, .csv/.txt/no-suffix writes legacy whitespace CSV.
@@ -734,11 +734,11 @@ def main(argv=None):
     disk. Pass --overwrite to force a full rescan.
 
     One-shot format conversion of an existing catalog is a one-liner:
-        python -c "from realTimeMonitor.dasio.dasdb import DASdb; \\
+        python -c "from dasio.dasdb import DASdb; \\
             DASdb.from_file('old.csv', system='ASN').to_file('new.parquet')"
     """
     import argparse
-    ap = argparse.ArgumentParser(prog='python -m realTimeMonitor.dasio.dasdb')
+    ap = argparse.ArgumentParser(prog='python -m dasio.dasdb')
     ap.add_argument(
         '--from', dest='raw_dir', required=True, type=Path,
         help='directory of raw DAS files to scan',

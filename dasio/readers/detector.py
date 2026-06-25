@@ -11,7 +11,7 @@ preserves.
 
 Both live in dasio/readers/ because they're the keys the readers
 package uses to dispatch within itself; the public API is still
-re-exported from realTimeMonitor.dasio.
+re-exported from dasio.
 """
 from __future__ import annotations
 
