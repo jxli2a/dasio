@@ -131,6 +131,7 @@ def read_optasense_raw(
         begin_time=begin_time, end_time=end_time,
         gauge_length_m=gauge_length_m, system='OptaSense',
         raw_meta=raw_meta,
+        units="count",
     )
 
 

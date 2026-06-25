@@ -115,7 +115,7 @@ def read_asn_raw(
     ) -> DASdata:
     """Read one raw ASN HDF5 file, apply sensitivity scaling + polarity flip.
 
-    Returns data in strain units (sign-flipped relative to raw). On-disk
+    Returns data in strain rate (strain/s), sign-flipped relative to raw. On-disk
     layout is (n_time_samples, n_channels); output DASdata is (nx, nt).
     """
     file = Path(file)
@@ -189,6 +189,7 @@ def read_asn_raw(
         begin_time=begin_time, end_time=end_time,
         gauge_length_m=gauge_length_m, system='ASN',
         raw_meta=raw_meta,
+        units="strain/s",
     )
 
 

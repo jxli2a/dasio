@@ -91,6 +91,11 @@ def read_data_proc(
     if convert and factor != 1.0:
         data = data * np.float32(factor)
 
+    if convert:
+        units = "microstrain" if system == "OptaSense" else "microstrain/s"
+    else:
+        units = {"OptaSense": "count", "APSensing": "radian/s"}.get(system, "strain/s")
+
     nt_out = data.shape[1]
     dt = float(attrs['dt'])
     begin_time = parse_iso(attrs['startTime']) + timedelta(seconds=first_sample * dt)
@@ -107,6 +112,7 @@ def read_data_proc(
         gauge_length_m=float(attrs['GaugeLength']) if 'GaugeLength' in attrs else None,
         system=system,
         raw_meta=None,
+        units=units,
     )
 
 

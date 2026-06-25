@@ -32,7 +32,7 @@ from typing import Any, Mapping, Optional, Union
 import h5py
 import numpy as np
 
-from ..dasdata import DASdata, DASmeta
+from ..dasdata import DASdata, DASmeta, normalize_unit
 
 
 # Structural attrs live on DASdata fields, not raw_meta.
@@ -106,6 +106,7 @@ def read_event(
         begin_time=begin_time, end_time=end_time,
         gauge_length_m=None, system='Event',
         raw_meta=raw_meta, t0_sec=t0_sec,
+        units=normalize_unit(attrs.get("unit")),
     )
 
 

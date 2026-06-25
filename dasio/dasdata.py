@@ -6,6 +6,38 @@ from typing import Optional, Tuple, TypedDict, Union
 import numpy as np
 
 
+VALID_UNITS = frozenset({
+    "count", "radian", "radian/s", "strain", "strain/s",
+    "microstrain", "microstrain/s",
+})
+
+# Substring -> canonical, longest patterns first so "microstrain/s" wins over "strain/s".
+_UNIT_PATTERNS = (
+    ("microstrain/s", "microstrain/s"),
+    ("radian/s", "radian/s"),
+    ("strain/s", "strain/s"),
+    ("microstrain", "microstrain"),
+    ("radian", "radian"),
+    ("strain", "strain"),
+    ("count", "count"),
+)
+
+
+def normalize_unit(s) -> str:
+    """Map a free-form unit string onto the controlled vocabulary.
+
+    Returns 'unknown' for anything unrecognized. Case-insensitive;
+    matches the first (longest) known substring.
+    """
+    if not s:
+        return "unknown"
+    t = str(s).strip().lower().replace("/sec", "/s")
+    for pat, canon in _UNIT_PATTERNS:
+        if pat in t:
+            return canon
+    return "unknown"
+
+
 class DASmeta(TypedDict):
     """One row of per-file catalog metadata (what DASdb holds).
 
@@ -50,6 +82,10 @@ class DASdata:
     # event." `begin_time` stays the absolute anchor, `t0_sec` is the
     # seconds-frame anchor; the two together pin both views.
     t0_sec:          float = 0.0
+    # Physical unit of `data`, from the controlled VALID_UNITS vocabulary
+    # ("unknown" = not tagged). Set by the readers; NOT auto-updated by
+    # processing (integrate/differentiate change the quantity but not this tag).
+    units:           str = "unknown"
 
     # ---- Read-only accessors ----------------------------------------------
 
