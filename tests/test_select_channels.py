@@ -54,3 +54,35 @@ def test_truncate_no_longer_accepts_ch_index():
     d = make()
     with pytest.raises(TypeError):
         d.truncate(ch_index=[0, 1])
+
+
+def test_skip_ch_decimates_and_scales_dx():
+    d = make(nx=6, fs=100.0)                         # dx = 2.0
+    out = d.skip_ch(2)
+    assert out.nx == 3                               # channels 0, 2, 4
+    assert list((out.data[:, 0] // 1000).astype(int)) == [0, 2, 4]
+    assert out.dx == 4.0                             # 2.0 * step
+    assert out.nt == d.nt and out.fs == d.fs and out.dt == d.dt   # time untouched
+    assert out.data.flags["C_CONTIGUOUS"]
+
+
+def test_skip_t_decimates_and_scales_dt_fs():
+    d = make(nx=4, nt=20, fs=100.0)                  # dt = 0.01
+    out = d.skip_t(5)
+    assert out.nt == 4                               # samples 0, 5, 10, 15
+    assert list((out.data[0] % 1000).astype(int)) == [0, 5, 10, 15]
+    assert out.nx == d.nx and out.dx == d.dx         # channels untouched
+    assert out.dt == pytest.approx(0.05)             # 0.01 * step
+    assert out.fs == pytest.approx(20.0)             # 100 / step
+    assert out.begin_time == d.begin_time            # sample 0 kept
+    # end_time snaps to the last kept sample: begin + (nt-1)*new_dt
+    assert (out.end_time - out.begin_time).total_seconds() == pytest.approx(0.15)
+    assert out.data.flags["C_CONTIGUOUS"]
+
+
+def test_skip_step_le_one_is_noop():
+    d = make()
+    for out in (d.skip_ch(1), d.skip_t(1), d.skip_ch(0)):   # 0 clamps to 1
+        assert out.nx == d.nx and out.nt == d.nt
+        assert out.dx == d.dx and out.dt == d.dt
+        np.testing.assert_array_equal(out.data, d.data)

@@ -233,6 +233,47 @@ class DASdata:
         new_data = np.ascontiguousarray(self.data[np.asarray(channels)])
         return replace(self, data=new_data, nx=new_data.shape[0])
 
+    def skip_ch(self, step: int) -> 'DASdata':
+        """Keep every `step`-th channel (uniform decimation), updating `dx`.
+
+        A coarse, faster channel view — `d.skip_ch(5)` keeps 1 channel in 5.
+        Because the stride is uniform, `dx` scales by `step` so the channel
+        axis stays physically correct (unlike `select_channels`, whose
+        arbitrary picks leave `dx` meaningless). No spatial anti-alias
+        filter is applied, so this is for display/preview, not analysis.
+        `step <= 1` returns an unchanged copy. `data` is C-contiguous.
+        """
+        step = max(1, int(step))
+        if step == 1:
+            return replace(self)
+        new_data = np.ascontiguousarray(self.data[::step])
+        new_dx = self.dx * step if self.dx is not None else None
+        return replace(self, data=new_data, nx=new_data.shape[0], dx=new_dx)
+
+    def skip_t(self, step: int) -> 'DASdata':
+        """Keep every `step`-th time sample (uniform decimation), updating `dt`/`fs`.
+
+        A coarse, faster time view — `d.skip_t(5)` keeps 1 sample in 5.
+        `dt` scales by `step` and `fs` divides by it, so the time axis stays
+        correct; `begin_time`/`t0_sec` are unchanged (sample 0 is kept) and
+        `end_time` snaps to the last kept sample. No temporal anti-alias
+        filter is applied, so this is for display/preview, not analysis
+        (use a proper resample/decimate for that). `step <= 1` returns an
+        unchanged copy. `data` is C-contiguous.
+        """
+        step = max(1, int(step))
+        if step == 1:
+            return replace(self)
+        new_data = np.ascontiguousarray(self.data[:, ::step])
+        new_nt = new_data.shape[1]
+        new_dt = self.dt * step
+        new_end = (
+            self.begin_time + timedelta(seconds=(new_nt - 1) * new_dt)
+            if new_nt else self.begin_time
+        )
+        return replace(self, data=new_data, nt=new_nt, dt=new_dt,
+                       fs=self.fs / step, end_time=new_end)
+
     def to_physical(self) -> "DASdata":
         """Return a copy with `physical_factor` applied to `data`.
 

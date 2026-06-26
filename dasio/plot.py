@@ -21,6 +21,8 @@ def imshow(
         ax=None,
         ch_range: Optional[Tuple[int, int]] = None,
         t_range: Optional[Tuple] = None,
+        skip_ch: int = 1,
+        skip_t: int = 1,
         style: str = 'seismic',
         usedatetime: bool = False,
         perc: float = 99.5,
@@ -42,6 +44,13 @@ def imshow(
         Forwarded to `DASdata.truncate` for the displayed window.
         For an arbitrary channel subset, pre-select with
         `d.select_channels(...)` and plot the result.
+    skip_ch, skip_t : int, default 1
+        Plot only every `skip_ch`-th channel / `skip_t`-th time sample —
+        a coarser, faster raster for big arrays (e.g. `skip_t=5` on a wide
+        window). Reuses `DASdata.skip_ch` / `.skip_t`. The percentile and
+        the image both run on the decimated array, so this genuinely speeds
+        the plot up; the channel/time axes still span the full range. `1`
+        (default) draws every sample.
     style : {'seismic', 'normal'}
         `'seismic'` (default, matches legacy DASutils) puts channels
         on the x-axis and time on the y-axis with time growing
@@ -80,6 +89,23 @@ def imshow(
         ch_range=ch_range, t_range=t_range,
     )
 
+    # Channel count and time-axis extent come from the *full* window, before
+    # any skip, so the axes always label the true channel / time range; the
+    # skip below only coarsens the rasterized array, not the coordinates.
+    nx_full = sub.nx
+    if usedatetime:
+        dt_axis = sub.datetime_axis
+        t_left = mdates.date2num(dt_axis[0].astype('datetime64[us]').astype(object))
+        t_right = mdates.date2num(dt_axis[-1].astype('datetime64[us]').astype(object))
+    else:
+        tax = sub.time_axis
+        t_left, t_right = float(tax[0]), float(tax[-1])
+
+    # Decimate the raster — every `skip_ch`-th channel and `skip_t`-th sample,
+    # reusing DASdata.skip_ch / .skip_t. The percentile and imshow then run on
+    # the smaller array (the real speedup); the extent above keeps the axes.
+    sub = sub.skip_ch(skip_ch).skip_t(skip_t)
+
     if vmin is None or vmax is None:
         v = float(np.nanpercentile(np.abs(sub.data), perc))
         if vmin is None:
@@ -92,20 +118,10 @@ def imshow(
             figsize = (8, 4) if style == 'seismic' else (4, 8)
         _, ax = plt.subplots(figsize=figsize)
 
-    # Time-axis values for the extent, in either seconds or mpl date
-    # units; we apply a date formatter on the chosen axis afterwards.
-    if usedatetime:
-        dt_axis = sub.datetime_axis
-        t_left = mdates.date2num(dt_axis[0].astype('datetime64[us]').astype(object))
-        t_right = mdates.date2num(dt_axis[-1].astype('datetime64[us]').astype(object))
-    else:
-        tax = sub.time_axis
-        t_left, t_right = float(tax[0]), float(tax[-1])
-
     if style == 'normal':
         # data shape (nx, nt) — imshow it directly: rows=channels, cols=time.
         # extent = (left, right, bottom, top); channel 0 at top.
-        extent = (t_left, t_right, sub.nx - 1, 0)
+        extent = (t_left, t_right, nx_full - 1, 0)
         im = ax.imshow(
             sub.data, aspect='auto', cmap=cmap,
             vmin=vmin, vmax=vmax, extent=extent, **kwargs,
@@ -116,7 +132,7 @@ def imshow(
     else:
         # 'seismic': transpose so rows=time, cols=channels; flip y so
         # time grows downward (small-time at top, large-time at bottom).
-        extent = (0, sub.nx - 1, t_right, t_left)
+        extent = (0, nx_full - 1, t_right, t_left)
         im = ax.imshow(
             sub.data.T, aspect='auto', cmap=cmap,
             vmin=vmin, vmax=vmax, extent=extent, **kwargs,

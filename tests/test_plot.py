@@ -2,6 +2,7 @@
 from datetime import datetime, timezone
 
 import numpy as np
+import pytest
 import matplotlib
 matplotlib.use("Agg")
 from matplotlib.collections import LineCollection
@@ -55,3 +56,16 @@ def test_wiggle_normal_style_and_datetime_run():
     ax2 = d.plot.wiggle(usedatetime=True)
     assert any(isinstance(c, LineCollection) for c in ax1.collections)
     assert any(isinstance(c, LineCollection) for c in ax2.collections)
+
+
+def test_imshow_skip_decimates_raster_but_keeps_full_extent():
+    d = make(nx=100, nt=2000, fs=100.0)
+    _, im_full = d.plot()                            # seismic style -> imshow(data.T)
+    assert im_full.get_array().shape == (2000, 100)  # (nt, nx)
+
+    _, im = d.plot(skip_ch=5, skip_t=10)
+    assert im.get_array().shape == (200, 20)         # raster decimated (nt/10, nx/5)
+    x0, x1, y0, y1 = im.get_extent()
+    assert (x0, x1) == (0, 99)                        # channel axis spans full range
+    assert y0 == pytest.approx(d.time_axis[-1])       # time axis spans full range
+    assert y1 == pytest.approx(d.time_axis[0])
