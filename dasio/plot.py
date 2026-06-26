@@ -40,6 +40,8 @@ def imshow(
         Plot target; one is created if not given.
     ch_range, t_range : tuples, optional
         Forwarded to `DASdata.truncate` for the displayed window.
+        For an arbitrary channel subset, pre-select with
+        `d.select_channels(...)` and plot the result.
     style : {'seismic', 'normal'}
         `'seismic'` (default, matches legacy DASutils) puts channels
         on the x-axis and time on the y-axis with time growing
@@ -131,7 +133,7 @@ def imshow(
         )
 
     if cbar:
-        ax.figure.colorbar(im, ax=ax, label=getattr(d, 'unit', None))
+        ax.figure.colorbar(im, ax=ax, label=getattr(d, 'units', None))
     return ax, im
 
 
@@ -141,6 +143,7 @@ def wiggle(
         ch_range: Optional[Tuple[int, int]] = None,
         t_range: Optional[Tuple] = None,
         n_max_ch: Optional[int] = 100,
+        max_nt: Optional[int] = 5000,
         style: str = 'seismic',
         scale: float = 1.0,
         color: str = 'k',
@@ -168,6 +171,13 @@ def wiggle(
     every channel. This stops a casual `d.plot.wiggle()` on a
     full-array DASdata from rendering thousands of overlapping lines.
     Use `ch_range` first if you want a specific window.
+
+    `max_nt` caps the number of time samples drawn *per trace* — when
+    `sub.nt > max_nt` the time axis is strided by `ceil(sub.nt / max_nt)`.
+    Wiggle render cost scales with `n_traces * n_samples`, and at screen
+    resolution a few thousand points per trace is already pixel-lossless,
+    so this is the main speed lever on wide time windows. Defaults to
+    5000; pass `None` to draw every sample.
     """
     import matplotlib.pyplot as plt
 
@@ -185,7 +195,16 @@ def wiggle(
         step = 1
         ch_indices = np.arange(sub.nx)
 
-    data = sub.data[ch_indices]
+    # Decimate the time axis for display. Wiggle cost scales with
+    # n_traces * n_samples; at screen resolution a few thousand points per
+    # trace is already pixel-lossless, so striding wide windows is the main
+    # speedup (analogous to n_max_ch for channels).
+    if max_nt is not None and sub.nt > max_nt:
+        t_step = int(np.ceil(sub.nt / max_nt))
+    else:
+        t_step = 1
+
+    data = sub.data[ch_indices][:, ::t_step]
     if normalize:
         peak = np.maximum(np.abs(data).max(axis=1, keepdims=True), 1e-30)
         data = data / peak
@@ -194,7 +213,18 @@ def wiggle(
     # regardless of n_max_ch decimation.
     data = data * scale * step
 
-    t = sub.datetime_axis if usedatetime else sub.time_axis
+    from matplotlib.collections import LineCollection
+
+    # Numeric time axis for the line geometry. A LineCollection bypasses
+    # matplotlib's datetime unit conversion, so convert explicitly here and
+    # flip the relevant axis into date mode afterwards.
+    if usedatetime:
+        from matplotlib import dates as mdates
+        t_vals = mdates.date2num(
+            sub.datetime_axis[::t_step].astype('datetime64[us]').astype(object)
+        )
+    else:
+        t_vals = sub.time_axis[::t_step]
 
     if ax is None:
         if figsize is None:
@@ -205,22 +235,30 @@ def wiggle(
             )
         _, ax = plt.subplots(figsize=figsize)
 
+    # One LineCollection (single artist) instead of an `ax.plot` per channel —
+    # the per-trace Python loop is the wiggle bottleneck on wide windows.
+    offs = data + ch_indices[:, None]                     # (n_lines, nt) offset traces
+    tt = np.broadcast_to(t_vals, offs.shape)              # (n_lines, nt)
     if style == 'seismic':
-        # channel on x, time on y growing downward
-        for i, ch in enumerate(ch_indices):
-            ax.plot(data[i] + ch, t, color=color, lw=lw, **kwargs)
+        segs = np.stack([offs, tt], axis=-1)              # x = amplitude, y = time
+    else:
+        segs = np.stack([tt, offs], axis=-1)              # x = time, y = amplitude
+    ax.add_collection(LineCollection(segs, colors=color, linewidths=lw, **kwargs))
+
+    if style == 'seismic':
         ax.set_xlim(-step, int(ch_indices[-1]) + step)
-        ax.set_ylim(t[-1], t[0])                          # inverted
+        ax.set_ylim(t_vals[-1], t_vals[0])                # inverted (time grows down)
         ax.set_xlabel('channel')
         ax.set_ylabel('time' if usedatetime else 't (s)')
+        if usedatetime:
+            ax.yaxis_date()
     else:
-        # 'normal': time on x, channel on y (descending so ch 0 is at top)
-        for i, ch in enumerate(ch_indices):
-            ax.plot(t, data[i] + ch, color=color, lw=lw, **kwargs)
-        ax.set_xlim(t[0], t[-1])
-        ax.set_ylim(int(ch_indices[-1]) + step, -step)    # inverted
+        ax.set_xlim(t_vals[0], t_vals[-1])
+        ax.set_ylim(int(ch_indices[-1]) + step, -step)    # inverted (ch 0 at top)
         ax.set_xlabel('time' if usedatetime else 't (s)')
         ax.set_ylabel('channel')
+        if usedatetime:
+            ax.xaxis_date()
     return ax
 
 
