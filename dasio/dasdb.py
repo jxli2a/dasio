@@ -300,10 +300,23 @@ class DASdb:
 
     @classmethod
     def from_dir(
-            cls, raw_dir: Path, system: str,
+            cls, raw_dir: Path, system: Optional[str] = None,
             workers: int = 1, progress: bool = False,
         ) -> 'DASdb':
         """Scan `raw_dir` and build a catalog for the given `system`."""
+        raw_dir = Path(raw_dir)
+        if system is None:
+            probe = next(
+                (p for pat in ('*.h5', '*.hdf5', '*/*.h5', '*/*.hdf5')
+                 for p in raw_dir.glob(pat)),
+                None,
+            )
+            if probe is None:
+                raise ValueError(
+                    f'DASdb.from_dir: no .h5/.hdf5 files under {raw_dir} '
+                    'to detect system from; pass system= explicitly.'
+                )
+            system = DASFile(probe).system
         return cls(
             scan_metadata(raw_dir, system, workers=workers, progress=progress),
             system,
@@ -669,6 +682,7 @@ class DASdb:
             begin_time=out_begin, end_time=out_end,
             gauge_length_m=first_read.gauge_length_m, system=self.system,
             raw_meta=first_read.raw_meta,
+            units=first_read.units,
         )
 
     # ------------------------------------------------------------- visualization
