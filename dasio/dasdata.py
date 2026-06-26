@@ -153,13 +153,17 @@ class DASdata:
             ch_range: Optional[Tuple[int, int]] = None,
             t_range:  Optional[Tuple[Union[datetime, float], Union[datetime, float]]] = None,
         ) -> 'DASdata':
-        """Slice channels and / or time, returning a fresh DASdata.
+        """Slice a contiguous channel range and / or time window, returning a fresh DASdata.
+
+        For an arbitrary (non-contiguous) set of channels, use
+        `select_channels`.
 
         Parameters
         ----------
         ch_range : (min_ch, max_ch), optional
-            Channel-index range, `max_ch` exclusive. Out-of-bounds
-            values are clipped to `[0, self.nx]`. `None` keeps all.
+            Contiguous channel-index range, `max_ch` exclusive.
+            Out-of-bounds values are clipped to `[0, self.nx]`. `None`
+            keeps all.
         t_range : (begin, end), optional
             Time range. The two ends must be the same type, either:
             `datetime` — absolute timestamps, clipped to overlap with
@@ -209,6 +213,25 @@ class DASdata:
             self, data=new_data, nx=new_nx, nt=new_nt,
             begin_time=new_begin, end_time=new_end, t0_sec=new_t0,
         )
+
+    def select_channels(self, channels) -> 'DASdata':
+        """Select an arbitrary set of channels, returning a fresh DASdata.
+
+        Parameters
+        ----------
+        channels : array-like
+            Integer index array or a length-`nx` boolean mask (e.g. a
+            list of good channels). Channels are returned in the given
+            order. For a contiguous channel range or a time window,
+            use `truncate`.
+
+        Only `data` and `nx` change; the time axis is untouched. Note
+        that an arbitrary selection generally leaves the channel axis
+        non-uniformly spaced, so `dx` no longer describes the true
+        inter-channel spacing. The returned `data` is C-contiguous.
+        """
+        new_data = np.ascontiguousarray(self.data[np.asarray(channels)])
+        return replace(self, data=new_data, nx=new_data.shape[0])
 
     def to_physical(self) -> "DASdata":
         """Return a copy with `physical_factor` applied to `data`.
