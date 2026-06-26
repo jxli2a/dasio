@@ -21,7 +21,8 @@ are pulled automatically by the build.
 ## Quickstart
 
 ```python
-import dasio
-d = dasio.read_das_data("file.hdf5", system="ASN")   # -> DASdata
-d = d.bandpass(1.0, 10.0)                              # C++ filter
+from dasio import DASFile
+
+d = DASFile('file.h5').read()                        # auto-detects the vendor format -> DASdata
+d.bandpass(1.0, 10.0).subtract_common_mode().plot()  # filter -> denoise -> waterfall
 ```
