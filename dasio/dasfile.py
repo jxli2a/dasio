@@ -36,7 +36,14 @@ from .readers.optasense import (
     read_optasense_raw,
 )
 from .readers.detector import detect_data_kind, detect_origin
+from .readers.passcal_segy import read_passcal_segy, read_passcal_segy_metadata
 from .readers.proc import read_data_proc, read_metadata_proc
+
+
+# SEG-Y is not HDF5, so it is detected by suffix rather than by sniffing
+# h5py groups. Only the `.segy` suffix routes to the PASSCAL SEG-Y reader.
+def _is_segy(path: Path) -> bool:
+    return path.suffix.lower() == '.segy'
 
 
 # Reader dispatch is keyed by the on-disk format (`data_kind`), not the
@@ -44,19 +51,21 @@ from .readers.proc import read_data_proc, read_metadata_proc
 # to parse its `/Data` group, not `read_asn_raw` which expects raw
 # ASN HDF5 paths.
 _DATA_READERS = {
-    'ASN':       read_asn_raw,
-    'OptaSense': read_optasense_raw,
-    'APSensing': read_apsensing_raw,
-    'Proc':      read_data_proc,
-    'Event':     read_event,
+    'ASN':          read_asn_raw,
+    'OptaSense':    read_optasense_raw,
+    'APSensing':    read_apsensing_raw,
+    'Proc':         read_data_proc,
+    'Event':        read_event,
+    'PASSCAL_SEGY': read_passcal_segy,
 }
 
 _METADATA_READERS = {
-    'ASN':       read_asn_metadata,
-    'OptaSense': read_optasense_metadata,
-    'APSensing': read_apsensing_metadata,
-    'Proc':      read_metadata_proc,
-    'Event':     read_event_metadata,
+    'ASN':          read_asn_metadata,
+    'OptaSense':    read_optasense_metadata,
+    'APSensing':    read_apsensing_metadata,
+    'Proc':         read_metadata_proc,
+    'Event':        read_event_metadata,
+    'PASSCAL_SEGY': read_passcal_segy_metadata,
 }
 
 # OptaSense and APSensing have non-trivial raw→strain factors. Keyed
@@ -107,15 +116,21 @@ class DASFile:
     @property
     def system(self) -> str:
         if self._system is None:
-            with h5py.File(self.path, 'r') as f:
-                self._system = detect_data_kind(f)
+            if _is_segy(self.path):                      # non-HDF5: detect by suffix
+                self._system = 'PASSCAL_SEGY'
+            else:
+                with h5py.File(self.path, 'r') as f:
+                    self._system = detect_data_kind(f)
         return self._system
 
     @property
     def origin(self) -> str:
         if self._origin is None:
-            with h5py.File(self.path, 'r') as f:
-                self._origin = detect_origin(f)
+            if _is_segy(self.path):                      # SEG-Y carries no vendor origin
+                self._origin = 'PASSCAL_SEGY'
+            else:
+                with h5py.File(self.path, 'r') as f:
+                    self._origin = detect_origin(f)
         return self._origin
 
     def __repr__(self) -> str:

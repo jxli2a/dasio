@@ -273,7 +273,7 @@ class DASdb:
         with np.errstate(divide='ignore', invalid='ignore'):
             expected = np.where(fs_prev > 0, 1.0 / fs_prev, 0.0)
         gap = (df['begin_time']
-               - df['end_time'].shift(1)).dt.total_seconds().to_numpy()
+                - df['end_time'].shift(1)).dt.total_seconds().to_numpy()
         # Use np.isclose directly (array-valued atol via broadcasting)
         # so NaN gaps — possible if end_time has NaT mid-stream — are
         # treated as "not close" and produce a break, matching the
@@ -301,14 +301,14 @@ class DASdb:
     @classmethod
     def from_dir(
             cls, raw_dir: Path, system: Optional[str] = None,
-            workers: int = 1, progress: bool = False,
+            workers: int = 1, progress: bool = True,
         ) -> 'DASdb':
         """Scan `raw_dir` and build a catalog for the given `system`."""
         raw_dir = Path(raw_dir)
         if system is None:
             probe = next(
                 (p for pat in ('*.h5', '*.hdf5', '*/*.h5', '*/*.hdf5')
-                 for p in raw_dir.glob(pat)),
+                    for p in raw_dir.glob(pat)),
                 None,
             )
             if probe is None:
