@@ -18,6 +18,19 @@ Build requirements: a C++14 compiler, CMake ≥3.15, and OpenMP (e.g.
 `apt-get install build-essential libomp-dev`). pybind11 and scikit-build-core
 are pulled automatically by the build.
 
+### Optional extras
+
+Ambient-noise cross-correlation and phase picking have heavier, optional
+dependencies, exposed as install extras (still editable):
+
+```bash
+pip install -e '.[noise]'       # ambient-noise cross-correlation (dasio.noise) -> PyTorch
+pip install -e '.[pick]'        # PhaseNet-DAS P/S picking (dasio.pick_phases) -> phasenet (+ PyTorch)
+pip install -e '.[noise,pick]'  # both
+```
+
+Both are imported lazily, so the rest of dasio works without them installed.
+
 ## Quickstart
 
 ```python
