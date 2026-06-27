@@ -1,5 +1,29 @@
+from datetime import datetime, timezone
+
+import numpy as np
+
 from dasio.dasfile import DASFile
-from dasio.dasdata import VALID_UNITS, normalize_unit
+from dasio.dasdata import VALID_UNITS, normalize_unit, DASdata
+
+
+def _d(units):
+    x = np.ones((3, 50), np.float32)
+    t0 = datetime(2023, 1, 1, tzinfo=timezone.utc)
+    return DASdata(data=x, fs=100.0, dt=0.01, nt=50, nx=3, dx=1.0,
+                   begin_time=t0, end_time=t0, units=units)
+
+
+def test_differentiate_propagates_units():
+    assert _d("strain").differentiate().units == "strain/s"
+    assert _d("microstrain").differentiate().units == "microstrain/s"
+    assert _d("radian").differentiate().units == "radian/s"
+    assert _d("count").differentiate().units == "count"          # unmapped -> unchanged
+
+
+def test_integrate_reverses_units():
+    assert _d("strain/s").integrate().units == "strain"
+    assert _d("radian/s").integrate().units == "radian"
+    assert _d("unknown").integrate().units == "unknown"
 
 
 def test_vocabulary_contents():

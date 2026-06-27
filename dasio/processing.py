@@ -20,7 +20,7 @@ from typing import Optional
 
 from .dasdata import DASdata
 from .signal import (
-    bandpass2d, detrend_time, diff_time, integrate_time,
+    bandpass2d, detrend_time, diff_time, gradient_time, integrate_time,
     preprocess_unwrap, taper_time,
     subtract_common_mode as _subtract_common_mode_kernel,
 )
@@ -65,15 +65,27 @@ def taper(d: DASdata, alpha: float = 0.4, copy: bool = True) -> DASdata:
     return replace(d, data=data)
 
 
-def differentiate(d: DASdata, copy: bool = True) -> DASdata:
+# time-derivative adds the /s rate; integration removes it (others pass through)
+_DIFF_UNITS = {"strain": "strain/s", "microstrain": "microstrain/s", "radian": "radian/s"}
+_INT_UNITS = {v: k for k, v in _DIFF_UNITS.items()}
+
+
+def differentiate(d: DASdata, copy: bool = True, method: str = "central") -> DASdata:
     """Differentiate along the time axis (d/dt).
 
-    First time sample is forced to zero (same convention as
-    `signal.diff_time`, matching DASutils.preprocess_diff).
+    ``method="central"`` (default) uses the second-order central difference
+    (`signal.gradient_time`, bit-identical to ``np.gradient``). ``"backward"``
+    uses the first-order backward difference with the first sample forced to
+    zero (`signal.diff_time`, matching DASutils.preprocess_diff).
     """
     data = d.data.copy() if copy else d.data
-    data = diff_time(data, d.dt)
-    return replace(d, data=data)
+    if method == "central":
+        data = gradient_time(data, d.dt)
+    elif method == "backward":
+        data = diff_time(data, d.dt)
+    else:
+        raise ValueError(f"method must be 'central' or 'backward', got {method!r}")
+    return replace(d, data=data, units=_DIFF_UNITS.get(d.units, d.units))
 
 
 def integrate(d: DASdata, copy: bool = True) -> DASdata:
@@ -85,7 +97,7 @@ def integrate(d: DASdata, copy: bool = True) -> DASdata:
     """
     data = d.data.copy() if copy else d.data
     data = integrate_time(data, d.dt)
-    return replace(d, data=data)
+    return replace(d, data=data, units=_INT_UNITS.get(d.units, d.units))
 
 
 def subtract_common_mode(
@@ -120,3 +132,38 @@ def unwrap(d: DASdata, factor: int = 1, copy: bool = True) -> DASdata:
     data = d.data.copy() if copy else d.data
     data = preprocess_unwrap(data, factor=factor)
     return replace(d, data=data)
+
+
+def downsample(
+        d: DASdata, factor: int, anti_alias: bool = True,
+        order: int = 8, zerophase: bool = True, copy: bool = True,
+    ) -> DASdata:
+    """Integer-factor downsample along time: anti-alias low-pass, then stride.
+
+    The analysis-grade counterpart to `DASdata.skip_t`, which is a bare
+    stride and therefore aliases. With ``anti_alias=True`` (default) a
+    zero-phase Butterworth low-pass at ``fs / (2.5 * factor)`` is applied
+    first, reusing the C++ filter — a band-pass with the high-pass corner
+    disabled (``freqmin=0``) is a pure low-pass. That cutoff is 0.8x the new
+    Nyquist (``fs / factor / 2``), the same 2.5x-oversampling guard band as
+    `desample.desample_window`, so the order-`order` Butterworth has room for
+    its transition roll-off before aliased energy can fold back. `fs`, `dt`,
+    `nt` and `end_time` are then updated by reusing `skip_t`; `begin_time`
+    and `t0_sec` are unchanged (sample 0 is kept).
+
+    Set ``anti_alias=False`` to skip the filter when the data is already
+    band-limited below the new Nyquist (e.g. you just band-passed) — then
+    this is exactly `skip_t` in the same call. ``factor <= 1`` is a no-op.
+    The C++ filter needs float32/float64 data, like `bandpass`.
+    """
+    factor = max(1, int(factor))
+    if factor == 1:
+        return replace(d, data=d.data.copy()) if copy else replace(d)
+    if anti_alias:
+        cutoff = d.fs / (2.5 * factor)         # 0.8x new Nyquist; matches desample's 2.5x guard
+        # freqmin=0 disables the high-pass stage in the C++ kernel -> low-pass.
+        data = bandpass2d(d.data, 0.0, cutoff, d.dt, order=order, zerophase=zerophase)
+        d = replace(d, data=data)              # fresh array; same shape
+    # skip_t always returns a fresh, contiguous array, so the result never
+    # aliases the caller's data whether or not the low-pass ran above.
+    return d.skip_t(factor)

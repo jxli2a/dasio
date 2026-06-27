@@ -88,8 +88,8 @@ class DASdata:
     # seconds-frame anchor; the two together pin both views.
     t0_sec:          float = 0.0
     # Physical unit of `data`, from the controlled VALID_UNITS vocabulary
-    # ("unknown" = not tagged). Set by the readers; NOT auto-updated by
-    # processing (integrate/differentiate change the quantity but not this tag).
+    # ("unknown" = not tagged). Set by the readers; `differentiate`/`integrate`
+    # propagate the rate (strain <-> strain/s).
     units:           str = "unknown"
     # Multiply `data` by this to reach physical units: strain (OptaSense
     # count->strain) or strain/s (AP Sensing radian/s->strain/s; ASN is
@@ -336,10 +336,10 @@ class DASdata:
         from .processing import taper as _t
         return _t(self, alpha=alpha, copy=copy)
 
-    def differentiate(self, copy: bool = True) -> 'DASdata':
+    def differentiate(self, copy: bool = True, method: str = "central") -> 'DASdata':
         """Time-axis derivative. See `processing.differentiate`."""
         from .processing import differentiate as _diff
-        return _diff(self, copy=copy)
+        return _diff(self, copy=copy, method=method)
 
     def integrate(self, copy: bool = True) -> 'DASdata':
         """Time-axis cumulative integral. See `processing.integrate`."""
@@ -358,3 +358,17 @@ class DASdata:
         """OptaSense int32 phase-wrap correction. See `processing.unwrap`."""
         from .processing import unwrap as _uw
         return _uw(self, factor=factor, copy=copy)
+
+    def downsample(
+            self, factor: int, anti_alias: bool = True,
+            order: int = 8, zerophase: bool = True, copy: bool = True,
+        ) -> 'DASdata':
+        """Integer-factor time downsample: anti-alias low-pass + stride.
+
+        Analysis-grade decimation — unlike `skip_t` (a bare stride that
+        aliases), this low-passes below the new Nyquist first. See
+        `processing.downsample`.
+        """
+        from .processing import downsample as _ds
+        return _ds(self, factor, anti_alias=anti_alias, order=order,
+                   zerophase=zerophase, copy=copy)
