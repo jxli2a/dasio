@@ -24,6 +24,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = ["pytest>=7"]
 noise = ["torch>=2"]
+pick = ["phasenet>=0.2"]
 
 [project.scripts]
 das-desample = "dasio.desample:main"

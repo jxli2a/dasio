@@ -123,6 +123,8 @@ _LAZY = {
     'imshow':                    ('plot',       'imshow'),
     'wiggle':                    ('plot',       'wiggle'),
     'plot_xcorr':                ('plot',       'plot_xcorr'),
+    'pick_phases':               ('picking',    'pick_phases'),
+    'Picks':                     ('picking',    'Picks'),
     'bandpass2d':                ('signal',     'bandpass2d'),
     'detrend_time':              ('signal',     'detrend_time'),
     'taper_time':                ('signal',     'taper_time'),
