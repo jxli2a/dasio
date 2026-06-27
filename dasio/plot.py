@@ -6,10 +6,11 @@ function body so a bare `import dasio` (or `import dasdata`) stays
 free of the matplotlib startup cost — the load only fires when an
 actual plot is requested.
 
-For richer plot types (cc2d, fk, xcorr) keep using
-`dasio`'s legacy plotting; this module covers the everyday
-"show me the data" case in ~60 lines without dragging that whole
-library into dasio.
+`plot_xcorr` images a cross-correlation gather (the `cc` array of a
+`dasio.noise.CCGather`); `CCGather.plot()` is the convenience wrapper
+around it. For other rich plot types (fk, dispersion) keep using
+`dasio`'s legacy plotting; this module covers the everyday "show me
+the data" case without dragging that whole library into dasio.
 """
 from typing import Optional, Tuple
 
@@ -276,6 +277,77 @@ def wiggle(
         if usedatetime:
             ax.xaxis_date()
     return ax
+
+
+def plot_xcorr(
+        cc,
+        lag_s=None,
+        fs: Optional[float] = None,
+        offsets=None,
+        ax=None,
+        perc: float = 99.0,
+        vmin: Optional[float] = None,
+        vmax: Optional[float] = None,
+        cmap: str = 'seismic',
+        cbar: bool = True,
+        figsize: Optional[Tuple[float, float]] = None,
+        **kwargs,
+    ):
+    """Image a cross-correlation gather — pair (x) vs lag time (y, downward).
+
+    Plots the ``(npair, nlag)`` array returned by `dasio.noise.xcorr_stack`
+    (the first tuple element) or `xcorr_dataset` (``result['cc']``): each column
+    is one channel pair's stacked correlation, zero lag at the centre row. Lag
+    time runs down the vertical axis (seismic-gather convention) and pairs along
+    the horizontal axis, so a common-shot gather shows the virtual-source moveout
+    fanning out symmetrically in +/- lag.
+
+    Parameters
+    ----------
+    cc : ``(npair, nlag)`` array.
+    lag_s : lag axis in seconds (e.g. ``xcorr_dataset``'s ``result['lag_s']``).
+        If None it is built from `fs` (or falls back to sample indices), with
+        zero lag at the centre. Drawn on the vertical axis, increasing downward.
+    fs : sample rate, used to label the lag axis in seconds when `lag_s` is None.
+    offsets : optional per-pair x values (e.g. inter-channel offset in km for a
+        common-offset gather); defaults to the pair index.
+    perc, vmin, vmax, cmap, cbar, figsize : as in `imshow` — `perc` sets
+        symmetric colour limits from the `perc`-th percentile of ``|cc|`` unless
+        `vmin`/`vmax` are given.
+    **kwargs : forwarded to `ax.imshow`.
+
+    Returns ``(ax, im)``.
+    """
+    import matplotlib.pyplot as plt
+
+    cc = np.asarray(cc)
+    npair, nlag = cc.shape
+    half = (nlag - 1) // 2
+    if lag_s is None:
+        lag_s = (np.arange(nlag) - half) / fs if fs else (np.arange(nlag) - half)
+    else:
+        lag_s = np.asarray(lag_s)
+    x = np.arange(npair) if offsets is None else np.asarray(offsets)
+
+    if vmin is None or vmax is None:
+        v = float(np.nanpercentile(np.abs(cc), perc))
+        if vmin is None:
+            vmin = -v
+        if vmax is None:
+            vmax = v
+
+    if ax is None:
+        _, ax = plt.subplots(figsize=figsize or (8, 10))
+
+    # lag on the vertical axis, increasing downward (top = first/most-negative lag)
+    extent = (float(x[0]), float(x[-1]), float(lag_s[-1]), float(lag_s[0]))
+    im = ax.imshow(cc.T, aspect='auto', cmap=cmap, vmin=vmin, vmax=vmax,
+                   extent=extent, **kwargs)
+    ax.set_xlabel('offset' if offsets is not None else 'pair index')
+    ax.set_ylabel('lag (s)' if (lag_s is not None or fs) else 'lag (samples)')
+    if cbar:
+        ax.figure.colorbar(im, ax=ax, label='cross-correlation')
+    return ax, im
 
 
 class _PlotAccessor:

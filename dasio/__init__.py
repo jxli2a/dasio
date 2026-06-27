@@ -122,6 +122,7 @@ _LAZY = {
     'downsample':                ('processing', 'downsample'),
     'imshow':                    ('plot',       'imshow'),
     'wiggle':                    ('plot',       'wiggle'),
+    'plot_xcorr':                ('plot',       'plot_xcorr'),
     'bandpass2d':                ('signal',     'bandpass2d'),
     'detrend_time':              ('signal',     'detrend_time'),
     'taper_time':                ('signal',     'taper_time'),

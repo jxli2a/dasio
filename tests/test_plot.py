@@ -69,3 +69,29 @@ def test_imshow_skip_decimates_raster_but_keeps_full_extent():
     assert (x0, x1) == (0, 99)                        # channel axis spans full range
     assert y0 == pytest.approx(d.time_axis[-1])       # time axis spans full range
     assert y1 == pytest.approx(d.time_axis[0])
+
+
+def test_plot_xcorr_extent_and_clim():
+    from dasio.plot import plot_xcorr
+    rng = np.random.default_rng(1)
+    npair, nlag = 30, 401                              # zero lag at column 200
+    cc = rng.standard_normal((npair, nlag)).astype(np.float32)
+    lag_s = (np.arange(nlag) - (nlag - 1) // 2) / 50.0  # +/- 4 s at 50 Hz
+    ax, im = plot_xcorr(cc, lag_s=lag_s)
+    assert im.get_array().shape == (nlag, npair)       # transposed: lag on the vertical axis
+    x0, x1, y0, y1 = im.get_extent()
+    assert (x0, x1) == pytest.approx((0, npair - 1))   # pair index on the horizontal axis
+    assert (y0, y1) == pytest.approx((lag_s[-1], lag_s[0]))  # lag on y, increasing downward
+    v = float(np.nanpercentile(np.abs(cc), 99.0))     # symmetric perc clim
+    assert im.get_clim() == pytest.approx((-v, v))
+
+
+def test_ccgather_plot_delegates_to_plot_xcorr():
+    from dasio.noise import CCGather                     # dataclass needs no torch
+    cc = np.random.default_rng(0).standard_normal((10, 21)).astype(np.float32)
+    g = CCGather(cc=cc, lag_s=np.linspace(-0.2, 0.2, 21), fs=50.0, nseg=3)
+    ax, im = g.plot()                                    # -> plot_xcorr(self.cc, lag_s=self.lag_s)
+    assert im.get_array().shape == (21, 10)              # transposed: lag (21) on y, pairs (10) on x
+    _, _, y0, y1 = im.get_extent()
+    assert (y0, y1) == pytest.approx((0.2, -0.2))        # stored lag axis on the vertical, downward
+    assert "10 pairs" in repr(g) and "50 Hz" in repr(g)
