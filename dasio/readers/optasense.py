@@ -138,7 +138,7 @@ def read_optasense_raw(
 # --- Catalog metadata helpers ---------------------------------------------
 
 def read_optasense_metadata(
-        file: Union[str, Path], rtol: float = 1e-4,
+        file: Union[str, Path], rtol: float = 1e-3,
     ) -> List[DASmeta]:
     """Read one OptaSense file's metadata as a list of DASmeta dicts.
 
@@ -161,8 +161,8 @@ def read_optasense_metadata(
             acq = f['Acquisition']
             raw0 = acq['Raw[0]']
             fs = float(raw0.attrs['OutputDataRate'])
-            dt_target = 1.0 / fs
-            t_us = raw0['RawDataTime'][:].astype(np.float64) * 1e-6
+            t_raw = raw0['RawDataTime'][:].astype(np.int64)
+            t_us = t_raw.astype(np.float64) * 1e-6
             nx = int(acq['Custom'].attrs.get(
                 'Num Output Channels', raw0['RawData'].shape[0]))
             dx = float(acq.attrs.get('SpatialSamplingInterval', 0.0))
@@ -175,8 +175,9 @@ def read_optasense_metadata(
     if n_tot == 0:
         return []
     if n_tot > 1:
-        strides = np.diff(t_us)
-        skip_idx = np.where(~np.isclose(strides, dt_target, rtol=rtol))[0] + 1
+        strides_us = np.diff(t_raw)
+        dt_target_us = 1e6 / fs
+        skip_idx = np.where(~np.isclose(strides_us, dt_target_us, rtol=rtol))[0] + 1
     else:
         skip_idx = np.array([], dtype=int)
     bounds = np.concatenate(([0], skip_idx, [n_tot]))
