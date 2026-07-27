@@ -24,17 +24,28 @@ from .signal import (
     preprocess_unwrap, taper_time,
     subtract_common_mode as _subtract_common_mode_kernel,
 )
+from .utils import default_nthreads
 
 
 def bandpass(
         d: DASdata,
         fmin: float, fmax: float,
         order: int = 14, zerophase: bool = True, copy: bool = True,
+        nthreads: Optional[int] = None,
     ) -> DASdata:
-    """Butterworth bandpass along the time axis."""
+    """Butterworth bandpass along the time axis.
+
+    `nthreads` sets the channel-parallel OpenMP fan-out in the C++ kernel.
+    `None` (default) resolves to `default_nthreads()` — the kernel's own
+    default is 1 thread, which leaves most of the machine idle on a filter
+    that is embarrassingly parallel over channels. Pass an explicit integer
+    to throttle on a shared host, or when calling this from inside worker
+    processes that already partition the cores (as `desample` does).
+    """
     data = d.data.copy() if copy else d.data
     data = bandpass2d(
         data, fmin, fmax, d.dt, order=order, zerophase=zerophase,
+        nThreads=default_nthreads() if nthreads is None else nthreads,
     )
     return replace(d, data=data)
 
@@ -137,6 +148,7 @@ def unwrap(d: DASdata, factor: int = 1, copy: bool = True) -> DASdata:
 def downsample(
         d: DASdata, factor: int, anti_alias: bool = True,
         order: int = 8, zerophase: bool = True, copy: bool = True,
+        nthreads: Optional[int] = None,
     ) -> DASdata:
     """Integer-factor downsample along time: anti-alias low-pass, then stride.
 
@@ -155,6 +167,8 @@ def downsample(
     band-limited below the new Nyquist (e.g. you just band-passed) — then
     this is exactly `skip_t` in the same call. ``factor <= 1`` is a no-op.
     The C++ filter needs float32/float64 data, like `bandpass`.
+
+    `nthreads` is forwarded to the anti-alias filter; see `bandpass`.
     """
     factor = max(1, int(factor))
     if factor == 1:
@@ -162,7 +176,10 @@ def downsample(
     if anti_alias:
         cutoff = d.fs / (2.5 * factor)         # 0.8x new Nyquist; matches desample's 2.5x guard
         # freqmin=0 disables the high-pass stage in the C++ kernel -> low-pass.
-        data = bandpass2d(d.data, 0.0, cutoff, d.dt, order=order, zerophase=zerophase)
+        data = bandpass2d(
+            d.data, 0.0, cutoff, d.dt, order=order, zerophase=zerophase,
+            nThreads=default_nthreads() if nthreads is None else nthreads,
+        )
         d = replace(d, data=data)              # fresh array; same shape
     # skip_t always returns a fresh, contiguous array, so the result never
     # aliases the caller's data whether or not the low-pass ran above.

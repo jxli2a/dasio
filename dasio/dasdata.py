@@ -318,12 +318,13 @@ class DASdata:
             self,
             fmin: float, fmax: float,
             order: int = 14, zerophase: bool = True, copy: bool = True,
+            nthreads: Optional[int] = None,
         ) -> 'DASdata':
         """Butterworth bandpass along the time axis. See `processing.bandpass`."""
         from .processing import bandpass as _bp
         return _bp(
             self, fmin, fmax,
-            order=order, zerophase=zerophase, copy=copy,
+            order=order, zerophase=zerophase, copy=copy, nthreads=nthreads,
         )
 
     def detrend(self, copy: bool = True) -> 'DASdata':
@@ -362,6 +363,7 @@ class DASdata:
     def downsample(
             self, factor: int, anti_alias: bool = True,
             order: int = 8, zerophase: bool = True, copy: bool = True,
+            nthreads: Optional[int] = None,
         ) -> 'DASdata':
         """Integer-factor time downsample: anti-alias low-pass + stride.
 
@@ -371,4 +373,4 @@ class DASdata:
         """
         from .processing import downsample as _ds
         return _ds(self, factor, anti_alias=anti_alias, order=order,
-                   zerophase=zerophase, copy=copy)
+                   zerophase=zerophase, copy=copy, nthreads=nthreads)
