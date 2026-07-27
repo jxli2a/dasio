@@ -89,7 +89,7 @@ def read_data_proc(
 
     data = data.astype(np.float32, copy=False)
     if convert and factor != 1.0:
-        data = data * np.float32(factor)
+        data *= np.float32(factor)
 
     if convert:
         # TODO: verify against a real OptaSense Proc file — the module docstring
