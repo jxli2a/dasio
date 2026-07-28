@@ -28,11 +28,9 @@ from ..dasdata import DASdata, DASmeta, normalize_unit
 from ..utils import iso_timestamp, parse_iso
 
 
-FORMAT = 'Basic'          # the `format` attr's value, and what detection reports
-
 # DASdata scalar fields stored verbatim. Handled separately: `data` is the
 # payload, `begin_time` / `end_time` need ISO serialization, `raw_meta` is
-# deliberately not kept, and `format` is written as the constant `FORMAT` rather
+# deliberately not kept, and `format` is written as the literal 'Basic' rather
 # than copied from the DASdata — the file IS Basic whatever it was read from,
 # and stamping a source 'Proc' there would make it undetectable.
 _ATTRS = ('fs', 'dt', 'dx', 'gauge_length_m', 'origin',
@@ -87,7 +85,7 @@ def read_basic(
         fs=float(attrs['fs']), dt=dt, nt=nt, nx=nx, dx=float(attrs['dx']),
         begin_time=begin_time, end_time=end_time,
         gauge_length_m=None if np.isnan(gauge_length_m) else gauge_length_m,
-        format=_text(attrs.get('format'), FORMAT),
+        format=_text(attrs.get('format'), 'Basic'),
         origin=_text(attrs.get('origin')),
         raw_meta=None,
         t0_sec=float(attrs.get('t0_sec', 0.0)) + int(first_sample) * dt,
@@ -121,7 +119,7 @@ def write_basic(
     tmp = file.with_suffix(file.suffix + '.lock')
     with h5py.File(tmp, 'w') as f:
         dset = f.create_dataset('data', data=d.data, **kwargs)
-        dset.attrs['format'] = FORMAT
+        dset.attrs['format'] = 'Basic'
         dset.attrs['begin_time'] = iso_timestamp(d.begin_time)
         dset.attrs['end_time'] = iso_timestamp(d.end_time)
         for k in _ATTRS:

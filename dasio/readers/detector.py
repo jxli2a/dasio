@@ -17,23 +17,11 @@ from __future__ import annotations
 
 import h5py
 
-# Defined in basic.py, imported here rather than duplicated so the on-disk
-# stamp and the check that reads it can never drift apart.
-from .basic import FORMAT as _BASIC_FORMAT
-
 
 def detect_format(f: h5py.File) -> str:
     """Return one of: 'Basic', 'Proc', 'ASN', 'OptaSense', 'APSensing',
     'Event', or 'Unknown'.
     """
-    # Basic names itself in `/data.attrs['format']`, so it is recognized
-    # outright — `/data` alone is ambiguous with ASN and Event.
-    if 'data' in f:
-        stamp = f['data'].attrs.get('format')
-        if isinstance(stamp, bytes):
-            stamp = stamp.decode()
-        if stamp == _BASIC_FORMAT:
-            return _BASIC_FORMAT
     if 'Data' in f:
         return 'Proc'
     if 'acqSpec' in f:
@@ -42,8 +30,14 @@ def detect_format(f: h5py.File) -> str:
         return 'OptaSense'
     if 'ProcessingServer' in f:
         return 'APSensing'
-    if 'data' in f and 'event_id' in f['data'].attrs:
-        return 'Event'
+    # ASN's payload is also `/data`, but it is caught above; the two formats
+    # that reach here name themselves in the attrs.
+    if 'data' in f:
+        attrs = f['data'].attrs
+        if attrs.get('format') == 'Basic':
+            return 'Basic'
+        if 'event_id' in attrs:
+            return 'Event'
     return 'Unknown'
 
 
