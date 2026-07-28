@@ -68,6 +68,22 @@ def optasense_count2strain_factor(f: h5py.File) -> float:
     return polarity * _COUNT2PHASE * phase2strain
 
 
+def _time_major(raw_ds, f) -> bool:
+    """True when `RawData` is stored as (time, channel).
+
+    The `Dimensions` attribute is authoritative and present on every file seen
+    so far. Where it is missing, fall back to matching the first axis against
+    the length of `RawDataTime`, which is one value per time sample.
+    """
+    dims = raw_ds.attrs.get('Dimensions')
+    if dims is not None:
+        first = dims[0]
+        first = first.decode() if isinstance(first, bytes) else str(first)
+        return first.strip().lower().startswith('time')
+    n_time = f['Acquisition/Raw[0]/RawDataTime'].shape[0]
+    return raw_ds.shape[0] == n_time and raw_ds.shape[1] != n_time
+
+
 def read_optasense_raw(
         file: Union[str, Path],
         min_ch: int = 0,
@@ -81,18 +97,29 @@ def read_optasense_raw(
     (desample_window) so results match legacy Desample_DAS.py, which unwraps
     the whole concatenated trace_buffer at once. Strain conversion is also
     deferred — legacy writes unscaled phase counts on disk in its default
-    (no --compressZFP) mode. On-disk layout is (n_channels, n_samples)
-    int32; returned DASdata is (nx, nt) float32 with NO unwrap applied.
+    (no --compressZFP) mode. Returned DASdata is (nx, nt) float32 with NO
+    unwrap applied.
+
+    On-disk `RawData` comes in **either** axis order depending on the
+    acquisition — `[locus, time]` (mammoth_south) or `[time, locus]`
+    (iceland_quantx) — and the file says which via its `Dimensions` attribute.
+    Assuming one order silently transposes the other: nx and nt come back
+    swapped and every value is taken from the wrong axis, so the result is
+    garbage rather than merely mis-shaped.
     """
     file = Path(file)
     with h5py.File(file, 'r') as f:
         raw_ds = f['Acquisition/Raw[0]/RawData']
-        total_nx, total_nt = raw_ds.shape
+        time_first = _time_major(raw_ds, f)
+        total_nt, total_nx = raw_ds.shape if time_first else raw_ds.shape[::-1]
         if max_ch is None:
             max_ch = total_nx
         if n_samples is None:
             n_samples = total_nt - first_sample
-        raw = raw_ds[min_ch:max_ch, first_sample:first_sample + n_samples].astype(np.float64)
+        ch, smp = slice(min_ch, max_ch), slice(first_sample, first_sample + n_samples)
+        # Slice on the axes as stored, then transpose — never the reverse, or
+        # h5py reads the whole dataset before the selection applies.
+        raw = (raw_ds[smp, ch].T if time_first else raw_ds[ch, smp]).astype(np.float64)
 
         time_ds = f['Acquisition/Raw[0]/RawDataTime']
         # RawDataTime is microseconds since epoch
@@ -163,8 +190,11 @@ def read_optasense_metadata(
             fs = float(raw0.attrs['OutputDataRate'])
             t_raw = raw0['RawDataTime'][:].astype(np.int64)
             t_us = t_raw.astype(np.float64) * 1e-6
+            # shape[0] is the *time* axis on time-major files, so pick the
+            # channel axis by layout rather than assuming the first one.
+            _ax = 1 if _time_major(raw0['RawData'], f) else 0
             nx = int(acq['Custom'].attrs.get(
-                'Num Output Channels', raw0['RawData'].shape[0]))
+                'Num Output Channels', raw0['RawData'].shape[_ax]))
             dx = float(acq.attrs.get('SpatialSamplingInterval', 0.0))
             gauge_length_m = float(acq.attrs.get('GaugeLength', 0.0))
     except (OSError, KeyError) as e:
