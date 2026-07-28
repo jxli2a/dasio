@@ -306,8 +306,13 @@ class DASdb:
         """Scan `raw_dir` and build a catalog for the given `format`."""
         raw_dir = Path(raw_dir)
         if format is None:
+            # Depth 1 (flat Proc / OptaSense), 2 (dated Proc, plain ASN) and 3
+            # (ASN with a channel subdir: <YYYYMMDD>/<ch>/<HHMMSS>.hdf5).
+            # `glob` is lazy and `next` stops at the first hit, so the deep
+            # patterns cost nothing on the shallow layouts.
             probe = next(
-                (p for pat in ('*.h5', '*.hdf5', '*/*.h5', '*/*.hdf5')
+                (p for pat in ('*.h5', '*.hdf5', '*/*.h5', '*/*.hdf5',
+                               '*/*/*.h5', '*/*/*.hdf5')
                     for p in raw_dir.glob(pat)),
                 None,
             )

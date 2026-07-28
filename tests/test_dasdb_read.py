@@ -51,3 +51,17 @@ def test_dasdb_read_with_factor_attaches_conversion(optasense_file):
     phys = out.to_physical()
     assert phys.units == "microstrain"
     assert phys.physical_factor == 1.0
+
+
+def test_from_dir_detects_the_asn_day_channel_layout(tmp_path, asn_file):
+    """ASN writes <YYYYMMDD>/<channel>/<HHMMSS>.hdf5 — three levels down. The
+    auto-detect probe only globbed two, so a real ASN tree raised 'no .h5/.hdf5
+    files ... to detect format from' unless format= was passed."""
+    import shutil
+    from dasio.dasdb import DASdb
+
+    nested = tmp_path / "20250716" / "dphi"
+    nested.mkdir(parents=True)
+    shutil.copy(asn_file, nested / "001114.hdf5")
+
+    assert DASdb.from_dir(tmp_path, progress=False).format == "ASN"
