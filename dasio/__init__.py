@@ -1,8 +1,8 @@
 """Public API for the dasio subpackage.
 
 `DASFile` is the canonical per-file entry point — it wraps a path,
-detects the vendor system once, and exposes `read` / `metadata` /
-`factor` methods. The free-function dispatchers below
+detects the on-disk format and the capture vendor once each, and exposes
+`read` / `metadata` / `factor` methods. The free-function dispatchers below
 (`read_das_data`, `read_das_metadata`, `factor_raw2strain`) are thin
 wrappers around it for one-shot call sites that don't want to hold a
 `DASFile` instance.
@@ -62,22 +62,25 @@ from .schema import RawWindow
 
 
 def read_das_data(
-        file: Union[str, Path], system: str, **kwargs,
+        file: Union[str, Path], system: Optional[str] = None, **kwargs,
     ) -> DASdata:
     """Read one DAS file using the system-appropriate reader.
 
     Thin wrapper over ``DASFile(file, system).read(**kwargs)``. Kept
     for one-shot callers that don't need to retain the ``DASFile``
-    instance.
+    instance. `system` is detected via ``detect_data_kind`` when
+    omitted, matching ``factor_raw2strain``; pass it to skip that open
+    when the format is already known.
     """
     return DASFile(file, system=system).read(**kwargs)
 
 
-def read_das_metadata(file: Union[str, Path], system: str):
+def read_das_metadata(file: Union[str, Path], system: Optional[str] = None):
     """Read one DAS file's metadata as a `DASmeta` dict (ASN / Proc) or
     list of `DASmeta` (OptaSense when the file splits on RawDataTime).
 
-    Thin wrapper over ``DASFile(file, system).metadata()``.
+    Thin wrapper over ``DASFile(file, system).metadata()``;
+    `system` is detected from the file when omitted.
     """
     return DASFile(file, system=system).metadata()
 
