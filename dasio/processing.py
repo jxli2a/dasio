@@ -2,7 +2,7 @@
 
 Thin wrappers around the numeric kernels in `signal.py` that preserve
 the `DASdata` envelope (fs, dt, nx, nt, dx, begin_time, end_time,
-gauge_length_m, system, raw_meta) so pipelines read naturally:
+gauge_length_m, format, raw_meta) so pipelines read naturally:
 
         d = read_das_data(path, 'Proc')
         d = bandpass(d, 0.01, 0.4)

@@ -12,7 +12,7 @@ import pytest
 from dasio.dasdata import DASdata
 from dasio.dasfile import DASFile
 from dasio.readers.basic import read_basic, read_basic_metadata, write_basic
-from dasio.readers.detector import detect_data_kind
+from dasio.readers.detector import detect_format
 from dasio.readers.proc import write_data_proc
 
 T0 = datetime(2023, 11, 14, 22, 13, 20, tzinfo=timezone.utc)
@@ -24,7 +24,7 @@ def make(units="microstrain", nx=6, nt=40, **kw):
         data=rng.standard_normal((nx, nt)).astype(np.float32),
         fs=100.0, dt=0.01, nt=nt, nx=nx, dx=2.5,
         begin_time=T0, end_time=T0 + timedelta(seconds=(nt - 1) * 0.01),
-        gauge_length_m=10.0, system="Proc", origin="OptaSense", units=units,
+        gauge_length_m=10.0, format="Proc", origin="OptaSense", units=units,
         t0_sec=-3.0, ch0=2000, dch=4, physical_factor=1.0,
     )
     fields.update(kw)
@@ -42,9 +42,9 @@ def test_round_trip_preserves_every_field(tmp_path):
         assert getattr(back, field) == getattr(d, field), field
     assert back.begin_time == d.begin_time
     assert back.end_time == d.end_time
-    # `system` is the format, so it becomes 'Basic' — the interrogator that
+    # `format` is the format, so it becomes 'Basic' — the interrogator that
     # recorded the samples is what `origin` keeps.
-    assert back.system == "Basic" and back.origin == "OptaSense"
+    assert back.format == "Basic" and back.origin == "OptaSense"
 
 
 @pytest.mark.parametrize("units", ["microstrain", "microstrain/s", "count",
@@ -84,8 +84,8 @@ def test_detected_and_dispatched_by_dasfile(tmp_path):
 
     p = write_basic(tmp_path / "d.h5", make())
     with h5py.File(p) as f:
-        assert detect_data_kind(f) == "Basic"
-    assert DASFile(p).system == "Basic"
+        assert detect_format(f) == "Basic"
+    assert DASFile(p).format == "Basic"
     assert DASFile(p).read().units == "microstrain"      # no reader kwargs needed
 
 

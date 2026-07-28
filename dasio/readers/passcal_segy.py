@@ -1,7 +1,7 @@
 """Reader for PASSCAL SEG-Y DAS files (e.g. legacy Ridgecrest AWS archives).
 
 SEG-Y is a non-HDF5 binary format, so it does not go through the h5py
-``detect_data_kind`` path the other readers use; ``DASFile`` routes the
+``detect_format`` path the other readers use; ``DASFile`` routes the
 ``.segy`` suffix to ``read_passcal_segy``.
 
 Layout: a 3600-byte file header (3200-byte textual + 400-byte binary), then
@@ -228,7 +228,7 @@ def read_passcal_segy(
     return DASdata(
         data=data, fs=1.0 / dt, dt=dt, nt=ns, nx=nx, dx=dx,
         begin_time=begin_time, end_time=end_time,
-        gauge_length_m=gauge_length_m, system="PASSCAL_SEGY", origin="PASSCAL_SEGY",
+        gauge_length_m=gauge_length_m, format="PASSCAL_SEGY", origin="PASSCAL_SEGY",
         raw_meta={"segy_format_code": fmt, "endian": ec,
                   "conversion_factor": conversion_factor},
         units=normalize_unit(units),

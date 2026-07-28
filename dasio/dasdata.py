@@ -77,14 +77,14 @@ class DASdata:
     begin_time:      datetime
     end_time:        datetime
     gauge_length_m:  Optional[float] = None
-    # The same pair `DASFile` carries, so `d.system == DASFile(p).system` and
-    # likewise for origin. `system` is the on-disk format that picked the
+    # The same pair `DASFile` carries, so `d.format == DASFile(p).format` and
+    # likewise for origin. `format` is the on-disk format that picked the
     # reader ('Proc', 'OptaSense', 'Basic', ...); `origin` is the interrogator
     # the samples came off, which for a Proc file is recovered from
     # /Acquisition_origin and is the only one of the two that survives
     # desampling. They coincide for raw vendor files and differ for everything
-    # else — a Proc capture from a QuantX reads system='Proc', origin='OptaSense'.
-    system:          str = 'unknown'
+    # else — a Proc capture from a QuantX reads format='Proc', origin='OptaSense'.
+    format:          str = 'unknown'
     origin:          str = 'unknown'
     raw_meta:        Optional[dict] = None
     # `t0_sec` is the seconds-axis value at sample 0. Default 0 so a
@@ -131,7 +131,7 @@ class DASdata:
         """
         keys = (
             'fs', 'dt', 'nt', 'nx', 'dx', 'begin_time', 'end_time',
-            't0_sec', 'gauge_length_m', 'system', 'origin', 'units',
+            't0_sec', 'gauge_length_m', 'format', 'origin', 'units',
         )
         return {k: getattr(self, k) for k in keys}
 

@@ -104,7 +104,7 @@ def read_event(
         data=data,
         fs=fs, dt=dt, nt=nt, nx=nx, dx=dx,
         begin_time=begin_time, end_time=end_time,
-        gauge_length_m=None, system='Event', origin='Event',
+        gauge_length_m=None, format='Event', origin='Event',
         raw_meta=raw_meta, t0_sec=t0_sec,
         units=normalize_unit(attrs.get("unit")),
     )

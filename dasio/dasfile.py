@@ -1,6 +1,6 @@
 """`DASFile`: per-file I/O facade.
 
-Wraps one `.h5` / `.hdf5` path. `system` (on-disk data kind) and
+Wraps one `.h5` / `.hdf5` path. `format` (on-disk format) and
 `origin` (original capture vendor) are detected lazily — only on
 attribute access — so construction is free. This matters for
 directory-scan hot paths (`DASdb.scan_metadata`) that build
@@ -36,7 +36,7 @@ from .readers.optasense import (
     read_optasense_metadata,
     read_optasense_raw,
 )
-from .readers.detector import detect_data_kind, detect_origin
+from .readers.detector import detect_format, detect_origin
 from .readers.passcal_segy import read_passcal_segy, read_passcal_segy_metadata
 from .readers.proc import read_data_proc, read_metadata_proc
 
@@ -85,24 +85,24 @@ class DASFile:
     """
     One DAS HDF5 file with lazy format + origin detection.
 
-    `system` is the on-disk data kind (`'ASN'`, `'OptaSense'`, `'Proc'`,
+    `format` is the on-disk format (`'ASN'`, `'OptaSense'`, `'Proc'`,
     `'Basic'`, …) and decides which reader dispatches. `origin` is the vendor
-    that originally captured the data — equal to `system` for raw files,
+    that originally captured the data — equal to `format` for raw files,
     recovered from `/Acquisition_origin` attrs for Proc files. It picks the
     raw->strain factor, and `DASdata` carries the same pair so a window keeps
     both facts after the file is closed.
 
     Both attributes are detected on first access and cached. Passing
     them up-front skips the detection open entirely — `.metadata()`
-    needs only `system`, `.factor()` needs only `origin`.
+    needs only `format`, `.factor()` needs only `origin`.
 
     Parameters
     ----------
     path :
         Filesystem path to the .h5 / .hdf5 file.
-    system :
-        Pre-known data kind. If omitted, detected via
-        ``detect_data_kind`` on first access.
+    format :
+        Pre-known format. If omitted, detected via
+        ``detect_format`` on first access.
     origin :
         Pre-known origin vendor. If omitted, detected via
         ``detect_origin`` on first access.
@@ -110,22 +110,22 @@ class DASFile:
 
     def __init__(
             self, path: Union[str, Path],
-            system: Optional[str] = None,
+            format: Optional[str] = None,
             origin: Optional[str] = None,
         ):
         self.path = Path(path)
-        self._system = system
+        self._format = format
         self._origin = origin
 
     @property
-    def system(self) -> str:
-        if self._system is None:
+    def format(self) -> str:
+        if self._format is None:
             if _is_segy(self.path):                      # non-HDF5: detect by suffix
-                self._system = 'PASSCAL_SEGY'
+                self._format = 'PASSCAL_SEGY'
             else:
                 with h5py.File(self.path, 'r') as f:
-                    self._system = detect_data_kind(f)
-        return self._system
+                    self._format = detect_format(f)
+        return self._format
 
     @property
     def origin(self) -> str:
@@ -138,7 +138,7 @@ class DASFile:
         return self._origin
 
     def __repr__(self) -> str:
-        return (f'DASFile({self.path!s}, system={self._system!r}, '
+        return (f'DASFile({self.path!s}, format={self._format!r}, '
                 f'origin={self._origin!r})')
 
     # ---- read / metadata / factor -------------------------------------
@@ -161,10 +161,10 @@ class DASFile:
         `to_physical()` applies.
         """
         try:
-            reader = _DATA_READERS[self.system]
+            reader = _DATA_READERS[self.format]
         except KeyError:
             raise ValueError(
-                f'No data reader for system {self.system!r}; '
+                f'No data reader for format {self.format!r}; '
                 f'known: {sorted(_DATA_READERS)}'
             )
         d = reader(self.path, **kwargs)
@@ -176,10 +176,10 @@ class DASFile:
         """Return a `DASmeta` dict (ASN / Proc) or list of them
         (OptaSense when the file holds multiple RawDataTime chunks)."""
         try:
-            reader = _METADATA_READERS[self.system]
+            reader = _METADATA_READERS[self.format]
         except KeyError:
             raise ValueError(
-                f'No metadata reader for system {self.system!r}; '
+                f'No metadata reader for format {self.format!r}; '
                 f'known: {sorted(_METADATA_READERS)}'
             )
         return reader(self.path)

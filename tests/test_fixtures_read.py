@@ -1,5 +1,5 @@
 from dasio.dasfile import DASFile
-from dasio.readers.detector import detect_data_kind
+from dasio.readers.detector import detect_format
 import h5py
 
 
@@ -10,7 +10,7 @@ def test_detect_kinds(optasense_file, asn_file, apsensing_file, proc_file, event
     }
     for path, kind in expected.items():
         with h5py.File(path, "r") as f:
-            assert detect_data_kind(f) == kind
+            assert detect_format(f) == kind
 
 
 def test_each_reader_returns_correct_shape(optasense_file, asn_file, apsensing_file,

@@ -1,6 +1,6 @@
 """Sniff an open HDF5 file to decide which reader handles it.
 
-detect_data_kind answers "which on-disk format is this". The return
+detect_format answers "which on-disk format is this". The return
 value selects the reader dispatched from dasio.read_data_raw /
 DASFile.
 
@@ -19,21 +19,21 @@ import h5py
 
 # Defined in basic.py, imported here rather than duplicated so the on-disk
 # stamp and the check that reads it can never drift apart.
-from .basic import KIND as _BASIC_KIND
+from .basic import FORMAT as _BASIC_FORMAT
 
 
-def detect_data_kind(f: h5py.File) -> str:
+def detect_format(f: h5py.File) -> str:
     """Return one of: 'Basic', 'Proc', 'ASN', 'OptaSense', 'APSensing',
     'Event', or 'Unknown'.
     """
-    # Basic names itself in `/data.attrs['system']`, so it is recognized
+    # Basic names itself in `/data.attrs['format']`, so it is recognized
     # outright — `/data` alone is ambiguous with ASN and Event.
     if 'data' in f:
-        stamp = f['data'].attrs.get('system')
+        stamp = f['data'].attrs.get('format')
         if isinstance(stamp, bytes):
             stamp = stamp.decode()
-        if stamp == _BASIC_KIND:
-            return _BASIC_KIND
+        if stamp == _BASIC_FORMAT:
+            return _BASIC_FORMAT
     if 'Data' in f:
         return 'Proc'
     if 'acqSpec' in f:
@@ -49,12 +49,12 @@ def detect_data_kind(f: h5py.File) -> str:
 
 def detect_origin(f: h5py.File) -> str:
     """Return one of: 'ASN', 'OptaSense', 'APSensing', 'Sintela',
-    or 'Unknown'. Mirrors the legacy DASutils._get_data_system 'system'
-    component.
+    or 'Unknown'. Mirrors the 'system' component of the legacy
+    DASutils._get_data_system (external name, unchanged).
     """
-    kind = detect_data_kind(f)
-    if kind != 'Proc':
-        return kind
+    fmt = detect_format(f)
+    if fmt != 'Proc':
+        return fmt
     if 'Acquisition_origin' in f:
         attrs = f['Acquisition_origin'].attrs
         if 'AcquisitionId' in attrs:

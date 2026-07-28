@@ -12,8 +12,8 @@ including `units`, `ch0`, `dch` and `t0_sec`, the fields the other formats drop.
 
 No `raw_meta`: preserving the vendor tree is the Proc cascade's job. `origin`
 is kept, since which interrogator recorded the samples stays true however far
-the data is processed. `system` doubles as the format stamp — it always reads
-'Basic', which is how `detect_data_kind` recognizes the file without guessing
+the data is processed. `format` doubles as the format stamp — it always reads
+'Basic', which is how `detect_format` recognizes the file without guessing
 at group names (`/data` alone is ambiguous with ASN and Event).
 """
 import sys
@@ -28,11 +28,11 @@ from ..dasdata import DASdata, DASmeta, normalize_unit
 from ..utils import iso_timestamp, parse_iso
 
 
-KIND = 'Basic'          # the `system` attr's value, and what detection reports
+FORMAT = 'Basic'          # the `format` attr's value, and what detection reports
 
 # DASdata scalar fields stored verbatim. Handled separately: `data` is the
 # payload, `begin_time` / `end_time` need ISO serialization, `raw_meta` is
-# deliberately not kept, and `system` is written as the constant `KIND` rather
+# deliberately not kept, and `format` is written as the constant `FORMAT` rather
 # than copied from the DASdata — the file IS Basic whatever it was read from,
 # and stamping a source 'Proc' there would make it undetectable.
 _ATTRS = ('fs', 'dt', 'dx', 'gauge_length_m', 'origin',
@@ -87,7 +87,7 @@ def read_basic(
         fs=float(attrs['fs']), dt=dt, nt=nt, nx=nx, dx=float(attrs['dx']),
         begin_time=begin_time, end_time=end_time,
         gauge_length_m=None if np.isnan(gauge_length_m) else gauge_length_m,
-        system=_text(attrs.get('system'), KIND),
+        format=_text(attrs.get('format'), FORMAT),
         origin=_text(attrs.get('origin')),
         raw_meta=None,
         t0_sec=float(attrs.get('t0_sec', 0.0)) + int(first_sample) * dt,
@@ -121,7 +121,7 @@ def write_basic(
     tmp = file.with_suffix(file.suffix + '.lock')
     with h5py.File(tmp, 'w') as f:
         dset = f.create_dataset('data', data=d.data, **kwargs)
-        dset.attrs['system'] = KIND
+        dset.attrs['format'] = FORMAT
         dset.attrs['begin_time'] = iso_timestamp(d.begin_time)
         dset.attrs['end_time'] = iso_timestamp(d.end_time)
         for k in _ATTRS:

@@ -33,7 +33,7 @@ def test_read_with_valid_header(tmp_path):
     d = read_passcal_segy(p)
     assert d.shape == (6, 100)                       # n_traces derived from file size
     assert d.fs == pytest.approx(250.0)             # 4000 us -> 250 Hz
-    assert d.system == "PASSCAL_SEGY"
+    assert d.format == "PASSCAL_SEGY"
     np.testing.assert_allclose(d.data, data, rtol=1e-5)
     expect = datetime(2020, 1, 1, tzinfo=timezone.utc) + timedelta(days=210, hours=14)
     assert d.begin_time == expect
@@ -60,7 +60,7 @@ def test_dasfile_routes_segy_by_suffix(tmp_path):
     data = np.arange(3 * 20, dtype=np.float32).reshape(3, 20)
     p = write_segy(tmp_path / "r.segy", data, dt_us=4000)
     f = DASFile(p)
-    assert f.system == "PASSCAL_SEGY"                  # detected by suffix, no h5py open
+    assert f.format == "PASSCAL_SEGY"                  # detected by suffix, no h5py open
     assert f.origin == "PASSCAL_SEGY"
     d = f.read()
     assert d.shape == (3, 20)

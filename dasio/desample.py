@@ -63,19 +63,19 @@ def _dasdb_path_loadable(path: Optional[Path]) -> bool:
 # below and desample_and_write_window both call this. dasdb stays
 # free of any desample-output knowledge.
 
-def _proc_out_path(out_dir: Path, system: str, begin: datetime,
+def _proc_out_path(out_dir: Path, format: str, begin: datetime,
                     date_subdir: bool) -> Path:
     """Resolve the on-disk path for a desampled window.
 
     Filename always begins with 'Proc' so a desampled file is
-    unambiguously distinguishable from raw input regardless of system;
-    re-running desample on Proc inputs (system='Proc') keeps the bare
+    unambiguously distinguishable from raw input regardless of format;
+    re-running desample on Proc inputs (format='Proc') keeps the bare
     'Proc-' prefix instead of producing 'ProcProc-'. `date_subdir=True`
     nests by UTC begin date so `Processed/` does not accumulate
     millions of flat siblings. The directory is *not* auto-created
     here — writers must mkdir before save.
     """
-    prefix = system if system.startswith('Proc') else f'Proc{system}'
+    prefix = format if format.startswith('Proc') else f'Proc{format}'
     name = f"{prefix}-{begin.strftime('%Y-%m-%dT%H%M%SZ')}.h5"
     if date_subdir:
         return out_dir / begin.strftime('%Y%m%d') / name
@@ -125,7 +125,7 @@ def iter_unprocessed(
             end = begin + timedelta(seconds=file_len)
             if end > last_file_begin:
                 break
-            out_path = _proc_out_path(out_dir, db.system, begin, date_subdir)
+            out_path = _proc_out_path(out_dir, db.format, begin, date_subdir)
             if not out_path.exists():
                 yield begin, end
             idx = seg_begins.searchsorted(pd.Timestamp(end))
@@ -208,7 +208,7 @@ def _trim_to_target(
 
 def desample_window(
         rw: RawWindow,
-        system: str,
+        format: str,
         fmax: float = 0.4,
         order: int = 14,
         min_ch: int = 0,
@@ -218,7 +218,7 @@ def desample_window(
     ) -> DASdata:
     """Read padded window, bandpass over full span, decimate, trim to target.
 
-    Accepts `system` in {'ASN', 'OptaSense', 'APSensing', 'Proc'}. With 'Proc'
+    Accepts `format` in {'ASN', 'OptaSense', 'APSensing', 'Proc'}. With 'Proc'
     the input files are themselves the output of an earlier desample run, and
     the int32 unwrap is skipped: an OptaSense-origin Proc file still holds
     counts, but they were unwrapped when that file was written and the
@@ -265,7 +265,7 @@ def desample_window(
         # read nch=nchbuffer from each file
         c1 = min(c0 + nchbuffer, max_ch)
         reads = [
-            DASFile(Path(r['file']), system=system).read(
+            DASFile(Path(r['file']), format=format).read(
                 min_ch=c0, max_ch=c1,
                 first_sample=int(r['first_sample']),
                 n_samples=int(r['nt']),
@@ -284,7 +284,7 @@ def desample_window(
         )
 
         # Unwrap OptaSense phase counts across the full concatenated buffer
-        if system == 'OptaSense':
+        if format == 'OptaSense':
             data = unwrap_int32(data, factor=1)
 
         if fmax > 0:
@@ -325,13 +325,13 @@ def desample_window(
         end_time=end_time_out,
         gauge_length_m=first_data.gauge_length_m,
         raw_meta=first_data.raw_meta,
-        # `system` is the input format this run dispatched on; `origin` is the
+        # `format` is the input format this run dispatched on; `origin` is the
         # interrogator, which a Proc -> Proc cascade must carry forward or the
         # vendor is lost after one generation. Desample concatenates, filters
         # and decimates but never scales, so `units` passes straight through
         # too — without it the output was always "unknown" and
         # `write_data_proc` had no way to tell raw from converted.
-        system=system, origin=first_data.origin,
+        format=format, origin=first_data.origin,
         units=first_data.units,
         ch0=first_data.ch0, dch=first_data.dch,
     )
@@ -342,7 +342,7 @@ def desample_and_write_window(
         begin: datetime,
         end: datetime,
         out_dir: Path,
-        system: str,
+        format: str,
         fmax: float = 0.4,
         order: int = 14,
         min_ch: int = 0,
@@ -374,11 +374,11 @@ def desample_and_write_window(
             f'segments (acquisition gap); desample each segment separately'
         )
     d = desample_window(
-        rws[0], system, fmax=fmax, order=order,
+        rws[0], format, fmax=fmax, order=order,
         min_ch=min_ch, max_ch=max_ch, nchbuffer=nchbuffer,
         nthreads=nthreads,
     )
-    out_path = _proc_out_path(out_dir, system, d.begin_time, date_subdir)
+    out_path = _proc_out_path(out_dir, format, d.begin_time, date_subdir)
     if out_path.exists():
         print(f'exists, skip: {out_path}')
         return None
@@ -395,7 +395,7 @@ def main(argv=None):
     ap.add_argument('--from', dest='raw_dir', required=True, type=Path)
     ap.add_argument('--to', dest='out_dir', required=True, type=Path)
     ap.add_argument(
-        '--system',
+        '--format',
         choices=['ASN', 'OptaSense', 'APSensing', 'Proc'], required=True,
     )
     ap.add_argument('--fmax', type=float, default=0.4)
@@ -481,7 +481,7 @@ def main(argv=None):
     )
     ap.add_argument(
         '--proc-dasdb', type=Path, default=None,
-        help='Catalog of files already in --to (system=Proc). On '
+        help='Catalog of files already in --to (format=Proc). On '
             'startup, load (or scan --to to build) and use the '
             'latest end_time as a resume marker: raw files with '
             'begin_time <= cutoff are dropped before the segment '
@@ -512,7 +512,7 @@ def main(argv=None):
     # `db.next_unprocessed` below. Built / updated catalog is
     # written to the file specified by --dasdb.
     if _dasdb_path_loadable(args.dasdb):
-        db = DASdb.from_file(args.dasdb, system=args.system)
+        db = DASdb.from_file(args.dasdb, format=args.format)
         n_before = db.n_files
         n_new = db.update_from_dir(
             args.raw_dir, workers=args.scan_workers, progress=progress,
@@ -524,7 +524,7 @@ def main(argv=None):
             db.to_file(args.dasdb)
     else:
         db = DASdb.from_dir(
-            args.raw_dir, args.system,
+            args.raw_dir, args.format,
             workers=args.scan_workers, progress=progress,
         )
         if args.dasdb is not None:
@@ -543,7 +543,7 @@ def main(argv=None):
     proc_db = None
     if args.proc_dasdb is not None:
         if _dasdb_path_loadable(args.proc_dasdb):
-            proc_db = DASdb.from_file(args.proc_dasdb, system='Proc')
+            proc_db = DASdb.from_file(args.proc_dasdb, format='Proc')
             n_pre = proc_db.n_files
             n_new = proc_db.update_from_dir(
                 args.out_dir, workers=args.scan_workers, progress=progress,
@@ -605,7 +605,7 @@ def main(argv=None):
             return 0
         for begin, end in windows:
             out_path = _proc_out_path(
-                args.out_dir, args.system, begin, args.out_date_subdir,
+                args.out_dir, args.format, begin, args.out_date_subdir,
             )
             print(f'would write: {out_path}  '
                   f'window=[{begin.isoformat()}, {end.isoformat()})')
@@ -614,7 +614,7 @@ def main(argv=None):
 
     def _run_one(begin, end):
         return desample_and_write_window(
-            db, begin, end, args.out_dir, args.system,
+            db, begin, end, args.out_dir, args.format,
             fmax=args.fmax, order=args.order,
             min_ch=args.min_ch, max_ch=args.max_ch,
             nchbuffer=args.nchbuffer,

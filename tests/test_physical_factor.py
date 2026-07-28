@@ -88,7 +88,7 @@ def test_optasense_origin_proc_reads_as_counts_and_converts(proc_optasense_file)
     factor attached, `.to_physical()` finishes the job. The reader applying the
     factor itself is what once let it be applied twice — 118 microstrain
     collapsing to 1.2e-11 on a real 1 Hz catalog."""
-    f = DASFile(proc_optasense_file, system="Proc")
+    f = DASFile(proc_optasense_file, format="Proc")
     assert f.origin == "OptaSense" and f.factor() != 1.0   # precondition
 
     d = f.read()
@@ -103,7 +103,7 @@ def test_optasense_origin_proc_reads_as_counts_and_converts(proc_optasense_file)
 def test_to_physical_is_idempotent_on_proc_data(proc_optasense_file):
     """Converted data must not pick up a second factor or 1e6 from a
     redundant call — callers should be able to apply it unconditionally."""
-    p = DASFile(proc_optasense_file, system="Proc").read().to_physical()
+    p = DASFile(proc_optasense_file, format="Proc").read().to_physical()
     np.testing.assert_array_equal(p.to_physical().data, p.data)
     assert p.to_physical().units == p.units
 

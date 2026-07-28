@@ -14,7 +14,7 @@ def test_dasdb_read_propagates_units(proc_file):
     db = DASdb(pd.DataFrame([meta]), "Proc")
 
     # what a direct single-file read yields
-    expected = DASFile(proc_file, system="Proc").read().units
+    expected = DASFile(proc_file, format="Proc").read().units
     assert expected != "unknown"
 
     out = db.read(meta["begin_time"], meta["begin_time"] + timedelta(seconds=1.0))
@@ -37,7 +37,7 @@ def test_dasdb_read_with_factor_attaches_conversion(optasense_file):
     metas = read_optasense_metadata(optasense_file)
     db = DASdb(pd.DataFrame(metas), "OptaSense")
     m0 = metas[0]
-    fac = DASFile(optasense_file, system="OptaSense").factor()
+    fac = DASFile(optasense_file, format="OptaSense").factor()
     assert fac != 1.0
 
     out = db.read(

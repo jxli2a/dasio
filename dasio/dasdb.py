@@ -43,7 +43,7 @@ from .schema import RawWindow, _CSV_TO_DF, _DF_COLUMNS, _DF_TO_CSV
 from .utils import atomic_write, list_data_files
 
 
-def _format_for(file: Union[str, Path]) -> str:
+def _catalog_format(file: Union[str, Path]) -> str:
     """Return 'parquet' or 'csv' from file extension; raise on unknown."""
     s = Path(file).suffix.lower()
     if s in ('.parquet', '.parq'):
@@ -63,21 +63,21 @@ def _format_for(file: Union[str, Path]) -> str:
 _ASN_DAY_DIR_RE = re.compile(r'^\d{8}$')
 
 
-def list_das_files(raw_dir: Path, system: str) -> List[Path]:
-    """Enumerate candidate DAS files under `raw_dir` for `system`.
+def list_das_files(raw_dir: Path, format: str) -> List[Path]:
+    """Enumerate candidate DAS files under `raw_dir` for `format`.
 
     Pure filesystem work — no HDF5 opens. Paired with
     `DASFile.metadata()` to drive incremental catalog refresh without
     reopening files already in the DASdb.
     """
     raw_dir = Path(raw_dir)
-    if system == 'ASN':
+    if format == 'ASN':
         files: List[Path] = []
         for sub in raw_dir.iterdir():
             if sub.is_dir() and _ASN_DAY_DIR_RE.match(sub.name):
                 files.extend(list_data_files(sub, ('*.hdf5', '*/*.hdf5')))
         return files
-    if system == 'Proc':
+    if format == 'Proc':
         # Two layouts coexist: flat (legacy desample output, before
         # --out-date-subdir landed) and <YYYYMMDD>/ProcASN-*.h5 (the
         # new layout the cron uses on Santorini-scale deployments to
@@ -89,26 +89,26 @@ def list_das_files(raw_dir: Path, system: str) -> List[Path]:
             if sub.is_dir() and _ASN_DAY_DIR_RE.match(sub.name):
                 files.extend(list_data_files(sub, '*.h5'))
         return files
-    if system in ('OptaSense', 'APSensing'):
+    if format in ('OptaSense', 'APSensing'):
         return list_data_files(raw_dir, '*.h5')
-    raise ValueError(f'Unknown system {system!r}')
+    raise ValueError(f'Unknown format {format!r}')
 
 
-def _read_metadata(file: Path, system: str) -> Optional[DASmeta]:
+def _read_metadata(file: Path, format: str) -> Optional[DASmeta]:
     """Module-level worker for `_read_metadata_batch` process pool.
 
     Lives at module scope (not as a closure) so it is picklable for
     ProcessPoolExecutor; the local-closure form would fail with
     'Can't pickle local object'.
     """
-    return DASFile(file, system=system).metadata()
+    return DASFile(file, format=format).metadata()
 
 
 def _read_metadata_batch(
-        files: List[Path], system: str,
+        files: List[Path], format: str,
         workers: int = 1, progress: bool = False,
     ) -> List[DASmeta]:
-    """Read DASFile(f, system=system).metadata() for each file.
+    """Read DASFile(f, format=format).metadata() for each file.
 
     Parallelizes via ProcessPoolExecutor (HDF5 holds an internal
     global lock that serializes thread-pool workers). progress=True
@@ -130,11 +130,11 @@ def _read_metadata_batch(
         return tqdm(iterable, total=len(files), unit='file', desc='scan')
 
     if workers <= 1:
-        metas = [_read_metadata(f, system) for f in _pbar(files)]
+        metas = [_read_metadata(f, format) for f in _pbar(files)]
     else:
         from concurrent.futures import ProcessPoolExecutor
         from functools import partial
-        worker = partial(_read_metadata, system=system)
+        worker = partial(_read_metadata, format=format)
         with ProcessPoolExecutor(max_workers=workers) as ex:
             metas = list(_pbar(ex.map(worker, files)))
 
@@ -147,10 +147,10 @@ def _read_metadata_batch(
 
 
 def scan_metadata(
-        raw_dir: Path, system: str,
+        raw_dir: Path, format: str,
         workers: int = 1, progress: bool = False,
     ) -> pd.DataFrame:
-    """Scan `raw_dir` for all `system` files and return a DASmeta DataFrame.
+    """Scan `raw_dir` for all `format` files and return a DASmeta DataFrame.
 
     Enumerates files via `list_das_files`, reads each through the
     `DASFile.metadata()` facade, concatenates OptaSense RawDataTime
@@ -167,7 +167,7 @@ def scan_metadata(
     """
     raw_dir = Path(raw_dir).resolve()
     rows = _read_metadata_batch(
-        list_das_files(raw_dir, system), system,
+        list_das_files(raw_dir, format), format,
         workers=workers, progress=progress,
     )
     df = pd.DataFrame(rows)
@@ -187,12 +187,12 @@ class DASdb:
         DataFrame with the `_DF_COLUMNS` schema (one row per
         DASmeta). Missing columns fall back to NaN / 0 where a default
         is meaningful.
-    system :
+    format :
         ``ASN``, ``OptaSense``, or ``Proc`` (matches the scanner used
         to build ``df``).
     """
 
-    def __init__(self, df: pd.DataFrame, system: str):
+    def __init__(self, df: pd.DataFrame, format: str):
         if df is None or len(df) == 0:
             df = pd.DataFrame({c: pd.Series(dtype=object) for c in _DF_COLUMNS})
         else:
@@ -204,18 +204,18 @@ class DASdb:
                 df[c] = np.nan
             df = df[_DF_COLUMNS]
         self.df = df.reset_index(drop=True)
-        self.system = system
+        self.format = format
 
     # ------------------------------------------------------------------ repr
 
     def __repr__(self) -> str:
         if self.df.empty:
-            return f'DASdb({self.system}, empty)'
+            return f'DASdb({self.format}, empty)'
         n = len(self.df)
         n_seg = self.n_segments
         t0 = self.df['begin_time'].iloc[0]
         t1 = self.df['end_time'].iloc[-1]
-        return (f'DASdb({self.system}, {n} files, {n_seg} segment'
+        return (f'DASdb({self.format}, {n} files, {n_seg} segment'
                 f'{"s" if n_seg != 1 else ""}, {t0} .. {t1})')
 
     # ------------------------------------------------------------- properties
@@ -300,12 +300,12 @@ class DASdb:
 
     @classmethod
     def from_dir(
-            cls, raw_dir: Path, system: Optional[str] = None,
+            cls, raw_dir: Path, format: Optional[str] = None,
             workers: int = 1, progress: bool = True,
         ) -> 'DASdb':
-        """Scan `raw_dir` and build a catalog for the given `system`."""
+        """Scan `raw_dir` and build a catalog for the given `format`."""
         raw_dir = Path(raw_dir)
-        if system is None:
+        if format is None:
             probe = next(
                 (p for pat in ('*.h5', '*.hdf5', '*/*.h5', '*/*.hdf5')
                     for p in raw_dir.glob(pat)),
@@ -314,27 +314,27 @@ class DASdb:
             if probe is None:
                 raise ValueError(
                     f'DASdb.from_dir: no .h5/.hdf5 files under {raw_dir} '
-                    'to detect system from; pass system= explicitly.'
+                    'to detect format from; pass format= explicitly.'
                 )
-            system = DASFile(probe).system
+            format = DASFile(probe).format
         return cls(
-            scan_metadata(raw_dir, system, workers=workers, progress=progress),
-            system,
+            scan_metadata(raw_dir, format, workers=workers, progress=progress),
+            format,
         )
 
     @classmethod
     def from_csv(
             cls, file: Union[str, Path],
-            system: Optional[str] = None,
+            format: Optional[str] = None,
         ) -> 'DASdb':
         """Load a legacy DAS_db CSV (whitespace-separated).
 
         Translates legacy column names (begTime, endTime, nChannels,
         dCh, GaugeLen, firstSample) into the internal snake_case
-        schema. Drops any `segment_id` or `system` columns the CSV
+        schema. Drops any `segment_id` or `format` columns the CSV
         might carry — neither is part of the in-memory schema. If
-        `system` is given and the CSV has a `system` column, rows are
-        filtered to that system before the column is dropped.
+        `format` is given and the CSV has a `format` column, rows are
+        filtered to that format before the column is dropped.
         """
         file = Path(file)
         df = pd.read_csv(file, sep=r'\s+', engine='python')
@@ -342,17 +342,17 @@ class DASdb:
         # format='ISO8601' so rows with and without fractional seconds mix freely;
         df['begin_time'] = pd.to_datetime(df['begin_time'], utc=True, format='ISO8601')
         df['end_time'] = pd.to_datetime(df['end_time'], utc=True, format='ISO8601')
-        if 'system' in df.columns:
-            if system is not None:
-                df = df[df['system'] == system]
+        if 'format' in df.columns:
+            if format is not None:
+                df = df[df['format'] == format]
             elif len(df):
-                system = df['system'].iloc[0]
-            df = df.drop(columns=['system'])
-        if system is None:
+                format = df['format'].iloc[0]
+            df = df.drop(columns=['format'])
+        if format is None:
             raise ValueError(
-                f"DASdb.from_csv: cannot infer system from {file.name!r} "
-                "(no `system` column and no `system=` kwarg). Pass "
-                "system='ASN' | 'OptaSense' | 'APSensing' | 'Proc' "
+                f"DASdb.from_csv: cannot infer format from {file.name!r} "
+                "(no `format` column and no `format=` kwarg). Pass "
+                "format='ASN' | 'OptaSense' | 'APSensing' | 'Proc' "
                 "explicitly. Catalogs from desample.py are 'Proc'."
             )
         if 'segment_id' in df.columns:
@@ -361,7 +361,7 @@ class DASdb:
         if 'first_sample' not in df.columns:
             df['first_sample'] = 0
         keep = [c for c in _DF_COLUMNS if c in df.columns]
-        return cls(df[keep], system)
+        return cls(df[keep], format)
 
     def to_csv(self, file: Union[str, Path]) -> None:
         """Write a DAS_db CSV (whitespace-separated, one row per DASmeta).
@@ -388,11 +388,11 @@ class DASdb:
     @classmethod
     def from_parquet(
             cls, file: Union[str, Path],
-            system: Optional[str] = None,
+            format: Optional[str] = None,
         ) -> 'DASdb':
         """Load a DASdb Parquet file.
 
-        system is recovered from the b'system' file-level metadata
+        format is recovered from the b'format' file-level metadata
         key written by to_parquet; the kwarg is a fallback for
         foreign parquet files without that key, and a conflict
         between the two raises.
@@ -400,30 +400,30 @@ class DASdb:
         import pyarrow.parquet as pq
         file = Path(file)
         meta = pq.read_schema(file).metadata or {}
-        meta_system = meta.get(b'system')
-        if meta_system is not None:
-            system_in_file = meta_system.decode('utf-8')
-            if system is not None and system != system_in_file:
+        meta_format = meta.get(b'format')
+        if meta_format is not None:
+            format_in_file = meta_format.decode('utf-8')
+            if format is not None and format != format_in_file:
                 raise ValueError(
-                    f"DASdb.from_parquet: system kwarg {system!r} "
-                    f"contradicts file metadata {system_in_file!r}"
+                    f"DASdb.from_parquet: format kwarg {format!r} "
+                    f"contradicts file metadata {format_in_file!r}"
                 )
-            system = system_in_file
-        if system is None:
+            format = format_in_file
+        if format is None:
             raise ValueError(
-                f"DASdb.from_parquet: cannot infer system from {file.name!r} "
-                "(no 'system' file metadata and no system= kwarg). Pass "
-                "system='ASN' | 'OptaSense' | 'APSensing' | 'Proc' "
+                f"DASdb.from_parquet: cannot infer format from {file.name!r} "
+                "(no 'format' file metadata and no format= kwarg). Pass "
+                "format='ASN' | 'OptaSense' | 'APSensing' | 'Proc' "
                 "explicitly."
             )
         df = pd.read_parquet(file)
         df = df.sort_values('begin_time').reset_index(drop=True)
-        return cls(df, system)
+        return cls(df, format)
 
     def to_parquet(self, file: Union[str, Path]) -> None:
         """Write a DASdb to a Parquet file (snake_case schema, snappy).
 
-        system rides along in file-level metadata under b'system'.
+        format rides along in file-level metadata under b'format'.
         Sorted by begin_time; atomic write.
         """
         import pyarrow as pa
@@ -431,7 +431,7 @@ class DASdb:
         sorted_df = self.df.sort_values('begin_time').reset_index(drop=True)
         table = pa.Table.from_pandas(sorted_df, preserve_index=False)
         existing = table.schema.metadata or {}
-        merged = {**existing, b'system': self.system.encode('utf-8')}
+        merged = {**existing, b'format': self.format.encode('utf-8')}
         table = table.replace_schema_metadata(merged)
         atomic_write(
             file,
@@ -441,15 +441,15 @@ class DASdb:
     @classmethod
     def from_file(
             cls, file: Union[str, Path],
-            system: Optional[str] = None,
+            format: Optional[str] = None,
         ) -> 'DASdb':
         """Load a catalog by path; format chosen from extension."""
-        reader = cls.from_parquet if _format_for(file) == 'parquet' else cls.from_csv
-        return reader(file, system=system)
+        reader = cls.from_parquet if _catalog_format(file) == 'parquet' else cls.from_csv
+        return reader(file, format=format)
 
     def to_file(self, file: Union[str, Path]) -> None:
         """Persist the catalog; format chosen from extension."""
-        writer = self.to_parquet if _format_for(file) == 'parquet' else self.to_csv
+        writer = self.to_parquet if _catalog_format(file) == 'parquet' else self.to_csv
         writer(file)
 
     # --------------------------------------------------------- incremental
@@ -489,11 +489,11 @@ class DASdb:
         raw_dir = Path(raw_dir).resolve()
         known = set(self.df['file']) if not self.df.empty else set()
         new_files = [
-            f for f in list_das_files(raw_dir, self.system)
+            f for f in list_das_files(raw_dir, self.format)
             if str(f) not in known
         ]
         rows = _read_metadata_batch(
-            new_files, self.system, workers=workers, progress=progress,
+            new_files, self.format, workers=workers, progress=progress,
         )
         if rows:
             self.append(pd.DataFrame(rows))
@@ -501,7 +501,7 @@ class DASdb:
 
     @classmethod
     def load_or_build(
-            cls, file: Optional[Path], raw_dir: Path, system: str,
+            cls, file: Optional[Path], raw_dir: Path, format: str,
             overwrite: bool = False,
             workers: int = 1, progress: bool = False,
         ) -> 'DASdb':
@@ -514,11 +514,11 @@ class DASdb:
         Never writes; caller persists via db.to_csv / db.to_parquet / db.to_file.
         """
         if file is not None and file.exists() and not overwrite:
-            db = cls.from_file(file, system=system)
+            db = cls.from_file(file, format=format)
             db.update_from_dir(raw_dir, workers=workers, progress=progress)
             return db
         return cls.from_dir(
-            raw_dir, system, workers=workers, progress=progress,
+            raw_dir, format, workers=workers, progress=progress,
         )
 
     # ---------------------------------------------------------------- queries
@@ -638,7 +638,7 @@ class DASdb:
                 ))
                 if n <= 0:
                     continue
-                d = DASFile(Path(row['file']), system=self.system).read(
+                d = DASFile(Path(row['file']), format=self.format).read(
                     min_ch=min_ch, max_ch=max_ch,
                     first_sample=int(row['first_sample']) + offset,
                     n_samples=n,
@@ -690,7 +690,7 @@ class DASdb:
             begin_time=out_begin, end_time=out_end,
             # Format from the catalog, vendor from the file it read.
             gauge_length_m=first_read.gauge_length_m,
-            system=self.system, origin=first_read.origin,
+            format=self.format, origin=first_read.origin,
             raw_meta=first_read.raw_meta,
             units=first_read.units,
             physical_factor=first_read.physical_factor,
@@ -780,7 +780,7 @@ class DASdb:
             ax.grid(axis='x', color='white', lw=0.8, zorder=1)
 
         ax.set_title(
-            f'{self.system}  |  {self.n_files:,} files  |  '
+            f'{self.format}  |  {self.n_files:,} files  |  '
             f'{self.n_segments} segments  |  '
             f'{spans[0][0]:%Y-%m-%d} to {spans[-1][1]:%Y-%m-%d}',
             fontsize=10,
@@ -801,7 +801,7 @@ def main(argv=None):
 
     One-shot format conversion of an existing catalog is a one-liner:
         python -c "from dasio.dasdb import DASdb; \\
-            DASdb.from_file('old.csv', system='ASN').to_file('new.parquet')"
+            DASdb.from_file('old.csv', format='ASN').to_file('new.parquet')"
     """
     import argparse
     ap = argparse.ArgumentParser(prog='python -m dasio.dasdb')
@@ -816,7 +816,7 @@ def main(argv=None):
             'Created on first run, updated incrementally on subsequent runs.',
     )
     ap.add_argument(
-        '--system',
+        '--format',
         choices=['ASN', 'OptaSense', 'APSensing', 'Proc'], required=True,
     )
     ap.add_argument(
@@ -848,14 +848,14 @@ def main(argv=None):
 
     pre_existed = args.dasdb.exists()
     if pre_existed and not args.overwrite:
-        db = DASdb.from_file(args.dasdb, system=args.system)
+        db = DASdb.from_file(args.dasdb, format=args.format)
         n_new = db.update_from_dir(
             args.raw_dir, workers=args.nworkers, progress=args.progress,
         )
         action, tail = 'updated', f'+{n_new} new'
     else:
         db = DASdb.from_dir(
-            args.raw_dir, args.system,
+            args.raw_dir, args.format,
             workers=args.nworkers, progress=args.progress,
         )
         action = 'rebuilt' if pre_existed else 'created'

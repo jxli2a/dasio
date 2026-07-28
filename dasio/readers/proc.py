@@ -5,7 +5,7 @@ whatever the origin vendor recorded (OptaSense counts, AP Sensing radian/s,
 else strain/s), plus a flattened `/Acquisition_origin` group carrying the full
 native-vendor metadata tree. `read_data_proc` / `write_data_proc` are the
 in-memory reader / writer; `read_metadata_proc` supplies the per-file catalog
-row so Proc is a first-class system for `DASdb.from_dir` and `read_das_data`.
+row so Proc is a first-class format for `DASdb.from_dir` and `read_das_data`.
 
 Units are re-derived from the origin on read rather than stored, which is only
 sound while the payload is raw — so `write_data_proc` refuses converted data
@@ -130,7 +130,7 @@ def read_data_proc(
         gauge_length_m=gauge_length_m,
         # Proc is the format; the vendor beneath it comes from
         # /Acquisition_origin and is what the conversion factor keys on.
-        system='Proc', origin=origin,
+        format='Proc', origin=origin,
         raw_meta=raw_meta,
         units=units,
     )

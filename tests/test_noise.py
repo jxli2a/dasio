@@ -250,7 +250,7 @@ def test_xcorr_dataset_end_to_end(tmp_path):
                     end_time=b + timedelta(seconds=(nt - 1) * dt), t0_sec=0.0)
         write_data_proc(tmp_path / f"proc_{k}.h5", d)
 
-    db = DASdb.from_dir(tmp_path, system="Proc")
+    db = DASdb.from_dir(tmp_path, format="Proc")
     assert db.n_segments == 1                            # the two files are time-contiguous
 
     ch1, ch2 = common_shot_pairs(0, nch)

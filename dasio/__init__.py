@@ -30,7 +30,7 @@ __all__ = [
     "read_apsensing_raw", "read_apsensing_metadata", "apsensing_radians2strain_factor",
     "read_event", "read_event_metadata",
     "read_passcal_segy", "read_passcal_segy_metadata",
-    "detect_data_kind", "detect_origin",
+    "detect_format", "detect_origin",
     "RawWindow",
 ]
 
@@ -56,33 +56,33 @@ from .readers.optasense import (
     read_optasense_metadata,
     read_optasense_raw,
 )
-from .readers.detector import detect_data_kind, detect_origin
+from .readers.detector import detect_format, detect_origin
 from .readers.passcal_segy import read_passcal_segy, read_passcal_segy_metadata
 from .schema import RawWindow
 
 
 def read_das_data(
-        file: Union[str, Path], system: Optional[str] = None, **kwargs,
+        file: Union[str, Path], format: Optional[str] = None, **kwargs,
     ) -> DASdata:
-    """Read one DAS file using the system-appropriate reader.
+    """Read one DAS file using the format-appropriate reader.
 
-    Thin wrapper over ``DASFile(file, system).read(**kwargs)``. Kept
+    Thin wrapper over ``DASFile(file, format).read(**kwargs)``. Kept
     for one-shot callers that don't need to retain the ``DASFile``
-    instance. `system` is detected via ``detect_data_kind`` when
+    instance. `format` is detected via ``detect_format`` when
     omitted, matching ``factor_raw2strain``; pass it to skip that open
     when the format is already known.
     """
-    return DASFile(file, system=system).read(**kwargs)
+    return DASFile(file, format=format).read(**kwargs)
 
 
-def read_das_metadata(file: Union[str, Path], system: Optional[str] = None):
+def read_das_metadata(file: Union[str, Path], format: Optional[str] = None):
     """Read one DAS file's metadata as a `DASmeta` dict (ASN / Proc) or
     list of `DASmeta` (OptaSense when the file splits on RawDataTime).
 
-    Thin wrapper over ``DASFile(file, system).metadata()``;
-    `system` is detected from the file when omitted.
+    Thin wrapper over ``DASFile(file, format).metadata()``;
+    `format` is detected from the file when omitted.
     """
-    return DASFile(file, system=system).metadata()
+    return DASFile(file, format=format).metadata()
 
 
 def factor_raw2strain(

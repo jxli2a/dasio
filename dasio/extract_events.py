@@ -140,7 +140,7 @@ def main():
     p.add_argument('catalog_csv')
     p.add_argument('dasdb')
     p.add_argument('out_dir')
-    p.add_argument('--system', default=None)
+    p.add_argument('--format', default=None)
     p.add_argument('--before', type=float, default=30.0)
     p.add_argument('--after', type=float, default=90.0)
     p.add_argument('--min-ch', type=int, default=0)
@@ -154,7 +154,7 @@ def main():
     )
     a = p.parse_args()
     cat = pd.read_csv(a.catalog_csv)
-    db = DASdb.from_file(a.dasdb, system=a.system)
+    db = DASdb.from_file(a.dasdb, format=a.format)
     m = extract_events(
         cat, db, a.out_dir,
         before=a.before, after=a.after,
