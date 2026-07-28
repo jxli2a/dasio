@@ -6,41 +6,41 @@ from typing import Optional, Tuple, TypedDict, Union
 import numpy as np
 
 
-VALID_UNITS = frozenset({
-    "count", "radian", "radian/s", "strain", "strain/s",
-    "microstrain", "microstrain/s",
-})
-
-# units after applying physical_factor (count->strain, radian/s->strain/s, ...).
-_PHYSICAL_UNIT = {
-    "count": "strain", "radian": "strain", "radian/s": "strain/s",
+# What `to_physical` turns each unit into. Everything lands on microstrain, so
+# a window's unit never depends on which instrument recorded it, and seismic
+# amplitudes read as ~1e2 rather than the ~1e-4 strain would give. Units absent
+# here are already microstrain, or untagged, and pass through untouched.
+_TO_MICROSTRAIN = {
+    "count":    "microstrain",       # OptaSense phase counts
+    "radian":   "microstrain",
+    "radian/s": "microstrain/s",     # AP Sensing
+    "strain":   "microstrain",       # ASN: physical already, owes only the 1e6
+    "strain/s": "microstrain/s",
 }
 
-# Substring -> canonical, longest patterns first so "microstrain/s" wins over "strain/s".
-_UNIT_PATTERNS = (
-    ("microstrain/s", "microstrain/s"),
-    ("radian/s", "radian/s"),
-    ("strain/s", "strain/s"),
-    ("microstrain", "microstrain"),
-    ("radian", "radian"),
-    ("strain", "strain"),
-    ("count", "count"),
-)
+# The instrument units above — meaningless until a vendor `physical_factor` is
+# applied, where strain merely needs scaling. `dasfile.read` attaches the
+# factor for exactly these.
+_NEEDS_FACTOR = ("count", "radian", "radian/s")
+
+# Everything `normalize_unit` accepts: the convertible units plus the two they
+# land on. Longest first, because it takes the first substring match and
+# "strain" sits inside "microstrain" — derived rather than hand-ordered so the
+# invariant cannot rot as the table grows.
+VALID_UNITS = tuple(sorted(
+    _TO_MICROSTRAIN.keys() | set(_TO_MICROSTRAIN.values()),
+    key=lambda u: (-len(u), u),
+))
 
 
 def normalize_unit(s) -> str:
-    """Map a free-form unit string onto the controlled vocabulary.
+    """Map a free-form unit string onto `VALID_UNITS`, else 'unknown'.
 
-    Returns 'unknown' for anything unrecognized. Case-insensitive;
-    matches the first (longest) known substring.
+    Case-insensitive substring match, so a vendor's
+    "Strain rate (microstrain/sec)" comes back as "microstrain/s".
     """
-    if not s:
-        return "unknown"
-    t = str(s).strip().lower().replace("/sec", "/s")
-    for pat, canon in _UNIT_PATTERNS:
-        if pat in t:
-            return canon
-    return "unknown"
+    t = str(s or "").strip().lower().replace("/sec", "/s")
+    return next((u for u in VALID_UNITS if u in t), "unknown")
 
 
 class DASmeta(TypedDict):
@@ -87,14 +87,24 @@ class DASdata:
     # event." `begin_time` stays the absolute anchor, `t0_sec` is the
     # seconds-frame anchor; the two together pin both views.
     t0_sec:          float = 0.0
+    # Channel index of row 0 — the channel-axis counterpart to `t0_sec`.
+    # A read with `min_ch=2000` returns rows that are really fiber channels
+    # 2000.., and without this anchor that offset is lost: plots and picks come
+    # out shifted by a constant with nothing to reveal it. `select_channels`
+    # leaves it meaningless (arbitrary subset), exactly as it does `dx`.
+    ch0:             int = 0
+    # Channel stride: 1 normally, `step` after `skip_ch`. Without it
+    # `channel_axis` would report consecutive numbers for a decimated view and
+    # be quietly wrong by a growing amount.
+    dch:             int = 1
     # Physical unit of `data`, from the controlled VALID_UNITS vocabulary
     # ("unknown" = not tagged). Set by the readers; `differentiate`/`integrate`
     # propagate the rate (strain <-> strain/s).
     units:           str = "unknown"
-    # Multiply `data` by this to reach physical units: strain (OptaSense
-    # count->strain) or strain/s (AP Sensing radian/s->strain/s; ASN is
-    # already strain/s so the factor is 1.0). Populated by
-    # DASFile.read(with_factor=True); 1.0 otherwise.
+    # The vendor's raw->strain constant (OptaSense count->strain, AP Sensing
+    # radian/s->strain/s; 1.0 for ASN, which already stores strain). Attached
+    # by `DASFile.read(with_factor=True)`, the default; `to_physical` applies
+    # it together with the strain->microstrain 1e6 and resets it to 1.0.
     physical_factor: float = 1.0
 
     # ---- Read-only accessors ----------------------------------------------
@@ -275,36 +285,37 @@ class DASdata:
                        fs=self.fs / step, end_time=new_end)
 
     def to_physical(self) -> "DASdata":
-        """Return a copy with `physical_factor` applied to `data`.
+        """Return a copy in microstrain (or microstrain/s), whatever the vendor.
 
-        `data` is multiplied by `physical_factor`, the factor is reset to
-        1.0, and `units` is advanced to its physical counterpart
-        (count->strain, radian/s->strain/s). When `physical_factor` is
-        already 1.0 and `units` is already physical (e.g. strain/s,
-        microstrain), returns an unchanged copy. When `physical_factor` is
-        1.0 but `units` still requires conversion (count/radian/radian/s),
-        raises `ValueError` — call `DASFile.read(with_factor=True)` first
-        so that the conversion factor is attached.
+        Applies `physical_factor` and the strain -> microstrain 1e6 in one
+        float32 pass, resets the factor to 1.0 and updates `units`. Counts,
+        radians and strain all land on the same unit, so downstream code and
+        colorbars never have to ask which vendor a window came from.
+
+        A metadata-only copy when the data is already microstrain — sharing
+        `data` rather than duplicating it — so calling this unconditionally is
+        both safe and idempotent.
 
         Raises
         ------
         ValueError
-            If called on non-physical units (count/radian/radian/s) without
-            an attached conversion factor (i.e. `physical_factor == 1.0`).
+            On count / radian / radian/s with no factor attached
+            (`physical_factor == 1.0`), rather than silently relabeling raw
+            counts as microstrain. Read with `with_factor=True` (the default).
         """
-        if self.physical_factor == 1.0:
-            if self.units in _PHYSICAL_UNIT:
-                raise ValueError(
-                    f"to_physical(): units={self.units!r} require a conversion "
-                    f"factor, but physical_factor is 1.0. "
-                    f"Read the file with DASFile.read(with_factor=True) first."
-                )
-            # Units already physical (strain/s, microstrain, etc.) — genuine no-op.
+        if self.units in _NEEDS_FACTOR and self.physical_factor == 1.0:
+            raise ValueError(
+                f"to_physical(): units={self.units!r} require a conversion "
+                f"factor, but physical_factor is 1.0. "
+                f"Read the file with DASFile.read(with_factor=True) first."
+            )
+        target = _TO_MICROSTRAIN.get(self.units)
+        if target is None:                      # already microstrain, or untagged
             return replace(self)
-        new_data = (self.data * np.float32(self.physical_factor)).astype(np.float32)
+        # otherwise return a fresh array with the factor applied, and reset the factor to 1.0
         return replace(
-            self, data=new_data, physical_factor=1.0,
-            units=_PHYSICAL_UNIT.get(self.units, self.units),
+            self, data=self.data * (self.physical_factor * 1e6),
+            physical_factor=1.0, units=target
         )
 
     # ---- OOP-style processing entry points ---------------------------------

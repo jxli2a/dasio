@@ -20,26 +20,29 @@ def test_asn_factor_is_one(asn_file):
     assert d.physical_factor == 1.0                         # already strain/s
 
 
-def test_to_physical_applies_factor_and_advances_units(apsensing_file):
+def test_to_physical_applies_factor_and_the_microstrain_scale(apsensing_file):
     d = DASFile(apsensing_file).read(with_factor=True)
     raw = d.data.copy()
     p = d.to_physical()
-    assert np.allclose(p.data, raw * 1e-7)
+    assert np.allclose(p.data, raw * 1e-7 * 1e6)    # factor, then strain -> micro
     assert p.physical_factor == 1.0
-    assert p.units == "strain/s"                            # radian/s -> strain/s
+    assert p.units == "microstrain/s"                       # radian/s -> microstrain/s
 
 
-def test_to_physical_noop_when_factor_one(asn_file):
+def test_to_physical_scales_a_vendor_that_needs_no_factor(asn_file):
+    """ASN is already strain/s, so `factor()` is 1.0 — but the 1e6 still owes,
+    or ASN windows would come back in a different unit from everyone else."""
     d = DASFile(asn_file).read(with_factor=True)
+    raw = d.data.copy()
     p = d.to_physical()
-    assert np.array_equal(p.data, d.data)
-    assert p.units == "strain/s"
+    assert np.allclose(p.data, raw * 1e6)
+    assert p.units == "microstrain/s"
 
 
 def test_to_physical_raises_without_factor(optasense_file):
-    # OptaSense default read: units="count", physical_factor=1.0 (no factor attached).
-    # Calling to_physical() must raise ValueError rather than silently mislabeling data.
-    d = DASFile(optasense_file).read()
+    # Counts with no factor attached: to_physical() must raise rather than
+    # silently relabel them microstrain. `with_factor=False` is how you get here.
+    d = DASFile(optasense_file).read(with_factor=False)
     assert d.units == "count"
     assert d.physical_factor == 1.0
     with pytest.raises(ValueError):

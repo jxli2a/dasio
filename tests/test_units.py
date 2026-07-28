@@ -27,10 +27,21 @@ def test_integrate_reverses_units():
 
 
 def test_vocabulary_contents():
-    assert VALID_UNITS == frozenset({
+    assert set(VALID_UNITS) == {
         "count", "radian", "radian/s", "strain", "strain/s",
         "microstrain", "microstrain/s",
-    })
+    }
+
+
+def test_a_name_never_shadows_one_that_contains_it():
+    """`normalize_unit` returns the first substring match, so ordering is
+    load-bearing: "strain" placed ahead of "microstrain" would silently
+    normalize every microstrain tag to plain strain."""
+    pos = {u: i for i, u in enumerate(VALID_UNITS)}
+    for long in VALID_UNITS:
+        for short in VALID_UNITS:
+            if short != long and short in long:
+                assert pos[long] < pos[short], f"{short!r} shadows {long!r}"
 
 
 def test_normalize_unit():
