@@ -1,11 +1,15 @@
 """Read/write/scan the Proc HDF5 format (Data + Acquisition_origin).
 
-`Proc` is our processed data format: a `/Data` payload in strain (or
-strain-rate for legacy OptaSense) units, plus a flattened
-`/Acquisition_origin` group carrying the full native-vendor metadata
-tree. `read_data_proc` / `write_data_proc` are the in-memory reader /
-writer; `read_metadata_proc` supplies the per-file catalog row so
-Proc is a first-class system for `DASdb.from_dir` and `read_das_data`.
+`Proc` is the concatenate / downsample intermediate: a `/Data` payload in
+whatever the origin vendor recorded (OptaSense counts, AP Sensing radian/s,
+else strain/s), plus a flattened `/Acquisition_origin` group carrying the full
+native-vendor metadata tree. `read_data_proc` / `write_data_proc` are the
+in-memory reader / writer; `read_metadata_proc` supplies the per-file catalog
+row so Proc is a first-class system for `DASdb.from_dir` and `read_das_data`.
+
+Units are re-derived from the origin on read rather than stored, which is only
+sound while the payload is raw — so `write_data_proc` refuses converted data
+and `dasio.write_basic` is where anything past `to_physical()` belongs.
 
 Preserves the on-disk attr names (`nCh`, `dCh`, `startTime`, `endTime`,
 `GaugeLength`) that existing external readers use. In-memory DASdata
@@ -31,6 +35,12 @@ from ..utils import iso_timestamp, parse_iso
 # non-OptaSense / non-AP Sensing as already-strain.
 _ORIGIN_UNITS = {"OptaSense": "count", "APSensing": "radian/s"}
 _DEFAULT_UNITS = "strain/s"
+
+# Proc re-derives units from /Acquisition_origin on read, so a payload is only
+# storable here in the units its origin implies. "unknown" passes — it makes no
+# claim, and synthetic payloads legitimately carry it. Converted data does not:
+# it would read back mislabeled and pick up a spurious 1e6 in `to_physical`.
+_WRITABLE_UNITS = frozenset(_ORIGIN_UNITS.values()) | {_DEFAULT_UNITS, "unknown"}
 
 
 def _gauge_length(f, data_attrs) -> Optional[float]:
@@ -192,7 +202,19 @@ def write_data_proc(
 
     Writes /Data + /Acquisition_origin, gzip compression, .lock-then-rename.
     On-disk attrs use nCh/dCh names for backward compat with existing readers.
+
+    Raises `ValueError` on a converted payload. Proc is the concatenate /
+    downsample intermediate: it stores raw vendor units and `read_data_proc`
+    re-derives them from the origin, which is only sound while nothing has been
+    scaled. Use `write_basic` for anything past `to_physical()`.
     """
+    if d.units not in _WRITABLE_UNITS:
+        raise ValueError(
+            f"write_data_proc: Proc stores raw vendor payloads, but units="
+            f"{d.units!r} has already been converted. On read the units would "
+            f"be re-derived from /Acquisition_origin and come back wrong. Use "
+            f"dasio.write_basic for converted data."
+        )
     file = Path(file)
     tmp = file.with_suffix(file.suffix + '.lock')
     # libver=('earliest', 'latest') lifts the 64 KB object-header cap

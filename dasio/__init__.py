@@ -25,6 +25,7 @@ __all__ = [
     "read_das_data", "read_das_metadata", "factor_raw2strain",
     "read_data_proc", "read_metadata_proc", "write_data_proc",
     "read_asn_raw", "read_asn_metadata",
+    "read_basic", "read_basic_metadata", "write_basic",
     "read_optasense_raw", "read_optasense_metadata", "optasense_count2strain_factor",
     "read_apsensing_raw", "read_apsensing_metadata", "apsensing_radians2strain_factor",
     "read_event", "read_event_metadata",
@@ -48,6 +49,7 @@ from .readers.apsensing import (
     read_apsensing_raw,
 )
 from .readers.asn import read_asn_raw, read_asn_metadata
+from .readers.basic import read_basic, read_basic_metadata, write_basic
 from .readers.event import read_event, read_event_metadata
 from .readers.optasense import (
     optasense_count2strain_factor,

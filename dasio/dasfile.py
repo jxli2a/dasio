@@ -29,6 +29,7 @@ from .readers.apsensing import (
     read_apsensing_raw,
 )
 from .readers.asn import read_asn_metadata, read_asn_raw
+from .readers.basic import read_basic, read_basic_metadata, write_basic
 from .readers.event import read_event, read_event_metadata
 from .readers.optasense import (
     optasense_count2strain_factor,
@@ -52,6 +53,7 @@ def _is_segy(path: Path) -> bool:
 # ASN HDF5 paths.
 _DATA_READERS = {
     'ASN':          read_asn_raw,
+    'Basic':        read_basic,
     'OptaSense':    read_optasense_raw,
     'APSensing':    read_apsensing_raw,
     'Proc':         read_data_proc,
@@ -61,6 +63,7 @@ _DATA_READERS = {
 
 _METADATA_READERS = {
     'ASN':          read_asn_metadata,
+    'Basic':        read_basic_metadata,
     'OptaSense':    read_optasense_metadata,
     'APSensing':    read_apsensing_metadata,
     'Proc':         read_metadata_proc,

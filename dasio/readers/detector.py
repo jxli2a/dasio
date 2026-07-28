@@ -17,11 +17,23 @@ from __future__ import annotations
 
 import h5py
 
+# Defined in basic.py, imported here rather than duplicated so the on-disk
+# stamp and the check that reads it can never drift apart.
+from .basic import KIND as _BASIC_KIND
+
 
 def detect_data_kind(f: h5py.File) -> str:
-    """Return one of: 'Proc', 'ASN', 'OptaSense', 'APSensing',
+    """Return one of: 'Basic', 'Proc', 'ASN', 'OptaSense', 'APSensing',
     'Event', or 'Unknown'.
     """
+    # Basic names itself in `/data.attrs['system']`, so it is recognized
+    # outright — `/data` alone is ambiguous with ASN and Event.
+    if 'data' in f:
+        stamp = f['data'].attrs.get('system')
+        if isinstance(stamp, bytes):
+            stamp = stamp.decode()
+        if stamp == _BASIC_KIND:
+            return _BASIC_KIND
     if 'Data' in f:
         return 'Proc'
     if 'acqSpec' in f:

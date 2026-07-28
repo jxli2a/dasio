@@ -2,8 +2,9 @@
 
 Lightweight, standalone IO + basic processing for DAS (Distributed Acoustic
 Sensing) data: vendor HDF5 readers (ASN/OptoDAS, OptaSense/QuantX, AP Sensing),
-a `Proc` processed format, an `Event` format, a numpy `DASdata` container, a
-file catalog (`DASdb`), and signal processing including a C++/OpenMP bandpass.
+a `Proc` concatenate/downsample format, a `Basic` format for converted analysis
+products, an `Event` format, a numpy `DASdata` container, a file catalog
+(`DASdb`), and signal processing including a C++/OpenMP bandpass.
 
 ## Install (development)
 
