@@ -323,8 +323,17 @@ def desample_window(
         dx=first_data.dx,
         begin_time=begin_time_out,
         end_time=end_time_out,
-        gauge_length_m=first_data.gauge_length_m, system=system,
+        gauge_length_m=first_data.gauge_length_m,
         raw_meta=first_data.raw_meta,
+        # `system` is the input format this run dispatched on; `origin` is the
+        # interrogator, which a Proc -> Proc cascade must carry forward or the
+        # vendor is lost after one generation. Desample concatenates, filters
+        # and decimates but never scales, so `units` passes straight through
+        # too — without it the output was always "unknown" and
+        # `write_data_proc` had no way to tell raw from converted.
+        system=system, origin=first_data.origin,
+        units=first_data.units,
+        ch0=first_data.ch0, dch=first_data.dch,
     )
 
 

@@ -154,9 +154,10 @@ def read_optasense_raw(
 
     return DASdata(
         data=data,
+        ch0=int(min_ch),
         fs=fs, dt=dt, nt=nt, nx=nx, dx=dx,
         begin_time=begin_time, end_time=end_time,
-        gauge_length_m=gauge_length_m, system='OptaSense',
+        gauge_length_m=gauge_length_m, system='OptaSense', origin='OptaSense',
         raw_meta=raw_meta,
         units="count",
     )

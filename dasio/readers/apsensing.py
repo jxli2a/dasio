@@ -138,9 +138,10 @@ def read_apsensing_raw(
 
     return DASdata(
         data=data,
+        ch0=int(min_ch),
         fs=fs, dt=dt, nt=nt, nx=nx, dx=dx,
         begin_time=begin_time, end_time=end_time,
-        gauge_length_m=gauge_length_m, system='APSensing',
+        gauge_length_m=gauge_length_m, system='APSensing', origin='APSensing',
         raw_meta=raw_meta,
         units="radian/s",
     )

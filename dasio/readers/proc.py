@@ -118,7 +118,9 @@ def read_data_proc(
         begin_time=begin_time,
         end_time=end_time,
         gauge_length_m=gauge_length_m,
-        system=origin,
+        # Proc is the format; the vendor beneath it comes from
+        # /Acquisition_origin and is what the conversion factor keys on.
+        system='Proc', origin=origin,
         raw_meta=raw_meta,
         units=units,
     )

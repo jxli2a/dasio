@@ -77,7 +77,15 @@ class DASdata:
     begin_time:      datetime
     end_time:        datetime
     gauge_length_m:  Optional[float] = None
+    # The same pair `DASFile` carries, so `d.system == DASFile(p).system` and
+    # likewise for origin. `system` is the on-disk format that picked the
+    # reader ('Proc', 'OptaSense', 'Basic', ...); `origin` is the interrogator
+    # the samples came off, which for a Proc file is recovered from
+    # /Acquisition_origin and is the only one of the two that survives
+    # desampling. They coincide for raw vendor files and differ for everything
+    # else — a Proc capture from a QuantX reads system='Proc', origin='OptaSense'.
     system:          str = 'unknown'
+    origin:          str = 'unknown'
     raw_meta:        Optional[dict] = None
     # `t0_sec` is the seconds-axis value at sample 0. Default 0 so a
     # bare `time_axis()` reads "0, dt, 2·dt, …". Event-data readers
@@ -123,7 +131,7 @@ class DASdata:
         """
         keys = (
             'fs', 'dt', 'nt', 'nx', 'dx', 'begin_time', 'end_time',
-            't0_sec', 'gauge_length_m', 'system', 'units',
+            't0_sec', 'gauge_length_m', 'system', 'origin', 'units',
         )
         return {k: getattr(self, k) for k in keys}
 
@@ -131,6 +139,15 @@ class DASdata:
     def time_axis(self) -> np.ndarray:
         """Time axis in seconds (`t0_sec` at sample 0; advances by `dt`)."""
         return self.t0_sec + np.arange(self.nt) * self.dt
+
+    @property
+    def channel_axis(self) -> np.ndarray:
+        """Channel indices for the rows, anchored at `ch0`.
+
+        Strided by the `skip_ch` factor implied by `dx`, so a decimated view
+        still reports the true fiber channel numbers.
+        """
+        return self.ch0 + np.arange(self.nx) * self.dch
 
     @property
     def datetime_axis(self) -> np.ndarray:
@@ -222,6 +239,7 @@ class DASdata:
         return replace(
             self, data=new_data, nx=new_nx, nt=new_nt,
             begin_time=new_begin, end_time=new_end, t0_sec=new_t0,
+            ch0=self.ch0 + c0 * self.dch,
         )
 
     def select_channels(self, channels) -> 'DASdata':
@@ -258,7 +276,8 @@ class DASdata:
             return replace(self)
         new_data = np.ascontiguousarray(self.data[::step])
         new_dx = self.dx * step if self.dx is not None else None
-        return replace(self, data=new_data, nx=new_data.shape[0], dx=new_dx)
+        return replace(self, data=new_data, nx=new_data.shape[0], dx=new_dx,
+                       dch=self.dch * step)
 
     def skip_t(self, step: int) -> 'DASdata':
         """Keep every `step`-th time sample (uniform decimation), updating `dt`/`fs`.

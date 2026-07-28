@@ -228,7 +228,7 @@ def read_passcal_segy(
     return DASdata(
         data=data, fs=1.0 / dt, dt=dt, nt=ns, nx=nx, dx=dx,
         begin_time=begin_time, end_time=end_time,
-        gauge_length_m=gauge_length_m, system="PASSCAL_SEGY",
+        gauge_length_m=gauge_length_m, system="PASSCAL_SEGY", origin="PASSCAL_SEGY",
         raw_meta={"segy_format_code": fmt, "endian": ec,
                   "conversion_factor": conversion_factor},
         units=normalize_unit(units),

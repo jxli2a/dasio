@@ -82,11 +82,12 @@ class DASFile:
     """
     One DAS HDF5 file with lazy format + origin detection.
 
-    `system` is the on-disk data kind (`'ASN'`, `'OptaSense'`,
-    `'Proc'`, …) and decides which reader dispatches. `origin` is
-    the vendor that originally captured the data — equal to `system`
-    for raw files, recovered from `/Acquisition_origin` attrs for
-    Proc files, and used only to pick the right raw→strain factor.
+    `system` is the on-disk data kind (`'ASN'`, `'OptaSense'`, `'Proc'`,
+    `'Basic'`, …) and decides which reader dispatches. `origin` is the vendor
+    that originally captured the data — equal to `system` for raw files,
+    recovered from `/Acquisition_origin` attrs for Proc files. It picks the
+    raw->strain factor, and `DASdata` carries the same pair so a window keeps
+    both facts after the file is closed.
 
     Both attributes are detected on first access and cached. Passing
     them up-front skips the detection open entirely — `.metadata()`
