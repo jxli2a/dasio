@@ -2,6 +2,7 @@
 from datetime import timedelta
 
 import pandas as pd
+import pytest
 
 from dasio.dasdb import DASdb
 from dasio.dasfile import DASFile
@@ -65,3 +66,19 @@ def test_from_dir_detects_the_asn_day_channel_layout(tmp_path, asn_file):
     shutil.copy(asn_file, nested / "001114.hdf5")
 
     assert DASdb.from_dir(tmp_path, progress=False).format == "ASN"
+
+
+@pytest.mark.parametrize("depth", ["root", "day", "leaf"])
+def test_asn_scan_accepts_being_pointed_below_the_day_level(tmp_path, asn_file, depth):
+    """ASN's layout is <root>/<YYYYMMDD>/<ch>/*.hdf5, and the scanner looked
+    only for day folders inside what it was given — so cataloguing a single
+    day, or the channel folder itself, silently returned zero files."""
+    import shutil
+    from dasio.dasdb import list_das_files
+
+    leaf = tmp_path / "20250716" / "dphi"
+    leaf.mkdir(parents=True)
+    shutil.copy(asn_file, leaf / "000004.hdf5")
+
+    target = {"root": tmp_path, "day": leaf.parent, "leaf": leaf}[depth]
+    assert len(list_das_files(target, "ASN")) == 1

@@ -76,6 +76,11 @@ def list_das_files(raw_dir: Path, format: str) -> List[Path]:
         for sub in raw_dir.iterdir():
             if sub.is_dir() and _ASN_DAY_DIR_RE.match(sub.name):
                 files.extend(list_data_files(sub, ('*.hdf5', '*/*.hdf5')))
+        # Pointed below the day level — at one <YYYYMMDD> or straight at its
+        # channel subdir — there are no day folders to find, and requiring the
+        # exact root meant a single day could not be catalogued at all.
+        if not files:
+            files = list_data_files(raw_dir, ('*.hdf5', '*/*.hdf5'))
         return files
     if format == 'Proc':
         # Two layouts coexist: flat (legacy desample output, before
