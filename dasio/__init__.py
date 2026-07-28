@@ -119,6 +119,7 @@ _LAZY = {
     'integrate':                 ('processing', 'integrate'),
     'unwrap':                    ('processing', 'unwrap'),
     'subtract_common_mode':      ('processing', 'subtract_common_mode'),
+    'median_filter_1d':          ('processing', 'median_filter_1d'),
     'downsample':                ('processing', 'downsample'),
     'imshow':                    ('plot',       'imshow'),
     'wiggle':                    ('plot',       'wiggle'),
@@ -131,7 +132,6 @@ _LAZY = {
     'diff_time':                 ('signal',     'diff_time'),
     'gradient_time':             ('signal',     'gradient_time'),
     'integrate_time':            ('signal',     'integrate_time'),
-    'preprocess_unwrap':         ('signal',     'preprocess_unwrap'),
 }
 
 

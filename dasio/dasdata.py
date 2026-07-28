@@ -387,8 +387,14 @@ class DASdata:
     
     def unwrap(self, factor: int = 1, copy: bool = True) -> 'DASdata':
         """OptaSense int32 phase-wrap correction. See `processing.unwrap`."""
-        from .processing import unwrap as _uw
+        from .processing import unwrap_int32 as _uw
         return _uw(self, factor=factor, copy=copy)
+
+    def median_filter(self, kernel_size: int, axis: str = 't',
+                      copy: bool = True) -> 'DASdata':
+        """Running median along time or channels. See `processing.median_filter`."""
+        from .processing import median_filter_1d as _mf
+        return _mf(self, kernel_size, axis=axis, copy=copy)
 
     def downsample(
             self, factor: int, anti_alias: bool = True,

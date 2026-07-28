@@ -24,7 +24,7 @@ from .utils import default_nthreads
 from .dasdata import DASdata
 from .dasfile import DASFile
 from .readers.proc import write_data_proc
-from .signal import bandpass2d, preprocess_unwrap
+from .signal import bandpass2d, unwrap_int32
 from .dasdb import DASdb
 from .schema import RawWindow
 
@@ -285,7 +285,7 @@ def desample_window(
 
         # Unwrap OptaSense phase counts across the full concatenated buffer
         if system == 'OptaSense':
-            data = preprocess_unwrap(data, factor=1)
+            data = unwrap_int32(data, factor=1)
 
         if fmax > 0:
             data = bandpass2d(

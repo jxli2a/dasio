@@ -20,9 +20,10 @@ from typing import Optional
 
 from .dasdata import DASdata
 from .signal import (
-    bandpass2d, detrend_time, diff_time, gradient_time, integrate_time,
-    preprocess_unwrap, taper_time,
+    bandpass2d, detrend_time, diff_time, gradient_time, integrate_time, taper_time,
+    unwrap_int32 as _unwrap_int32,
     subtract_common_mode as _subtract_common_mode_kernel,
+    median_filter_1d as _median_filter_1d_kernel,
 )
 from .utils import default_nthreads
 
@@ -133,16 +134,19 @@ def subtract_common_mode(
     return replace(d, data=data)
 
 
-def unwrap(d: DASdata, factor: int = 1, copy: bool = True) -> DASdata:
+def unwrap_int32(d: DASdata, factor: int = 1, copy: bool = True) -> DASdata:
     """Unwrap int32 rollover along the time axis.
 
     Needed for raw OptaSense phase counts; a no-op for data that's
     already strain. `factor` scales the 2**32 wrap increment (default
     1, matching standard OptaSense int32).
+
+    Thin wrapper over `signal.unwrap_int32`, which works in place;
+    `copy=True` (default) protects the caller's array, `copy=False` unwraps
+    `d.data` where it lies.
     """
     data = d.data.copy() if copy else d.data
-    data = preprocess_unwrap(data, factor=factor)
-    return replace(d, data=data)
+    return replace(d, data=_unwrap_int32(data, factor=factor))
 
 
 def downsample(
@@ -184,3 +188,17 @@ def downsample(
     # skip_t always returns a fresh, contiguous array, so the result never
     # aliases the caller's data whether or not the low-pass ran above.
     return d.skip_t(factor)
+
+
+def median_filter_1d(
+        d: DASdata, kernel_size: int, axis: str = 't', copy: bool = True
+    ) -> DASdata:
+    """Running median along time (`axis='t'`) or channels (`axis='x'`).
+
+    Suppresses spikes narrower than the kernel while leaving genuine edges
+    intact — the thing a band-pass cannot do, since a band-pass smears an
+    impulse across its whole passband instead of removing it. `kernel_size`
+    must be odd. See `signal.median_filter_1d`.
+    """
+    data = d.data.copy() if copy else d.data
+    return replace(d, data=_median_filter_1d_kernel(data, kernel_size, axis=axis))
