@@ -22,7 +22,7 @@ from typing import List, Optional, Union
 
 import h5py
 
-from .dasdata import DASdata, DASmeta
+from .dasdata import _NEEDS_FACTOR, DASdata, DASmeta
 from .readers.apsensing import (
     apsensing_radians2strain_factor,
     read_apsensing_metadata,
@@ -139,15 +139,22 @@ class DASFile:
 
     # ---- read / metadata / factor -------------------------------------
 
-    def read(self, *, with_factor: bool = False, **kwargs) -> DASdata:
+    def read(self, *, with_factor: bool = True, **kwargs) -> DASdata:
         """Load the payload as a `DASdata`.
 
         Keyword arguments pass through to the vendor reader
-        (``min_ch``, ``max_ch``, ``first_sample``, ``n_samples``,
-        ``convert``); the Proc reader ignores the first_sample /
-        n_samples pair.
-        When with_factor=True, attaches DASFile.factor() as DASdata.physical_factor
-        (one extra file open; default False keeps the desample/dasdb read path unchanged).
+        (``min_ch``, ``max_ch``, ``first_sample``, ``n_samples``).
+
+        `with_factor=True` (default) attaches `DASFile.factor()` as
+        `DASdata.physical_factor`, which is what makes `.to_physical()` work
+        without the caller having to re-read the file. It costs one extra open
+        — 0.6 ms against a ~550 ms payload read — so the default is on and
+        `desample` opts out explicitly, being the one path that wants raw
+        counts on disk.
+
+        It is attached only for the instrument units in `_NEEDS_FACTOR`;
+        strain payloads need no vendor factor, only the 1e6 that
+        `to_physical()` applies.
         """
         try:
             reader = _DATA_READERS[self.system]
@@ -157,7 +164,7 @@ class DASFile:
                 f'known: {sorted(_DATA_READERS)}'
             )
         d = reader(self.path, **kwargs)
-        if with_factor:
+        if with_factor and d.units in _NEEDS_FACTOR:
             d = replace(d, physical_factor=self.factor())
         return d
 

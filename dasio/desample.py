@@ -268,7 +268,9 @@ def desample_window(
                 min_ch=c0, max_ch=c1,
                 first_sample=int(r['first_sample']),
                 n_samples=int(r['nt']),
-                **read_kwargs_extra,
+                # Desample writes unscaled counts, matching legacy
+                # Desample_DAS.py; the factor would only be dead weight here.
+                with_factor=False,
             )
             for _, r in rw.rows.iterrows()
         ]

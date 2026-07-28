@@ -3,9 +3,11 @@ import pytest
 from dasio.dasfile import DASFile
 
 
-def test_default_read_has_unit_factor(apsensing_file):
-    d = DASFile(apsensing_file).read()                      # with_factor defaults False
-    assert d.physical_factor == 1.0
+def test_default_read_attaches_the_factor(apsensing_file):
+    """The default is on, so `.to_physical()` works off a plain `read()`."""
+    d = DASFile(apsensing_file).read()
+    assert d.physical_factor != 1.0
+    assert DASFile(apsensing_file).read(with_factor=False).physical_factor == 1.0
 
 
 def test_with_factor_attaches_nontrivial_factor(apsensing_file):

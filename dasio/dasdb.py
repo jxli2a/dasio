@@ -573,12 +573,13 @@ class DASdb:
         return windows
 
     def read(
-            self, 
-            begin_time: datetime, 
+            self,
+            begin_time: datetime,
             end_time: datetime,
             min_ch: int = 0,
             max_ch: Optional[int] = None,
             fill_gap: bool = True,
+            with_factor: bool = True,
         ) -> DASdata:
         """Read a concatenated DASdata covering [begin, end).
 
@@ -598,6 +599,12 @@ class DASdb:
         shorter than `(end - begin) x fs`. `end_time` reports the
         last sample's true timestamp, so callers can detect the
         shortening.
+
+        `with_factor=True` (default) attaches the raw->physical conversion as
+        `physical_factor`, so `.to_physical()` reaches microstrain without a
+        re-read. It is not applied here: OptaSense counts must be `unwrap`ed
+        on the concatenated array first, and scaling before that would put the
+        2**32 rails at unrecognizable values.
 
         Raises `RuntimeError` if no files intersect the window.
         """
@@ -635,6 +642,7 @@ class DASdb:
                     min_ch=min_ch, max_ch=max_ch,
                     first_sample=int(row['first_sample']) + offset,
                     n_samples=n,
+                    with_factor=with_factor,
                 )
                 reads.append(d)
             if not reads:
@@ -683,6 +691,7 @@ class DASdb:
             gauge_length_m=first_read.gauge_length_m, system=self.system,
             raw_meta=first_read.raw_meta,
             units=first_read.units,
+            physical_factor=first_read.physical_factor,
         )
 
     # ------------------------------------------------------------- visualization
