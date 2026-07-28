@@ -40,6 +40,10 @@ def extract_event(
     ):
     """Read one event's window and write <event_id>.h5.
 
+    The window is converted with `to_physical()` before writing, so the `unit`
+    attr describes the payload rather than asserting a hardcoded
+    'microstrain/s' over whatever the catalog happened to hold.
+
     Returns a status dict: {event_id, file, status, event_time_index}.
     status is one of 'extract' | 'skip' | 'fail'.
     """
@@ -56,6 +60,9 @@ def extract_event(
         d = dasdb.read(begin, end, min_ch=min_ch, max_ch=max_ch, fill_gap=True)
     except RuntimeError:
         return {'event_id': event_id, 'file': str(fpath), 'status': 'fail'}
+    # Event files are consumed as microstrain; readers no longer convert, so
+    # scale here rather than writing a unit label the payload does not match.
+    d = d.to_physical()
 
     # Index relative to the ACTUAL returned begin_time (first real sample).
     idx = int(round((event_time - d.begin_time).total_seconds() / d.dt))
@@ -66,7 +73,9 @@ def extract_event(
         'time_before': float(before), 'time_after': float(after),
         'latitude': float(row['latitude']), 'longitude': float(row['longitude']),
         'depth_km': float(row['depth_km']), 'magnitude': float(row['magnitude']),
-        'unit': 'microstrain/s',
+        # Whatever the db actually returned — hardcoding 'microstrain/s' here
+        # labeled raw-count catalogs wrongly, and `read_event` trusts this attr.
+        'unit': d.units,
     }
     for opt in ('magnitude_type', 'source', 'time_reference'):
         if opt in row and pd.notna(row[opt]):

@@ -56,5 +56,5 @@ def test_reader_units(optasense_file, asn_file, apsensing_file, proc_file, event
     assert DASFile(optasense_file).read().units == "count"
     assert DASFile(asn_file).read().units == "strain/s"
     assert DASFile(apsensing_file).read().units == "radian/s"
-    assert DASFile(proc_file).read().units == "microstrain/s"   # Unknown origin, convert=True
+    assert DASFile(proc_file).read().units == "strain/s"        # Unknown origin -> stored strain
     assert DASFile(event_file).read().units == "microstrain/s"  # from file 'unit' attr

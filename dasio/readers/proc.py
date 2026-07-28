@@ -20,11 +20,33 @@ from typing import Optional, Union
 import h5py
 import numpy as np
 
-from .apsensing import apsensing_radians2strain_factor
 from .detector import detect_origin
-from .optasense import optasense_count2strain_factor
 from ..dasdata import DASdata, DASmeta
 from ..utils import iso_timestamp, parse_iso
+
+
+# What each origin's raw payload is stored as. ASN, Sintela and Unknown all
+# fall through to strain/s: files written by `write_data_proc` without raw_meta
+# carry no origin marker, and legacy readFile_HDF likewise treated everything
+# non-OptaSense / non-AP Sensing as already-strain.
+_ORIGIN_UNITS = {"OptaSense": "count", "APSensing": "radian/s"}
+_DEFAULT_UNITS = "strain/s"
+
+
+def _gauge_length(f, data_attrs) -> Optional[float]:
+    """`GaugeLength` from /Data, falling back to /Acquisition_origin.
+
+    `write_data_proc` puts it on /Data, but legacy Desample_DAS.py wrote it
+    only into the flattened origin group — so every iceland_quantx window came
+    back with `gauge_length_m=None` despite the value (102.095 m) sitting in
+    the file. Both places are checked because both layouts are in the archive.
+    """
+    if 'GaugeLength' in data_attrs:
+        return float(data_attrs['GaugeLength'])
+    origin = f.get('Acquisition_origin')
+    if origin is not None and 'GaugeLength' in origin.attrs:
+        return float(origin.attrs['GaugeLength'])
+    return None
 
 
 def read_data_proc(
@@ -33,17 +55,16 @@ def read_data_proc(
         max_ch=None,
         first_sample: int = 0,
         n_samples: Optional[int] = None,
-        convert: bool = True,
     ) -> DASdata:
-    """Read a Proc HDF5 file and return a DASdata.
+    """Read a Proc HDF5 file and return a DASdata in its stored units.
 
-    When `convert=True` we bring the payload into microstrain / sec —
-    the unit the monitor and viewers expect. ASN-origin Proc files
-    already store strain and just need a 1e6 factor; OptaSense-origin
-    Proc files store raw phase counts and need `count2strain * 1e6`,
-    computed from the on-disk /Acquisition_origin attrs. The origin
-    system is detected from /Acquisition_origin so callers always get
-    an accurate `system` field.
+    Payload units follow the origin recorded in /Acquisition_origin:
+    OptaSense-origin files hold raw phase counts, AP Sensing radian/s,
+    everything else strain/s. Call `.to_physical()` for microstrain,
+    exactly as with the raw vendor readers — this reader used to apply
+    the conversion itself behind a `convert=True` flag, which meant the
+    vendor factor was chosen in two places and a Proc read came back in a
+    different unit from every other read.
 
     ``first_sample`` / ``n_samples`` are accepted for signature parity
     with the raw readers (`read_asn_raw`, `read_optasense_raw`) — they
@@ -69,36 +90,19 @@ def read_data_proc(
             data = dset[int(min_ch):int(max_ch), int(first_sample):int(t_end)]
         else:
             data = dset[int(first_sample):int(t_end), int(min_ch):int(max_ch)].T
-        system = detect_origin(f)
-        factor = 1.0
-        if convert:
-            if system == 'OptaSense':
-                factor = optasense_count2strain_factor(f) * 1e6
-            elif system == 'APSensing':
-                # Proc payload is already radians/sec (saved by
-                # Desample_DAS); convert to strain/sec → microstrain/sec.
-                factor = apsensing_radians2strain_factor(f) * 1e6
-            else:
-                # ASN, Sintela, or Unknown (files produced by
-                # write_data_proc without raw_meta carry no system
-                # marker in /Acquisition_origin). Legacy readFile_HDF
-                # multiplied by 1e6 unconditionally for everything that
-                # wasn't OptaSense / APSensing raw, so keep that as
-                # the default.
-                factor = 1e6
+        origin = detect_origin(f)
+        gauge_length_m = _gauge_length(f, attrs)
+        # Carry /Acquisition_origin forward. `detect_origin` above already
+        # reads this group, and dropping it made a Proc -> Proc desample write
+        # an origin-less file: the second generation detects as 'Unknown' and
+        # its units are then inferred wrong. The attrs are already in the
+        # flattened dotted form `_flatten_dict` produces, so they write back
+        # unchanged.
+        origin_grp = f.get('Acquisition_origin')
+        raw_meta = dict(origin_grp.attrs) if origin_grp is not None else None
 
     data = data.astype(np.float32, copy=False)
-    if convert and factor != 1.0:
-        data *= np.float32(factor)
-
-    if convert:
-        # TODO: verify against a real OptaSense Proc file — the module docstring
-        # mentions "strain-rate for legacy OptaSense", so confirm whether
-        # OptaSense-origin Proc (convert=True) stores strain or strain-rate.
-        # Current assumption: "microstrain" (strain scale, not strain-rate).
-        units = "microstrain" if system == "OptaSense" else "microstrain/s"
-    else:
-        units = {"OptaSense": "count", "APSensing": "radian/s"}.get(system, "strain/s")
+    units = _ORIGIN_UNITS.get(origin, _DEFAULT_UNITS)
 
     nt_out = data.shape[1]
     dt = float(attrs['dt'])
@@ -113,9 +117,9 @@ def read_data_proc(
         dx=float(attrs.get('dCh', 0.0)),
         begin_time=begin_time,
         end_time=end_time,
-        gauge_length_m=float(attrs['GaugeLength']) if 'GaugeLength' in attrs else None,
-        system=system,
-        raw_meta=None,
+        gauge_length_m=gauge_length_m,
+        system=origin,
+        raw_meta=raw_meta,
         units=units,
     )
 
@@ -136,10 +140,7 @@ def read_metadata_proc(file: Union[str, Path]) -> Optional[DASmeta]:
             nt = int(attrs['nt'])
             nx = int(attrs['nCh'])
             dx = float(attrs.get('dCh', np.nan))
-            gauge_length_m = (
-                float(attrs['GaugeLength'])
-                if 'GaugeLength' in attrs else None
-            )
+            gauge_length_m = _gauge_length(f, attrs)
             begin_time = parse_iso(attrs['startTime'])
             end_time = parse_iso(attrs['endTime'])
     except (OSError, KeyError, ValueError) as e:

@@ -218,10 +218,13 @@ def desample_window(
     ) -> DASdata:
     """Read padded window, bandpass over full span, decimate, trim to target.
 
-    Accepts `system` in {'ASN', 'OptaSense', 'APSensing', 'Proc'}. With 'Proc' the
-    input files are themselves the output of an earlier desample run
-    and the OptaSense phase-count unwrap is skipped (Proc payloads
-    are already strain).
+    Accepts `system` in {'ASN', 'OptaSense', 'APSensing', 'Proc'}. With 'Proc'
+    the input files are themselves the output of an earlier desample run, and
+    the int32 unwrap is skipped: an OptaSense-origin Proc file still holds
+    counts, but they were unwrapped when that file was written and the
+    correction is idempotent. Payload units are never changed here — the
+    output carries whatever the reader reported, which is what lets
+    `write_data_proc` tell a raw payload from a converted one.
 
     The channel axis is processed in chunks of `nchbuffer` to bound
     peak memory on wide acquisitions — a 30 min padded 100 Hz window
@@ -257,8 +260,6 @@ def desample_window(
     it_left_cached: Optional[int] = None
     it_right_cached: Optional[int] = None
 
-    # Cascading Proc -> Proc must read raw strain with convert=False
-    read_kwargs_extra = {'convert': False} if system == 'Proc' else {}
 
     for c0 in range(min_ch, max_ch, nchbuffer):
         # read nch=nchbuffer from each file

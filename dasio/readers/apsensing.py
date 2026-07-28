@@ -4,10 +4,11 @@ Top-level groups: `/ProcessingServer` (sampling + conversion factors),
 `/Timestamps` (per-sample µs-since-epoch), `/Distances` (channel
 positions), `/DAS` (payload in radians/sec, i.e. phase rate).
 
-Payload units: radians/sec. The DASdb-scan returns raw values; conver-
-sion to strain-rate via `apsensing_radians2strain_factor` = `1e-9 *
-RadiansToNanoStrain`, applied by `read_data_proc` when the Proc file's
-origin is APSensing, by analogy with the OptaSense count→strain chain.
+Payload units: radians/sec. Readers return raw values; the conversion
+to strain-rate is `apsensing_radians2strain_factor` = `1e-9 *
+RadiansToNanoStrain`, which `DASFile.read` attaches as
+`physical_factor` for `DASdata.to_physical()` to apply — the same chain
+as OptaSense count→strain.
 
 No intra-file RawDataTime gap splitting here (legacy DASutils doesn't
 split either) — each file contributes exactly one `DASmeta` row.
