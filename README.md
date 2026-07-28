@@ -34,9 +34,31 @@ Both are imported lazily, so the rest of dasio works without them installed.
 
 ## Quickstart
 
+One file:
+
 ```python
 from dasio import DASFile
 
-d = DASFile('file.h5').read()                        # auto-detects the vendor format -> DASdata
+d = DASFile('file.h5').read().to_physical()          # format auto-detected -> microstrain (or /s)
 d.bandpass(1.0, 10.0).subtract_common_mode().plot()  # filter -> denoise -> waterfall
 ```
+
+A directory, queried by time — `DASdb` catalogues the files once, then `read`
+stitches any window across file boundaries:
+
+```python
+from datetime import datetime, timedelta, timezone
+from dasio import DASdb
+
+db = DASdb.from_dir('/data/das/100Hz')       # scan once; format auto-detected
+db.to_file('dasdb.csv')                      # DASdb.from_file() next time
+
+t0 = datetime(2025, 1, 1, 0, 0, tzinfo=timezone.utc)
+d = db.read(t0, t0 + timedelta(seconds=120)) # concatenated, gaps zero-filled
+d = d.to_physical()                          # vendor units -> microstrain (or /s)
+```
+
+Readers return the instrument's own units (OptaSense counts, AP Sensing
+radian/s, ASN strain/s); `to_physical()` is the one conversion step, and a no-op
+if already converted. Raw OptaSense can roll over at 2**32 — call `d.unwrap()`
+first, on the concatenated window rather than per file.
