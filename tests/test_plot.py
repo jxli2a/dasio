@@ -95,3 +95,40 @@ def test_ccgather_plot_delegates_to_plot_xcorr():
     _, _, y0, y1 = im.get_extent()
     assert (y0, y1) == pytest.approx((0.2, -0.2))        # stored lag axis on the vertical, downward
     assert "10 pairs" in repr(g) and "50 Hz" in repr(g)
+
+
+# --- the channel axis is labelled in fiber channels, not row positions ------
+
+def _anchored(nx=12, nt=200, ch0=2000, dch=4):
+    """A window as `read(min_ch=2000)` then `skip_ch(4)` would return it."""
+    t0 = datetime(2023, 1, 1, tzinfo=timezone.utc)
+    return DASdata(
+        data=np.random.default_rng(0).standard_normal((nx, nt)).astype(np.float32),
+        fs=100.0, dt=0.01, nt=nt, nx=nx, dx=4.0,
+        begin_time=t0, end_time=t0, units="strain/s", ch0=ch0, dch=dch,
+    )
+
+
+@pytest.mark.parametrize("style,axis", [("normal", "y"), ("seismic", "x")])
+def test_imshow_extent_spans_the_channel_range(style, axis):
+    d = _anchored()
+    _, im = d.plot.imshow(style=style)
+    left, right, bottom, top = im.get_extent()
+    got = (top, bottom) if axis == "y" else (left, right)
+    assert sorted(got) == [d.ch0, d.ch0 + (d.nx - 1) * d.dch]      # 2000 .. 2044
+
+
+def test_imshow_channel_extent_survives_skip_ch():
+    """skip_ch multiplies dch, so the extent must be computed before it runs
+    or a decimated raster relabels the same fiber as a shorter span."""
+    _, im = _anchored().plot.imshow(style="normal", skip_ch=3)
+    left, right, bottom, top = im.get_extent()
+    assert sorted((top, bottom)) == [2000, 2044]
+
+
+def test_wiggle_places_traces_at_their_channel_numbers():
+    ax = _anchored(nx=4, dch=4).plot.wiggle(
+        style="normal", normalize=True, n_max_ch=None)
+    centres = sorted(float(np.median(s[:, 1]))
+                     for s in ax.collections[0].get_segments())
+    assert centres == pytest.approx([2000, 2004, 2008, 2012], abs=1.0)

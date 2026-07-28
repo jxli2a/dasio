@@ -59,9 +59,11 @@ def test_pick_phases_returns_picks(mocked):
     res = pk.pick_phases(_d(), device="cpu")
     assert isinstance(res, pk.Picks)
     assert list(res.df.columns) == [
-        "channel_index", "phase_index", "phase_type", "phase_time", "phase_score",
+        "channel_index", "channel", "phase_index", "phase_type", "phase_time",
+        "phase_score",
     ]
     assert res.df["channel_index"].tolist() == [2, 5]
+    assert res.df["channel"].tolist() == [2, 5]          # ch0=0, dch=1 here
     assert set(res.df["phase_type"]) == {"P", "S"}
     assert res.df["phase_index"].dtype.kind == "i" and res.df["phase_score"].dtype.kind == "f"
     assert res.scores is None  # default: no heatmap
@@ -113,3 +115,26 @@ def test_picks_plot_applies_t0_offset():
     p = pk.Picks(df=df, fs=100.0, model="m", begin_time=None, nx=8, nt=400, t0_sec=-30.0)
     ax = p.plot()  # y = t0_sec + sample/fs = -30 + 1.0, matching DASdata.time_axis
     assert ax.collections[0].get_offsets()[0][1] == pytest.approx(-29.0)
+
+
+def test_picks_carry_the_channel_anchor(mocked):
+    """A min_ch=2000 read picks on fiber channels 2000.., not rows 0..; the
+    row position stays available as `channel_index` because it indexes
+    `scores`."""
+    d = _d()
+    d.ch0, d.dch = 2000, 4
+    res = pk.pick_phases(d, device="cpu")
+    assert res.ch0 == 2000 and res.dch == 4
+    assert res.df["channel_index"].tolist() == [2, 5]
+    assert res.df["channel"].tolist() == [2008, 2020]
+
+
+def test_picks_plot_uses_channel_numbers(mocked):
+    import matplotlib
+
+    matplotlib.use("Agg")
+    d = _d()
+    d.ch0, d.dch = 2000, 4
+    ax = pk.pick_phases(d, device="cpu").plot()
+    xs = sorted(c.get_offsets()[0][0] for c in ax.collections)
+    assert xs == [2008, 2020]

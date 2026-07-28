@@ -53,13 +53,20 @@ def _load_model(model, device):
 
 @dataclass
 class Picks:
-    df: object  # DataFrame: channel_index, phase_index, phase_type, phase_time, phase_score
+    df: object  # DataFrame: channel_index, channel, phase_index, phase_type,
+                #            phase_time, phase_score
     fs: float
     model: str
     begin_time: Optional[datetime]
     nx: int
     nt: int
     t0_sec: float = 0.0  # seconds-axis value at sample 0, matching DASdata.time_axis
+    # Channel anchor of row 0, matching DASdata.channel_axis. `channel_index`
+    # stays the row position (it indexes `scores`); the `channel` column is
+    # what a min_ch=2000 read actually picked on, and what joins to a channel
+    # catalog such as DASinfo.
+    ch0: int = 0
+    dch: int = 1
     scores: Optional[np.ndarray] = None
 
     def __repr__(self):
@@ -77,7 +84,7 @@ class Picks:
         for phase, color in (("P", "red"), ("S", "blue")):
             sub = self.df[self.df["phase_type"] == phase]
             ax.scatter(
-                sub["channel_index"],
+                self.ch0 + sub["channel_index"] * self.dch,
                 self.t0_sec + sub["phase_index"] / self.fs,  # match DASdata.time_axis
                 s=s,
                 c=color,
@@ -140,12 +147,15 @@ def pick_phases(
         vmin=min_prob,
         device=device,
     )
-    cols = ["channel_index", "phase_index", "phase_type", "phase_time", "phase_score"]
+    ch0, dch = getattr(d, "ch0", 0), getattr(d, "dch", 1)
+    cols = ["channel_index", "channel", "phase_index", "phase_type",
+            "phase_time", "phase_score"]
     if raw:
         r = pd.DataFrame(raw)
         df = pd.DataFrame(
             {
                 "channel_index": r["channel_index"].astype(int),
+                "channel": ch0 + r["channel_index"].astype(int) * dch,
                 "phase_index": r["phase_index"].astype(int),
                 "phase_type": r["phase_type"],
                 "phase_time": pd.to_datetime(r["phase_time"], format="ISO8601"),
@@ -162,5 +172,6 @@ def pick_phases(
         nx=d.nx,
         nt=d.nt,
         t0_sec=getattr(d, "t0_sec", 0.0),
+        ch0=ch0, dch=dch,
         scores=scores if return_scores else None,
     )

@@ -94,6 +94,11 @@ def imshow(
     # any skip, so the axes always label the true channel / time range; the
     # skip below only coarsens the rasterized array, not the coordinates.
     nx_full = sub.nx
+    # Channel numbers of the first and last row, captured before `skip_ch`
+    # below multiplies `dch`. On a min_ch=2000 read these are 2000 and up,
+    # so the axis labels the fiber rather than the array.
+    ch_lo = sub.ch0
+    ch_hi = sub.ch0 + (nx_full - 1) * sub.dch
     if usedatetime:
         dt_axis = sub.datetime_axis
         t_left = mdates.date2num(dt_axis[0].astype('datetime64[us]').astype(object))
@@ -121,8 +126,8 @@ def imshow(
 
     if style == 'normal':
         # data shape (nx, nt) — imshow it directly: rows=channels, cols=time.
-        # extent = (left, right, bottom, top); channel 0 at top.
-        extent = (t_left, t_right, nx_full - 1, 0)
+        # extent = (left, right, bottom, top); first channel at top.
+        extent = (t_left, t_right, ch_hi, ch_lo)
         im = ax.imshow(
             sub.data, aspect='auto', cmap=cmap,
             vmin=vmin, vmax=vmax, extent=extent, **kwargs,
@@ -133,7 +138,7 @@ def imshow(
     else:
         # 'seismic': transpose so rows=time, cols=channels; flip y so
         # time grows downward (small-time at top, large-time at bottom).
-        extent = (0, nx_full - 1, t_right, t_left)
+        extent = (ch_lo, ch_hi, t_right, t_left)
         im = ax.imshow(
             sub.data.T, aspect='auto', cmap=cmap,
             vmin=vmin, vmax=vmax, extent=extent, **kwargs,
@@ -221,14 +226,17 @@ def wiggle(
     else:
         t_step = 1
 
+    # Rows select the traces; channel numbers place them on the axis.
+    ch_vals = sub.ch0 + ch_indices * sub.dch
     data = sub.data[ch_indices][:, ::t_step]
     if normalize:
         peak = np.maximum(np.abs(data).max(axis=1, keepdims=True), 1e-30)
         data = data / peak
-    # Scale by `step` so a peak ±1 normalized trace just fills the
-    # gap between adjacent traces — keeps visual density constant
-    # regardless of n_max_ch decimation.
-    data = data * scale * step
+    # Scale by the plotted spacing (`step` traces apart, `dch` channels each)
+    # so a peak ±1 normalized trace just fills the gap between neighbours —
+    # keeps visual density constant regardless of decimation.
+    gap = step * sub.dch
+    data = data * scale * gap
 
     from matplotlib.collections import LineCollection
 
@@ -254,7 +262,7 @@ def wiggle(
 
     # One LineCollection (single artist) instead of an `ax.plot` per channel —
     # the per-trace Python loop is the wiggle bottleneck on wide windows.
-    offs = data + ch_indices[:, None]                     # (n_lines, nt) offset traces
+    offs = data + ch_vals[:, None]                        # (n_lines, nt) offset traces
     tt = np.broadcast_to(t_vals, offs.shape)              # (n_lines, nt)
     if style == 'seismic':
         segs = np.stack([offs, tt], axis=-1)              # x = amplitude, y = time
@@ -263,7 +271,7 @@ def wiggle(
     ax.add_collection(LineCollection(segs, colors=color, linewidths=lw, **kwargs))
 
     if style == 'seismic':
-        ax.set_xlim(-step, int(ch_indices[-1]) + step)
+        ax.set_xlim(ch_vals[0] - gap, ch_vals[-1] + gap)
         ax.set_ylim(t_vals[-1], t_vals[0])                # inverted (time grows down)
         ax.set_xlabel('channel')
         ax.set_ylabel('time' if usedatetime else 't (s)')
@@ -271,7 +279,7 @@ def wiggle(
             ax.yaxis_date()
     else:
         ax.set_xlim(t_vals[0], t_vals[-1])
-        ax.set_ylim(int(ch_indices[-1]) + step, -step)    # inverted (ch 0 at top)
+        ax.set_ylim(ch_vals[-1] + gap, ch_vals[0] - gap)  # inverted (first ch at top)
         ax.set_xlabel('time' if usedatetime else 't (s)')
         ax.set_ylabel('channel')
         if usedatetime:
