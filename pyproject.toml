@@ -23,10 +23,14 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=7"]
-# jupyterlab is deliberately absent: the viewer runs *in* a Jupyter
-# environment but never imports it, and pulling it adds 69 packages
-# (jupyter-server, nbconvert, tornado, ...) to a 36-package extra.
-viewer = ["fastplotlib>=0.3", "ipywidgets>=8"]
+# ipykernel, not jupyterlab: the env has to be usable *as a kernel*, which is
+# what both VSCode and a browser JupyterLab connect to, and ipywidgets does not
+# pull it. JupyterLab itself is the frontend application -- VSCode replaces it
+# outright, and a browser install is made once in the launching env -- so
+# declaring it would add 66 packages (jupyter-server, nbconvert, tornado, ...)
+# that the viewer never calls. The widget renderer, jupyterlab_widgets, does
+# come with ipywidgets.
+viewer = ["fastplotlib>=0.3", "ipywidgets>=8", "ipykernel>=6"]
 noise = ["torch>=2"]
 pick = ["phasenet>=0.2"]
 

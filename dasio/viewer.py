@@ -275,11 +275,11 @@ def view(d, style: str = 'seismic', ncol: int = 2800, perc: float = 99.5,
          figsize=(1000, 720)):
     """Interactive viewer for an in-memory `DASdata`. Returns the canvas widget.
 
-    Waterfall over wiggles, sharing one axis. Install the libraries with the
-    `[viewer]` extra and run it from a Jupyter kernel you already have — the
-    extra deliberately does not pull JupyterLab itself. `rendercanvas` picks
-    its anywidget backend in a kernel, which works in JupyterLab and VSCode
-    alike.
+    Waterfall over wiggles, sharing one axis. `pip install 'dasio[viewer]'`
+    makes the environment usable as a Jupyter kernel; run it from VSCode or a
+    browser JupyterLab, whichever you already have — the extra does not pull
+    the JupyterLab application itself. `rendercanvas` picks its anywidget
+    backend in a kernel, which works in both.
 
     `style` matches `dasio.plot`: `'seismic'` (default) puts channels on x and
     time on y running **downward**, the traditional seismic-record orientation,
