@@ -20,3 +20,6 @@ docs/superpowers/
 
 # OS / editor cruft
 .DS_Store
+
+# Local scratch: ad-hoc scripts and figures against the local archive
+mytest/
