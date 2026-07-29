@@ -43,3 +43,21 @@ def test_downsample_forwards_nthreads_to_anti_alias_filter():
     d = make(nt=4000, fs=1000.0)
     np.testing.assert_array_equal(downsample(d, 5, nthreads=4).data,
                                   downsample(d, 5, nthreads=1).data)
+
+
+def test_default_nthreads_survives_a_missing_psutil(monkeypatch):
+    """psutil is not a declared dependency, and `bandpass` calls this on every
+    invocation — so an ImportError here failed every filter in a clean install."""
+    import builtins
+    from dasio.utils import default_nthreads
+
+    real_import = builtins.__import__
+
+    def no_psutil(name, *a, **kw):
+        if name == "psutil":
+            raise ImportError("no psutil")
+        return real_import(name, *a, **kw)
+
+    monkeypatch.setattr(builtins, "__import__", no_psutil)
+    n = default_nthreads()
+    assert isinstance(n, int) and n >= 1
