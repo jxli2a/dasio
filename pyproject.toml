@@ -23,6 +23,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=7"]
+viewer = ["fastplotlib>=0.3", "ipywidgets>=8", "jupyterlab>=4"]
 noise = ["torch>=2"]
 pick = ["phasenet>=0.2"]
 

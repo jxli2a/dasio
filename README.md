@@ -25,6 +25,7 @@ Ambient-noise cross-correlation and phase picking have heavier, optional
 dependencies, exposed as install extras (still editable):
 
 ```bash
+pip install -e '.[viewer]'      # interactive viewer (dasio.viewer.view) -> fastplotlib, ipywidgets
 pip install -e '.[noise]'       # ambient-noise cross-correlation (dasio.noise) -> PyTorch
 pip install -e '.[pick]'        # PhaseNet-DAS P/S picking (dasio.pick_phases) -> phasenet (+ PyTorch)
 pip install -e '.[noise,pick]'  # both
