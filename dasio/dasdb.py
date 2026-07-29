@@ -62,6 +62,11 @@ def _catalog_format(file: Union[str, Path]) -> str:
 # glob '*.h5'.
 _ASN_DAY_DIR_RE = re.compile(r'^\d{8}$')
 
+# Both HDF5 spellings are in the archive, and some projects nest one level
+# under a date directory whose name is not the ASN `\d{8}` convention.
+_H5 = ('*.h5', '*.hdf5')
+_H5_NESTED = ('*/*.h5', '*/*.hdf5')
+
 
 def list_das_files(raw_dir: Path, format: str) -> List[Path]:
     """Enumerate candidate DAS files under `raw_dir` for `format`.
@@ -89,13 +94,21 @@ def list_das_files(raw_dir: Path, format: str) -> List[Path]:
         # keep readdir on Processed/ from blowing up). Cover both —
         # without the date-subdir branch, building a Proc dasdb from
         # the new layout returns zero files.
-        files = list(list_data_files(raw_dir, '*.h5'))
+        files = list(list_data_files(raw_dir, _H5))
         for sub in raw_dir.iterdir():
             if sub.is_dir() and _ASN_DAY_DIR_RE.match(sub.name):
-                files.extend(list_data_files(sub, '*.h5'))
-        return files
+                files.extend(list_data_files(sub, _H5))
+        return files or list_data_files(raw_dir, _H5_NESTED)
     if format in ('OptaSense', 'APSensing'):
-        return list_data_files(raw_dir, '*.h5')
+        # Flat is the common layout, but arcata_usgs nests by date
+        # (`2024-12-04/sensor_*.h5`) and south_korea_urban writes `.hdf5`.
+        # Both scanned to an empty catalog before this.
+        return (list_data_files(raw_dir, _H5)
+                or list_data_files(raw_dir, _H5_NESTED))
+    if format in ('Event', 'Basic'):
+        # Both are flat products written one file per window; no vendor
+        # directory convention to honour.
+        return list_data_files(raw_dir, ('*.h5', '*.hdf5'))
     raise ValueError(f'Unknown format {format!r}')
 
 

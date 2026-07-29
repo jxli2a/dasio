@@ -172,3 +172,20 @@ def test_scan_warns_when_no_file_matches_the_format(tmp_path, proc_file, capsys)
 
     assert scan_metadata(raw, "OptaSense", progress=False).empty
     assert "none matched that format" in capsys.readouterr().err
+
+
+@pytest.mark.parametrize("layout,fmt", [
+    ("flat_h5", "OptaSense"), ("flat_hdf5", "APSensing"), ("nested", "OptaSense"),
+])
+def test_file_discovery_covers_the_layouts_in_the_archive(tmp_path, layout, fmt):
+    """Real folders that scanned to an empty catalog: arcata_usgs nests under a
+    dashed date (`2024-12-04/sensor_*.h5`) and south_korea_urban writes `.hdf5`,
+    while the OptaSense/APSensing branch globbed only flat `*.h5`."""
+    from dasio.dasdb import list_das_files
+
+    target = {"flat_h5": tmp_path / "a.h5",
+              "flat_hdf5": tmp_path / "a.hdf5",
+              "nested": tmp_path / "2024-12-04" / "sensor_a.h5"}[layout]
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.touch()
+    assert list_das_files(tmp_path, fmt) == [target]
