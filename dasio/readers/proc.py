@@ -111,7 +111,9 @@ def read_data_proc(
         origin_grp = f.get('Acquisition_origin')
         raw_meta = dict(origin_grp.attrs) if origin_grp is not None else None
 
-    data = data.astype(np.float32, copy=False)
+    # Contiguous: the time-first branch above transposes, and `astype` would
+    # keep that F layout (order='K'). See `signal.bandpass2d`.
+    data = np.ascontiguousarray(data, dtype=np.float32)
     units = _ORIGIN_UNITS.get(origin, _DEFAULT_UNITS)
 
     nt_out = data.shape[1]

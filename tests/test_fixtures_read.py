@@ -19,3 +19,16 @@ def test_each_reader_returns_correct_shape(optasense_file, asn_file, apsensing_f
         d = DASFile(path).read()
         assert d.data.shape == (d.nx, d.nt)
         assert d.nx == 4 and d.nt == 256
+
+
+def test_every_reader_returns_c_contiguous_data(
+        optasense_file, asn_file, apsensing_file, proc_file, event_file):
+    """The C++ bandpass reads the raw buffer, so an F-contiguous payload is
+    walked in the wrong order and returns a periodic pattern rather than an
+    error. Four readers reach (nx, nt) by transposing, and `astype`'s default
+    order='K' preserves that layout."""
+    from dasio.dasfile import DASFile
+
+    for f in (optasense_file, asn_file, apsensing_file, proc_file, event_file):
+        d = DASFile(f).read()
+        assert d.data.flags["C_CONTIGUOUS"], f"{DASFile(f).format} payload is not contiguous"

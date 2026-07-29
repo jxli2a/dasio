@@ -148,7 +148,10 @@ def read_optasense_raw(
     # NOTE: unwrap is applied later by desample_window on the full concatenated
     # buffer, so it propagates across file boundaries. This reader just returns
     # the raw int32 counts cast to float32.
-    data = raw.astype(np.float32)
+    # `astype` defaults to order='K', which preserves the F layout a time-major
+    # file picks up from the transpose above; the C++ bandpass reads the raw
+    # buffer and would misread it (see `signal.bandpass2d`).
+    data = np.ascontiguousarray(raw, dtype=np.float32)
 
     nx = data.shape[0]
     nt = data.shape[1]
