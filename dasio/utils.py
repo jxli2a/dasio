@@ -75,27 +75,20 @@ def utcdatetime(*args, **kwargs) -> datetime:
 def default_nthreads() -> int:
     """Physical cores available to this process.
 
-    Logical CPUs (hyperthreads) don't help an FP-bound OMP filter and
-    can hurt via cache contention, so we count physical cores via
-    psutil. Capped by `sched_getaffinity` so taskset / cgroup /
-    container limits are respected (cron under a quota'd unit etc.).
+    Every CPU the process may run on, hyperthreads included. This used to
+    count *physical* cores via psutil, on the theory that hyperthreads cannot
+    help an FP-bound OMP filter -- measured on the vendored kernel that is
+    simply not so: 64 threads take 82.8 ms on a 4000x30000 window where 128
+    take 62.6 ms, and scaling stays near-linear the whole way. psutil returned
+    the slower answer and was not a declared dependency.
 
-    psutil is optional -- it is the only way to get the *physical* count, but
-    it is not worth a hard dependency for one call, so without it we fall back
-    to the logical count. That over-counts on an SMT host, which costs some
-    throughput; raising ImportError from the default path of `bandpass` would
-    cost a great deal more.
+    `sched_getaffinity` rather than `cpu_count` so taskset / cgroup /
+    container limits are respected (cron under a quota'd unit etc.).
     """
     try:
-        import psutil
-        n_phys = psutil.cpu_count(logical=False) or os.cpu_count() or 1
-    except ImportError:
-        n_phys = os.cpu_count() or 1
-    try:
-        n_aff = len(os.sched_getaffinity(0))
-    except AttributeError:
-        n_aff = os.cpu_count() or n_phys
-    return max(1, min(n_phys, n_aff))
+        return max(1, len(os.sched_getaffinity(0)))
+    except AttributeError:                      # not Linux
+        return max(1, os.cpu_count() or 1)
 
 
 def list_data_files(root: Union[str, Path],
