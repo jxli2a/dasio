@@ -142,3 +142,33 @@ def test_read_output_is_c_contiguous(gapped_db):
     reader output could come back F-contiguous."""
     db, t0 = gapped_db
     assert db.read(t0, t0 + timedelta(seconds=70)).data.flags["C_CONTIGUOUS"]
+
+
+def test_cli_format_is_optional_for_both_create_and_update(tmp_path, proc_file, capsys):
+    """`to_csv` writes no format column, so the update path cannot recover it
+    from the catalog — the CLI resolves it from the raw directory instead."""
+    import shutil
+    from dasio.dasdb import main
+
+    raw = tmp_path / "raw"; raw.mkdir()
+    shutil.copy(proc_file, raw / "a.h5")
+    cat = tmp_path / "cat.csv"
+
+    main(["--from", str(raw), "--dasdb", str(cat)])
+    assert DASdb.from_file(cat, format="Proc").n_files == 1
+    main(["--from", str(raw), "--dasdb", str(cat)])   # update
+    assert DASdb.from_file(cat, format="Proc").n_files == 1
+
+
+def test_scan_warns_when_no_file_matches_the_format(tmp_path, proc_file, capsys):
+    """Readers return [] for a file failing their signature check so a mixed
+    directory scans cleanly; every file failing means the format is wrong, and
+    the only symptom used to be an empty catalog."""
+    import shutil
+    from dasio.dasdb import scan_metadata
+
+    raw = tmp_path / "raw"; raw.mkdir()
+    shutil.copy(proc_file, raw / "a.h5")
+
+    assert scan_metadata(raw, "OptaSense", progress=False).empty
+    assert "none matched that format" in capsys.readouterr().err

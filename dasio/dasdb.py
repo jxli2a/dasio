@@ -99,6 +99,29 @@ def list_das_files(raw_dir: Path, format: str) -> List[Path]:
     raise ValueError(f'Unknown format {format!r}')
 
 
+def detect_dir_format(raw_dir: Union[str, Path]) -> str:
+    """On-disk format of the first DAS file found under `raw_dir`.
+
+    Depth 1 (flat Proc / OptaSense), 2 (dated Proc, plain ASN) and 3 (ASN with
+    a channel subdir: `<YYYYMMDD>/<ch>/<HHMMSS>.hdf5`). `glob` is lazy and
+    `next` stops at the first hit, so the deep patterns cost nothing on the
+    shallow layouts.
+    """
+    raw_dir = Path(raw_dir)
+    probe = next(
+        (p for pat in ('*.h5', '*.hdf5', '*/*.h5', '*/*.hdf5',
+                       '*/*/*.h5', '*/*/*.hdf5')
+            for p in raw_dir.glob(pat)),
+        None,
+    )
+    if probe is None:
+        raise ValueError(
+            f'no .h5/.hdf5 files under {raw_dir} to detect the format from; '
+            'pass format= explicitly.'
+        )
+    return DASFile(probe).format
+
+
 def _read_metadata(file: Path, format: str) -> Optional[DASmeta]:
     """Module-level worker for `_read_metadata_batch` process pool.
 
@@ -171,10 +194,21 @@ def scan_metadata(
     dir.
     """
     raw_dir = Path(raw_dir).resolve()
+    files = list_das_files(raw_dir, format)
     rows = _read_metadata_batch(
-        list_das_files(raw_dir, format), format,
-        workers=workers, progress=progress,
+        files, format, workers=workers, progress=progress,
     )
+    # Readers return [] for a file that fails their signature check, so a
+    # mixed directory scans cleanly. Every file failing is a different thing:
+    # it means `format` is wrong, and the only symptom was an empty catalog.
+    if files and not rows:
+        import sys
+        print(
+            f'WARNING! scan_metadata: read {len(files)} files under {raw_dir} '
+            f'as {format!r} and none matched that format; the catalog is '
+            f'empty. Check --format, or omit it to detect from the files.',
+            file=sys.stderr,
+        )
     df = pd.DataFrame(rows)
     if not df.empty:
         df = df.sort_values('begin_time').reset_index(drop=True)
@@ -311,22 +345,7 @@ class DASdb:
         """Scan `raw_dir` and build a catalog for the given `format`."""
         raw_dir = Path(raw_dir)
         if format is None:
-            # Depth 1 (flat Proc / OptaSense), 2 (dated Proc, plain ASN) and 3
-            # (ASN with a channel subdir: <YYYYMMDD>/<ch>/<HHMMSS>.hdf5).
-            # `glob` is lazy and `next` stops at the first hit, so the deep
-            # patterns cost nothing on the shallow layouts.
-            probe = next(
-                (p for pat in ('*.h5', '*.hdf5', '*/*.h5', '*/*.hdf5',
-                               '*/*/*.h5', '*/*/*.hdf5')
-                    for p in raw_dir.glob(pat)),
-                None,
-            )
-            if probe is None:
-                raise ValueError(
-                    f'DASdb.from_dir: no .h5/.hdf5 files under {raw_dir} '
-                    'to detect format from; pass format= explicitly.'
-                )
-            format = DASFile(probe).format
+            format = detect_dir_format(raw_dir)
         return cls(
             scan_metadata(raw_dir, format, workers=workers, progress=progress),
             format,
@@ -810,8 +829,12 @@ def main(argv=None):
             'Created on first run, updated incrementally on subsequent runs.',
     )
     ap.add_argument(
-        '--format',
-        choices=['ASN', 'OptaSense', 'APSensing', 'Proc'], required=True,
+        '--format', default=None,
+        choices=['ASN', 'OptaSense', 'APSensing', 'Proc', 'Event', 'Basic'],
+        help='on-disk format. Detected from the first file when omitted; pass '
+            'it to skip that open, or to force a format on a mixed directory. '
+            'Forcing the wrong one is silent -- every file fails its signature '
+            'check and the catalog comes out empty.',
     )
     ap.add_argument(
         '--overwrite', action='store_true',
@@ -840,16 +863,20 @@ def main(argv=None):
     )
     args = ap.parse_args(argv)
 
+    # Resolved here rather than left to from_dir: `to_csv` writes no format
+    # column, so the update path below cannot recover it from the catalog.
+    fmt = args.format or detect_dir_format(args.raw_dir)
+
     pre_existed = args.dasdb.exists()
     if pre_existed and not args.overwrite:
-        db = DASdb.from_file(args.dasdb, format=args.format)
+        db = DASdb.from_file(args.dasdb, format=fmt)
         n_new = db.update_from_dir(
             args.raw_dir, workers=args.nworkers, progress=args.progress,
         )
         action, tail = 'updated', f'+{n_new} new'
     else:
         db = DASdb.from_dir(
-            args.raw_dir, args.format,
+            args.raw_dir, fmt,
             workers=args.nworkers, progress=args.progress,
         )
         action = 'rebuilt' if pre_existed else 'created'
