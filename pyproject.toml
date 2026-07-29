@@ -23,7 +23,10 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=7"]
-viewer = ["fastplotlib>=0.3", "ipywidgets>=8", "jupyterlab>=4"]
+# jupyterlab is deliberately absent: the viewer runs *in* a Jupyter
+# environment but never imports it, and pulling it adds 69 packages
+# (jupyter-server, nbconvert, tornado, ...) to a 36-package extra.
+viewer = ["fastplotlib>=0.3", "ipywidgets>=8"]
 noise = ["torch>=2"]
 pick = ["phasenet>=0.2"]
 

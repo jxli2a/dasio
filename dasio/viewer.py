@@ -275,9 +275,11 @@ def view(d, style: str = 'seismic', ncol: int = 2800, perc: float = 99.5,
          figsize=(1000, 720)):
     """Interactive viewer for an in-memory `DASdata`. Returns the canvas widget.
 
-    Waterfall over wiggles, sharing one axis. Needs a Jupyter kernel (see the
-    `[viewer]` extra); `rendercanvas` picks its anywidget backend there, which
-    works in JupyterLab and VSCode alike.
+    Waterfall over wiggles, sharing one axis. Install the libraries with the
+    `[viewer]` extra and run it from a Jupyter kernel you already have — the
+    extra deliberately does not pull JupyterLab itself. `rendercanvas` picks
+    its anywidget backend in a kernel, which works in JupyterLab and VSCode
+    alike.
 
     `style` matches `dasio.plot`: `'seismic'` (default) puts channels on x and
     time on y running **downward**, the traditional seismic-record orientation,
@@ -316,9 +318,9 @@ def view(d, style: str = 'seismic', ncol: int = 2800, perc: float = 99.5,
     except ImportError as e:
         raise ImportError(
             f"the viewer needs fastplotlib and ipywidgets ({e.name} is "
-            f"missing): pip install 'dasio[viewer]'. Everything else in dasio "
-            f"works without them, which is why they are an extra -- they pull "
-            f"a GPU stack and a Jupyter server, ~100 packages."
+            f"missing): pip install 'dasio[viewer]'. They are an extra because "
+            f"they pull a GPU stack, ~36 packages, and everything else in "
+            f"dasio -- readers, catalogs, desample, picking -- is headless."
         ) from e
     from datetime import timedelta as _timedelta
 

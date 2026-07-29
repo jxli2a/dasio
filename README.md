@@ -26,6 +26,7 @@ dependencies, exposed as install extras (still editable):
 
 ```bash
 pip install -e '.[viewer]'      # interactive viewer (dasio.viewer.view) -> fastplotlib, ipywidgets
+#                                 run it from a Jupyter kernel you already have
 pip install -e '.[noise]'       # ambient-noise cross-correlation (dasio.noise) -> PyTorch
 pip install -e '.[pick]'        # PhaseNet-DAS P/S picking (dasio.pick_phases) -> phasenet (+ PyTorch)
 pip install -e '.[noise,pick]'  # both
