@@ -351,3 +351,23 @@ def test_view_builds_and_draws_the_first_frame(style):
     d = _make(nx=200, nt=2000)
     d.ch0, d.dch = 2000, 4
     view(d, style=style)          # raises if any of the above is broken
+
+
+def test_missing_viewer_extra_names_the_extra(monkeypatch):
+    """A bare ModuleNotFoundError leaves the user guessing which extra to
+    install — `picking.py` already points at `dasio[pick]`, so this should
+    point at `dasio[viewer]`."""
+    import builtins
+
+    from dasio.viewer import view
+
+    real = builtins.__import__
+
+    def no_fpl(name, *a, **kw):
+        if name.startswith("fastplotlib"):
+            raise ImportError("nope", name="fastplotlib")
+        return real(name, *a, **kw)
+
+    monkeypatch.setattr(builtins, "__import__", no_fpl)
+    with pytest.raises(ImportError, match=r"dasio\[viewer\]"):
+        view(_make())

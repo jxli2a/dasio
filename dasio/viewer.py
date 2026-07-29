@@ -308,10 +308,18 @@ def view(d, style: str = 'seismic', ncol: int = 2800, perc: float = 99.5,
         raise ValueError(f"style must be 'seismic' or 'normal', got {style!r}")
     seismic = style == 'seismic'
 
-    import fastplotlib as fpl
-    import ipywidgets as w
-    from fastplotlib.utils.types import SelectorColorStates as _PlaneColor
-    from IPython.display import display
+    try:
+        import fastplotlib as fpl
+        import ipywidgets as w
+        from fastplotlib.utils.types import SelectorColorStates as _PlaneColor
+        from IPython.display import display
+    except ImportError as e:
+        raise ImportError(
+            f"the viewer needs fastplotlib and ipywidgets ({e.name} is "
+            f"missing): pip install 'dasio[viewer]'. Everything else in dasio "
+            f"works without them, which is why they are an extra -- they pull "
+            f"a GPU stack and a Jupyter server, ~100 packages."
+        ) from e
     from datetime import timedelta as _timedelta
 
     base = d
