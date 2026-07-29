@@ -385,13 +385,14 @@ class DASdata:
         from .processing import subtract_common_mode as _scm
         return _scm(self, ch_min=ch_min, ch_max=ch_max, copy=copy)
     
-    def unwrap(self, factor: int = 1, copy: bool = True) -> 'DASdata':
+    def unwrap_int32(self, factor: int = 1, copy: bool = True) -> 'DASdata':
         """OptaSense int32 phase-wrap correction. See `processing.unwrap`."""
         from .processing import unwrap_int32 as _uw
         return _uw(self, factor=factor, copy=copy)
 
-    def median_filter(self, kernel_size: int, axis: str = 't',
-                      copy: bool = True) -> 'DASdata':
+    def median_filter_1d(
+            self, kernel_size: int, axis: str = 't', copy: bool = True
+        ) -> 'DASdata':
         """Running median along time or channels. See `processing.median_filter`."""
         from .processing import median_filter_1d as _mf
         return _mf(self, kernel_size, axis=axis, copy=copy)
