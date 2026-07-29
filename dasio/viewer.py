@@ -272,7 +272,7 @@ def _row(title, *widgets):
 
 
 def view(d, style: str = 'seismic', ncol: int = 2800, perc: float = 99.5,
-         figsize=(1000, 720)):
+         figsize=(1000, 720), chain=None):
     """Interactive viewer for an in-memory `DASdata`. Returns the canvas widget.
 
     Waterfall over wiggles, sharing one axis. `pip install 'dasio[viewer]'`
@@ -303,6 +303,17 @@ def view(d, style: str = 'seismic', ncol: int = 2800, perc: float = 99.5,
     uniform updates (free, drag them). Zoom re-pools (tens of ms). Apply
     re-runs the processing chain over the whole array and is the only control
     that costs real time.
+
+    `chain` replaces the built-in processing entirely with your own callable,
+    `f(DASdata) -> DASdata`. The built-in order is fixed — differentiate,
+    detrend, taper, median, band-pass, integrate, common-mode — so this is how
+    you reorder it, or do anything it does not offer:
+
+        view(d, chain=lambda x: x.detrend().differentiate().bandpass(0.5, 10))
+
+    The filter and median rows are then omitted, since their controls would do
+    nothing. Apply still re-runs the callable, which is useful when it reads
+    something you change between presses.
     """
     # Validate before the heavy import, so a typo fails immediately instead of
     # after fastplotlib and a GPU context have been brought up.
@@ -552,10 +563,16 @@ def view(d, style: str = 'seismic', ncol: int = 2800, perc: float = 99.5,
         _draw()
 
     def _apply(_=None):
-        """Re-run the processing chain from the widget values, then redraw."""
+        """Re-run the processing chain, then redraw.
+
+        A caller-supplied `chain` replaces the built-in one outright rather
+        than composing with it: composing would apply the panel's band-pass on
+        top of whatever the callable did, which is not what anyone means by
+        "my own chain".
+        """
         status.value = "<span style='color:#b60'>processing…</span>"
         try:
-            state['proc'] = apply_chain(
+            state['proc'] = chain(base) if chain else apply_chain(
                 base,
                 differentiate=di_on.value, detrend=dt_on.value,
                 taper_sec=tap.value or None,
@@ -746,16 +763,23 @@ def view(d, style: str = 'seismic', ncol: int = 2800, perc: float = 99.5,
 
     cmap.observe(_set_cmap, names='value')
 
-    panel = w.VBox([
-        _row('view', _lbl('t', 12), t0, _lbl('–'), t1, _lbl('s', 14),
-             _lbl('ch', 20), c0, _lbl('–'), c1, zoom_btn, full_btn, pan_on,
-             status),
+    filter_rows = [
         _row('filter', bp_on, f0, _lbl('–'), f1, _lbl('Hz', 20),
              _lbl('order', 34), order, zph),
         _row('', dt_on, di_on, in_on, _lbl('taper s', 44), tap,
              cm_on, cm0, _lbl('–'), cm1, apply_btn),
         _row('median', _lbl('time k', 44), mt, _lbl('chan k', 46), mx,
              _lbl('(odd, 0 = off)')),
+    ] if chain is None else [
+        _row('filter', _lbl(f'custom chain: {getattr(chain, "__name__", "callable")}'),
+             apply_btn),
+    ]
+
+    panel = w.VBox([
+        _row('view', _lbl('t', 12), t0, _lbl('–'), t1, _lbl('s', 14),
+             _lbl('ch', 20), c0, _lbl('–'), c1, zoom_btn, full_btn, pan_on,
+             status),
+        *filter_rows,
         _row('cursor', hover),
         _row('waterfall', _lbl('gain', 28), img_gain, img_gain_n, cmap,
              cb_lo, cbar_img, cb_hi),

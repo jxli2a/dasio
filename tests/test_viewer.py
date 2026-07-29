@@ -371,3 +371,24 @@ def test_missing_viewer_extra_names_the_extra(monkeypatch):
     monkeypatch.setattr(builtins, "__import__", no_fpl)
     with pytest.raises(ImportError, match=r"dasio\[viewer\]"):
         view(_make())
+
+
+def test_view_accepts_a_custom_chain():
+    """The built-in order is fixed, so a callable is how you reorder it or add
+    a step it does not offer. It replaces the built-in chain rather than
+    composing, or the panel's band-pass would run on top of your work."""
+    import os
+
+    os.environ.setdefault("WGPU_FORCE_OFFSCREEN", "1")
+    pytest.importorskip("fastplotlib")
+    from dasio.viewer import view
+
+    calls = []
+
+    def my_chain(x):
+        calls.append(x.units)
+        return x.detrend().differentiate()      # integrate-last order reversed
+
+    d = _make(nx=64, nt=512)
+    view(d, chain=my_chain)
+    assert calls, "the custom chain was never called"
