@@ -745,93 +745,14 @@ class DASdb:
     # ------------------------------------------------------------- visualization
 
     def plot_timeline(self, ax=None, by_month=None):
-        """Gantt-style coverage timeline: green where data exists, red for gaps.
+        """Gantt-style coverage timeline. See `dasio.plot.plot_timeline`.
 
-        With `by_month=True` each calendar month becomes its own row against a
-        shared day-of-month axis, which keeps a multi-month archive legible —
-        a year on one continuous axis compresses every gap into a hairline.
-        `None` (default) picks that layout automatically when the catalog spans
-        more than one month.
-
-        Bar geometry is computed in matplotlib date numbers rather than handed
-        over as Timestamp/Timedelta objects. Mixing the two lets the unit
-        machinery interpret a width in the same frame as a position, and a
-        single bad conversion is enough to push the axes limits far enough that
-        rendering a `bbox_inches='tight'` figure asks for a canvas of millions
-        of pixels.
+        Lazy-imported so a bare `import dasio.dasdb` stays clear of matplotlib.
         """
-        try:
-            import matplotlib.pyplot as plt
-            from matplotlib import dates as mdates
-        except ImportError as e:
-            raise ImportError(
-                'plot_timeline needs matplotlib; already a core dep for '
-                'the monitor but was not found in this env'
-            ) from e
+        from .plot import plot_timeline as _plot_timeline
+        return _plot_timeline(self, ax=ax, by_month=by_month)
 
-        segments = list(self.segments())
-        if not segments:
-            raise RuntimeError('DASdb is empty; nothing to plot')
 
-        spans = [(s['begin_time'].iloc[0], s['end_time'].iloc[-1])
-                 for s in segments]
-        gaps = [(a[1], b[0]) for a, b in zip(spans[:-1], spans[1:]) if b[0] > a[1]]
-
-        months = pd.period_range(spans[0][0], spans[-1][1], freq='M')
-        if by_month is None:
-            by_month = len(months) > 1
-
-        if not by_month:
-            if ax is None:
-                _, ax = plt.subplots(figsize=(12, 2.0), layout='constrained')
-            for t0, t1 in spans:
-                x0, x1 = mdates.date2num(t0), mdates.date2num(t1)
-                ax.barh(0, x1 - x0, left=x0, height=0.6,
-                        color='#66bb66', edgecolor='#2e7d32', alpha=0.9)
-            for t0, t1 in gaps:
-                x0, x1 = mdates.date2num(t0), mdates.date2num(t1)
-                ax.barh(0, x1 - x0, left=x0, height=0.6, color='#d55', alpha=0.4)
-            ax.set_xlim(mdates.date2num(spans[0][0]), mdates.date2num(spans[-1][1]))
-            ax.set_ylim(-0.5, 0.5)
-            ax.set_yticks([])
-            ax.xaxis.set_major_formatter(
-                mdates.ConciseDateFormatter(ax.xaxis.get_major_locator()))
-            ax.set_xlabel('time')
-        else:
-            if ax is None:
-                _, ax = plt.subplots(figsize=(12, 0.42 * len(months) + 1.1),
-                                     layout='constrained')
-            for row, month in enumerate(months):
-                m0 = month.start_time.tz_localize(spans[0][0].tz)
-                m1 = (month + 1).start_time.tz_localize(spans[0][0].tz)
-                span_days = (m1 - m0).total_seconds() / 86400.0
-                ax.barh(row, span_days, left=0, height=0.62,
-                        color='#f2f2f2', edgecolor='#dddddd', zorder=0)
-                for (t0, t1), color, alpha in (
-                        [(s, '#66bb66', 0.95) for s in spans]
-                        + [(g, '#d55', 0.55) for g in gaps]):
-                    lo, hi = max(t0, m0), min(t1, m1)
-                    if hi <= lo:
-                        continue          # this bar does not reach into this month
-                    left = (lo - m0).total_seconds() / 86400.0
-                    ax.barh(row, (hi - lo).total_seconds() / 86400.0, left=left,
-                            height=0.62, color=color, alpha=alpha, zorder=2)
-            ax.set_ylim(len(months) - 0.5, -0.5)      # first month at the top
-            ax.set_yticks(range(len(months)))
-            ax.set_yticklabels([str(m) for m in months], fontsize=9)
-            ax.set_xlim(0, 31)
-            ax.set_xticks(range(0, 31, 5))
-            ax.set_xticklabels([str(d + 1) for d in range(0, 31, 5)])
-            ax.set_xlabel('day of month')
-            ax.grid(axis='x', color='white', lw=0.8, zorder=1)
-
-        ax.set_title(
-            f'{self.format}  |  {self.n_files:,} files  |  '
-            f'{self.n_segments} segments  |  '
-            f'{spans[0][0]:%Y-%m-%d} to {spans[-1][1]:%Y-%m-%d}',
-            fontsize=10,
-        )
-        return ax
 
 
 # --- CLI ---
