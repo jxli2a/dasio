@@ -37,3 +37,33 @@ def test_matches_realtimemonitor_reference_bitwise():
     ref = ref_lfilter(data, fmin * dt, order, fmax * dt, order, 1, 1)
     # Same source -> expect bit-identical (allow ~8 ULP float32 slack).
     np.testing.assert_allclose(got, ref, rtol=0, atol=1e-6)
+
+
+def test_bandpass_ignores_memory_layout():
+    """The C++ extension reads the raw buffer, so a transposed array was walked
+    in the wrong order and returned a plausible periodic pattern instead of an
+    error. ASN and AP Sensing reach `(nx, nt)` by transposing, so this was
+    reachable straight from DASdb.read: the error exceeded the signal."""
+    import numpy as np
+    from dasio.signal import bandpass2d
+
+    rng = np.random.default_rng(0)
+    c = rng.standard_normal((32, 2000)).astype(np.float32)
+    f = np.asfortranarray(c)
+    assert np.array_equal(c, f) and not f.flags["C_CONTIGUOUS"]
+
+    kw = dict(order=8, zerophase=True, nThreads=2)
+    np.testing.assert_array_equal(
+        bandpass2d(c, 1.0, 20.0, 0.01, **kw),
+        bandpass2d(f, 1.0, 20.0, 0.01, **kw),
+    )
+
+
+@pytest.mark.parametrize("reader,fixture", [("asn", "asn_file"), ("apsensing", "apsensing_file")])
+def test_transposing_readers_return_contiguous_data(reader, fixture, request):
+    """Both reach (nx, nt) via .T; an F-contiguous payload silently corrupts
+    every downstream bandpass."""
+    from dasio.dasfile import DASFile
+
+    d = DASFile(request.getfixturevalue(fixture)).read()
+    assert d.data.flags["C_CONTIGUOUS"], f"{reader} payload must be C-contiguous"

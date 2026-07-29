@@ -127,7 +127,9 @@ def read_apsensing_raw(
                         dist_meta[k] = v
         raw_meta = {'ProcessingServer': ps_meta, 'Distances': dist_meta}
 
-    data = raw.astype(np.float32, copy=False)  # (nx, nt)
+    # Contiguous: `raw` is a transposed view on time-first files, and the C++
+    # bandpass reads the raw buffer (see `signal.bandpass2d`).
+    data = np.ascontiguousarray(raw, dtype=np.float32)  # (nx, nt)
     nx = data.shape[0]
     nt = data.shape[1]
     dt = 1.0 / fs

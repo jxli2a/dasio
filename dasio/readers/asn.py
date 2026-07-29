@@ -175,7 +175,9 @@ def read_asn_raw(
     else:
         sens = np.float32(sens_arr.flat[0])
     scale = np.float32(-data_scale) / sens
-    data = (raw.astype(np.float32, copy=False) * scale).T  # (nx, nt)
+    # Contiguous after the transpose: the C++ bandpass reads the raw buffer
+    # and would misread an F-contiguous array (see `signal.bandpass2d`).
+    data = np.ascontiguousarray((raw.astype(np.float32, copy=False) * scale).T)
 
     nx = data.shape[0]
     nt = data.shape[1]

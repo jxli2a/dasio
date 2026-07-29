@@ -22,7 +22,16 @@ from .cpp import lfilter, lfilter_double
 
 
 def bandpass2d(data, freqmin, freqmax, dt, order=6, zerophase=False, nThreads=1):
-    """2D bandpass along the fast axis via the vendored pybind11 C++ extension."""
+    """2D bandpass along the fast axis via the vendored pybind11 C++ extension.
+
+    The extension reads the array's raw buffer assuming a C-contiguous layout,
+    so a transposed or strided input is walked in the wrong order and comes
+    back as a plausible-looking periodic pattern rather than an error. ASN and
+    AP Sensing readers transpose to reach `(nx, nt)`, so this is reachable from
+    a plain `DASdb.read`; the copy is skipped when the input is already
+    contiguous.
+    """
+    data = np.ascontiguousarray(data)
     phase = 0 if zerophase else 1
     if data.dtype == np.float32:
         return lfilter(data, freqmin * dt, order, freqmax * dt, order, phase, nThreads)
