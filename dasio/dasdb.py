@@ -29,6 +29,7 @@ stderr warning.
 """
 from __future__ import annotations
 
+import glob
 import re
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -75,6 +76,11 @@ def list_das_files(raw_dir: Path, format: str) -> List[Path]:
     `DASFile.metadata()` to drive incremental catalog refresh without
     reopening files already in the DASdb.
     """
+    # A glob pattern wins over every layout heuristic below: it says exactly
+    # which files are wanted, which is how the legacy DAS_db took its input.
+    # Quote it so the shell does not expand it first.
+    if _is_pattern(raw_dir):
+        return _glob_pattern(raw_dir)
     raw_dir = Path(raw_dir)
     if format == 'ASN':
         files: List[Path] = []
@@ -112,6 +118,17 @@ def list_das_files(raw_dir: Path, format: str) -> List[Path]:
     raise ValueError(f'Unknown format {format!r}')
 
 
+def _is_pattern(p: Union[str, Path]) -> bool:
+    """True when the path carries shell-glob magic rather than naming a directory."""
+    return any(c in str(p) for c in '*?[')
+
+
+def _glob_pattern(pattern: Union[str, Path]) -> List[Path]:
+    """Expand a glob pattern to a sorted file list, `**` included."""
+    return sorted(Path(p) for p in glob.glob(str(pattern), recursive=True)
+                  if Path(p).is_file())
+
+
 def detect_dir_format(raw_dir: Union[str, Path]) -> str:
     """On-disk format of the first DAS file found under `raw_dir`.
 
@@ -120,13 +137,16 @@ def detect_dir_format(raw_dir: Union[str, Path]) -> str:
     `next` stops at the first hit, so the deep patterns cost nothing on the
     shallow layouts.
     """
-    raw_dir = Path(raw_dir)
-    probe = next(
-        (p for pat in ('*.h5', '*.hdf5', '*/*.h5', '*/*.hdf5',
-                       '*/*/*.h5', '*/*/*.hdf5')
-            for p in raw_dir.glob(pat)),
-        None,
-    )
+    if _is_pattern(raw_dir):
+        probe = next(iter(_glob_pattern(raw_dir)), None)
+    else:
+        raw_dir = Path(raw_dir)
+        probe = next(
+            (p for pat in ('*.h5', '*.hdf5', '*/*.h5', '*/*.hdf5',
+                           '*/*/*.h5', '*/*/*.hdf5')
+                for p in raw_dir.glob(pat)),
+            None,
+        )
     if probe is None:
         raise ValueError(
             f'no .h5/.hdf5 files under {raw_dir} to detect the format from; '
@@ -833,7 +853,10 @@ def main(argv=None):
     ap = argparse.ArgumentParser(prog='python -m dasio.dasdb')
     ap.add_argument(
         '--from', dest='raw_dir', required=True, type=Path,
-        help='directory of raw DAS files to scan',
+        help='directory of raw DAS files to scan, or a glob pattern naming '
+            "them exactly (--from 'path/*/*.h5'). Quote a pattern so the "
+            'shell does not expand it first. A pattern also skips the layout '
+            'guessing, and skips dot-prefixed files such as macOS ._ forks.',
     )
     ap.add_argument(
         '--dasdb', required=True, type=Path,

@@ -189,3 +189,34 @@ def test_file_discovery_covers_the_layouts_in_the_archive(tmp_path, layout, fmt)
     target.parent.mkdir(parents=True, exist_ok=True)
     target.touch()
     assert list_das_files(tmp_path, fmt) == [target]
+
+
+def test_discovery_accepts_a_glob_pattern(tmp_path):
+    """A pattern says exactly which files are wanted, so it works on layouts
+    no per-format branch knows about — how the legacy DAS_db took its input."""
+    from dasio.dasdb import detect_dir_format, list_das_files
+
+    for day in ("2024-12-04", "2024-12-05"):
+        (tmp_path / day).mkdir()
+        (tmp_path / day / "sensor_a.h5").touch()
+    (tmp_path / "loose.h5").touch()
+
+    assert list_das_files(tmp_path / "*" / "*.h5", "OptaSense") == [
+        tmp_path / "2024-12-04" / "sensor_a.h5",
+        tmp_path / "2024-12-05" / "sensor_a.h5",
+    ]
+    assert len(list_das_files(str(tmp_path / "**" / "*.h5"), "OptaSense")) == 3
+
+
+def test_glob_pattern_skips_dot_prefixed_files(tmp_path):
+    """macOS ._ forks match a directory scan and cost an open each — 2160 of
+    them in arcata_usgs/25Hz. `glob` leaves hidden names alone."""
+    from dasio.dasdb import list_das_files
+
+    (tmp_path / "2024-12-04").mkdir()
+    (tmp_path / "2024-12-04" / "sensor_a.h5").touch()
+    (tmp_path / "2024-12-04" / "._sensor_a.h5").touch()
+
+    assert list_das_files(tmp_path / "*" / "*.h5", "OptaSense") == [
+        tmp_path / "2024-12-04" / "sensor_a.h5"
+    ]
