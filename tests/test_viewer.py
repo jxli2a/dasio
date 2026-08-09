@@ -7,6 +7,8 @@ drawn straight from the raw texture is invisible more often than not
 (measured 0/10 for a 1-sample transient). Pooling by max-|x| keeps the
 peak, so the same transient is always drawn.
 """
+from datetime import datetime, timezone
+
 import numpy as np
 import pytest
 
@@ -140,12 +142,13 @@ def test_default_band_is_valid_at_every_sample_rate(fs):
     from dasio.viewer import default_band
 
     fmin, fmax = default_band(fs)
+    assert fmin == 0.0, "the default is a low-pass; nothing is cut below fmax"
     assert 0 <= fmin < fmax < fs / 2, f"invalid default band at fs={fs}"
 
 
-def test_default_band_keeps_the_familiar_1_to_20_hz_for_normal_rates():
+def test_default_band_keeps_the_familiar_20_hz_top_for_normal_rates():
     from dasio.viewer import default_band
-    assert default_band(100.0) == (1.0, 20.0)
+    assert default_band(100.0) == (0.0, 20.0)
 
 
 def test_chain_rejects_an_inverted_band_instead_of_returning_junk():
@@ -325,6 +328,16 @@ def test_fit_view_margin_is_pixel_sized_and_clamped():
     assert narrow.camera.rect[0] == pytest.approx(-15.0)     # capped, not -26
 
 
+def test_fit_view_left_margin_is_widenable_for_wider_labels():
+    """A timestamp label needs about twice the room a bare number does, and the
+    margin is what stops it rendering clipped against the panel edge."""
+    from dasio.viewer import fit_view
+
+    sp = _FakeSubplot(w=1000, h=700)
+    fit_view(sp, 0.0, 100.0, 0.0, 100.0, left_px=92.0)
+    assert sp.camera.rect[0] == pytest.approx(-9.2, abs=0.01)
+
+
 def test_fit_view_leaves_the_ruler_free_only_when_panning():
     from dasio.viewer import fit_view
 
@@ -335,13 +348,74 @@ def test_fit_view_leaves_the_ruler_free_only_when_panning():
     assert panning.axes.intersection is None
 
 
+# --- usedatetime: wall-clock tick labels ------------------------------------
+
+def _labels(span, start=(2024, 3, 5, 14, 22, 31)):
+    """Tick labels a `span`-second window would carry, starting at `start`."""
+    from dasio.viewer import datetime_ticks
+
+    begin = datetime(*start, tzinfo=timezone.utc)
+    values, fmt = datetime_ticks(begin, 0.0, 0.0, span)
+    return [fmt(v, 0.0, span) for v in values]
+
+
+def test_datetime_ticks_land_on_clock_boundaries_not_round_seconds():
+    """The whole reason this places its own ticks. pygfx's 1/2/2.5/5 ladder is
+    round in seconds, so a day-long axis steps by 20000 s and labels ticks
+    19:55:51 and 01:29:11. A clock wants 00:00 and 06:00."""
+    assert _labels(86400) == [
+        "03-05 18:00", "03-06 00:00", "03-06 06:00", "03-06 12:00"]
+
+
+def test_datetime_tick_precision_follows_the_step():
+    """No tick carries a field that is constant down the whole axis, and none
+    omits one that is changing."""
+    assert _labels(21600) == [f"{h:02d}:00" for h in range(15, 21)]   # hours
+    assert _labels(600)[:2] == ["14:24", "14:26"]                     # minutes
+    assert _labels(30)[:2] == ["14:22:35", "14:22:40"]                # seconds
+    assert _labels(2)[:2] == ["14:22:31.000", "14:22:31.500"]         # milliseconds
+
+
+def test_datetime_ticks_add_the_date_only_when_they_cross_midnight():
+    assert _labels(21600, start=(2024, 3, 5, 21, 0, 0))[0] == "03-05 21:00"
+    assert _labels(21600)[0] == "15:00"                  # same day, no date
+
+
+def test_datetime_ticks_are_relative_to_t0_sec_not_sample_zero():
+    """Event readers set `t0_sec` negative so t=0 is the event origin; a tick at
+    t=0 must then read `begin_time` + 30 s, not `begin_time`."""
+    from dasio.viewer import datetime_ticks
+
+    begin = datetime(2024, 3, 5, 14, 22, 31, tzinfo=timezone.utc)
+    _, fmt = datetime_ticks(begin, -30.0, -30.0, 30.0)
+    assert fmt(0.0, -30.0, 30.0) == "14:23:01"
+
+
+def test_datetime_ticks_are_accepted_by_a_real_pygfx_ruler():
+    """pygfx probes the format callable with (0, -1, 1) and rejects anything not
+    returning a str, and `ticks` must be list-like — so a signature drift here
+    fails at assignment rather than silently leaving the ruler numeric."""
+    pygfx = pytest.importorskip("pygfx")
+    from dasio.viewer import datetime_ticks
+
+    r = pygfx.Ruler()
+    r.ticks, r.tick_format = datetime_ticks(
+        datetime(2024, 3, 5, tzinfo=timezone.utc), 0.0, 0.0, 3600.0)
+    assert callable(r.tick_format) and len(r.ticks) > 1
+
+
 # --- view() itself: construction and the first draw -------------------------
 
 @pytest.mark.parametrize("style", ["seismic", "normal"])
-def test_view_builds_and_draws_the_first_frame(style):
+@pytest.mark.parametrize("panels", ["both", "image", "wiggle"])
+def test_view_builds_and_draws_the_first_frame(style, panels):
     """The only coverage `view()` has. It runs the full construction path plus
     the initial `_apply` -> `_draw`: chain, both pooling passes, image creation,
-    scale and position. Needs the [viewer] extra and a GPU adapter."""
+    scale and position. Needs the [viewer] extra and a GPU adapter.
+
+    Each `panels` mode skips a different half of `_draw`, and the single-panel
+    ones re-index the figure and move the pointer handlers onto whichever
+    subplot survives — so all three are exercised."""
     import os
 
     os.environ.setdefault("WGPU_FORCE_OFFSCREEN", "1")
@@ -350,7 +424,111 @@ def test_view_builds_and_draws_the_first_frame(style):
 
     d = _make(nx=200, nt=2000)
     d.ch0, d.dch = 2000, 4
-    view(d, style=style)          # raises if any of the above is broken
+    view(d, style=style, panels=panels)   # raises if any of the above is broken
+
+
+@pytest.mark.parametrize("style,time_axis", [("seismic", "y"), ("normal", "x")])
+def test_usedatetime_formats_only_the_time_ruler(style, time_axis):
+    """The other ruler counts channels and has to keep its plain numbers."""
+    import os
+
+    os.environ.setdefault("WGPU_FORCE_OFFSCREEN", "1")
+    fpl = pytest.importorskip("fastplotlib")
+    from dasio.viewer import view
+
+    seen = []
+    real = fpl.Figure
+
+    class RecFigure(real):                # name must end in "Figure" for fpl
+        def __init__(self, *a, **kw):
+            super().__init__(*a, **kw)
+            seen.append(self)
+
+    fpl.Figure = RecFigure
+    try:
+        d = _make(nx=64, nt=512)
+        view(d, style=style, panels="image", usedatetime=True)
+    finally:
+        fpl.Figure = real
+
+    axes = seen[0][0, 0].axes
+    other = "x" if time_axis == "y" else "y"
+    assert callable(getattr(axes, time_axis).tick_format)
+    assert len(getattr(axes, time_axis).ticks) > 1          # placed, not auto
+    assert getattr(axes, other).tick_format == "0.4g"       # untouched default
+    assert getattr(axes, other).ticks is None
+
+
+def _viewer_widgets(monkeypatch, **kw):
+    """Build a viewer, returning `(recorded fit_view rects, widgets by name)`.
+
+    `view()` displays its panel rather than returning it, so the only way to
+    drive the controls from a test is to record the widgets as they are built.
+    """
+    import ipywidgets as w
+    import dasio.viewer as V
+
+    made = []
+    for name in ("Button", "FloatText", "IntText", "Checkbox"):
+        base = getattr(w, name)
+
+        class Rec(base):
+            def __init__(self, *a, **k):
+                super().__init__(*a, **k)
+                made.append(self)
+
+        monkeypatch.setattr(w, name, Rec)
+
+    fits = []
+    real = V.fit_view
+
+    def rec_fit(sp, x0, x1, y0, y1, pan_enabled=False, left_px=52.0):
+        fits.append((x0, x1, y0, y1))
+        return real(sp, x0, x1, y0, y1, pan_enabled, left_px)
+
+    monkeypatch.setattr(V, "fit_view", rec_fit)
+
+    d = _make(nx=400, nt=6000, fs=100.0)
+    d.dt = 0.01
+    d.data = np.random.default_rng(0).standard_normal((400, 6000)).astype(np.float32)
+    V.view(d, panels="image", **kw)
+    by_name = {getattr(x, "description", ""): x for x in made}
+    nums = [x for x in made if type(x).__bases__[0].__name__ in
+            ("FloatText", "IntText")]
+    return fits, by_name, nums
+
+
+@pytest.mark.parametrize("style", ["seismic", "normal"])
+def test_pan_mode_keeps_the_view_it_was_enabled_on(monkeypatch, style):
+    """Pan loads the whole array so dragging lands on data, but the camera must
+    follow the *view*. Fitting it to the loaded extent instead zoomed the time
+    axis out to the entire record the moment `pan` was ticked — and, because
+    every pointer-up redraws through the same path, undid each drag on release.
+    """
+    import os
+
+    os.environ.setdefault("WGPU_FORCE_OFFSCREEN", "1")
+    pytest.importorskip("fastplotlib")
+
+    fits, by_name, nums = _viewer_widgets(monkeypatch, style=style)
+    t0, t1, c0, c1 = nums[:4]
+    t0.value, t1.value, c0.value, c1.value = 10.0, 13.0, 50, 150
+
+    fits.clear()
+    by_name["Zoom"].click()
+    zoomed = fits[-1]
+
+    by_name["pan"].value = True
+    assert fits[-1] == zoomed, "ticking pan moved the camera off the view"
+
+    by_name["pan"].value = False
+    assert fits[-1] == zoomed, "unticking pan moved the camera off the view"
+
+
+def test_view_rejects_an_unknown_panels_mode_before_importing_fastplotlib():
+    from dasio.viewer import view
+    with pytest.raises(ValueError, match="panels must be"):
+        view(_make(), panels='waterfall')
 
 
 def test_missing_viewer_extra_names_the_extra(monkeypatch):

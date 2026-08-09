@@ -72,13 +72,13 @@ def clim_of(a: np.ndarray, perc: float = 99.5) -> float:
 def default_band(fs: float) -> tuple:
     """Sensible (fmin, fmax) band-pass corners for a given sample rate.
 
-    Both corners scale with `fs`. Pinning `fmin` at 1 Hz while `fmax` tracked
-    the rate inverted the band below ~2.5 Hz — and the C kernel does not reject
-    `fmin > fmax`, it quietly returns near-zero data, so a 1 Hz catalog opened
-    to a blank panel. Normal seismic rates still get the familiar 1-20 Hz.
+    `fmin` is 0, making the default a plain low-pass: the long periods are what
+    a DAS deployment is often recording for, so the opening view should not cut
+    them. It also cannot invert — a corner pinned at 1 Hz put `fmin > fmax`
+    below ~2.5 Hz, and the C kernel does not reject that, it quietly returns
+    near-zero data, so a 1 Hz catalog opened to a blank panel.
     """
-    fmax = min(20.0, 0.4 * fs)
-    return round(min(1.0, fmax / 20.0), 4), round(fmax, 4)
+    return 0.0, round(min(20.0, 0.4 * fs), 4)
 
 
 def apply_chain(d, differentiate=False, detrend=False, taper_sec=None,
@@ -161,13 +161,16 @@ def window_bounds(d, t_lo, t_hi, ch_lo, ch_hi):
 
     Returns `(i0, i1, a0, a1)` — half-open, always at least one sample and one
     channel wide. `t_lo`/`t_hi` are seconds in `d`'s own frame and
-    `ch_lo`/`ch_hi` are *fiber* channel numbers, so they map through `ch0`/`dch`;
-    reading them as row indices silently mislabels any `min_ch` read.
+    `ch_lo`/`ch_hi` are channel numbers in whatever axis `channel_axis_name` selects,
+    looked up on `channel_axis` rather than mapped through `ch0`/`dch` — the
+    two agree only while the rows are a uniform ramp, and `select_taptest`
+    leaves an axis that is neither the raw axis nor evenly spaced.
     """
     i0 = max(0, int(round((t_lo - d.t0_sec) / d.dt)))
     i1 = min(d.nt, int(round((t_hi - d.t0_sec) / d.dt)))
-    a0 = max(0, min((int(ch_lo) - d.ch0) // d.dch, d.nx - 1))
-    a1 = max(a0 + 1, min(-(-(int(ch_hi) - d.ch0) // d.dch), d.nx))
+    axis = d.channel_axis
+    a0 = max(0, min(int(np.searchsorted(axis, ch_lo, 'left')), d.nx - 1))
+    a1 = max(a0 + 1, min(int(np.searchsorted(axis, ch_hi, 'left')), d.nx))
     return i0, max(i0 + 1, i1), a0, a1
 
 
@@ -196,11 +199,11 @@ def view_rect(subplot):
             float(subplot.axes.y.start_value), float(subplot.axes.y.end_value))
 
 
-def fit_view(subplot, x0, x1, y0, y1, pan_enabled=False):
+def fit_view(subplot, x0, x1, y0, y1, pan_enabled=False, left_px=52.0):
     """Show `(x0, x1, y0, y1)` with room for the tick labels.
 
     Margins are sized in *pixels*, not as a fraction of the data range: tick
-    labels need a fixed ~52 px to the left and ~34 px below, so a proportional
+    labels need a fixed `left_px` to the left and ~34 px below, so a proportional
     margin leaves acres of white space on a wide view and too little on a
     narrow one. Only those two sides get one, so the data reaches the other
     edges. Both are clamped to 15 %: the viewport is not always sized on the
@@ -215,11 +218,74 @@ def fit_view(subplot, x0, x1, y0, y1, pan_enabled=False):
     still while the data moves under it.
     """
     vw, vh = subplot.viewport.logical_size
-    fx = 52.0 / vw if vw and vw > 120 else 0.06
+    fx = left_px / vw if vw and vw > 120 else 0.06
     fy = 34.0 / vh if vh and vh > 80 else 0.06
     mx, my = min(fx, 0.15) * (x1 - x0), min(fy, 0.15) * (y1 - y0)
     subplot.camera.show_rect(x0 - mx, x1, y0, y1 + my)
     subplot.axes.intersection = None if pan_enabled else (x0, y1, 0)
+
+
+# Steps that are round on a clock, not round in seconds: pygfx's 1/2/2.5/5
+# ladder steps a day by 20000 s and lands ticks at 19:55:51. Below a second the
+# two agree again.
+_CLOCK_STEPS = (0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5,
+                1, 2, 5, 10, 15, 30,                       # seconds
+                60, 120, 300, 600, 900, 1800,              # minutes
+                3600, 7200, 10800, 21600, 43200,           # hours
+                86400, 172800, 604800)                     # days
+
+
+def datetime_ticks(begin_time, t0_sec, t_lo, t_hi):
+    """Wall-clock tick values and their labels for a span in a DASdata's frame.
+
+    Returns `(values, fmt)` to assign to a pygfx `Ruler`'s `ticks` and
+    `tick_format`. Ticks are placed on round clock boundaries — 18:00, not
+    19:55:51 — by aligning to the epoch, which is midnight UTC, and DAS
+    timestamps are UTC by convention. Label precision follows the chosen step,
+    so no tick ever carries a field that is constant across the whole axis.
+    """
+    from datetime import timedelta
+
+    span = max(float(t_hi - t_lo), 1e-6)
+    # ~7 ticks: enough to read the span, few enough not to collide.
+    step = next((s for s in _CLOCK_STEPS if span / s <= 7), _CLOCK_STEPS[-1])
+    # Ticks are round in *absolute* time, so align on the epoch and come back.
+    anchor = begin_time.timestamp() - t0_sec
+    first = np.ceil((anchor + t_lo) / step) * step - anchor
+    values = np.arange(first, t_hi + 1e-9, step)
+
+    def stamp_at(v):
+        return begin_time + timedelta(seconds=v - t0_sec)
+
+    # Date only when the ticks cross midnight — from the ticks, not the span,
+    # or an 18:00-to-06:00 window labels both ends with bare clock times.
+    first, last = stamp_at(values[0]), stamp_at(values[-1])
+    crosses = values.size > 1 and first.date() != last.date()
+    if step >= 86400:
+        pat = '%m-%d'                       # every tick is midnight
+    elif step >= 60:
+        pat = '%m-%d %H:%M' if crosses else '%H:%M'
+    elif step >= 1:
+        pat = '%m-%d %H:%M:%S' if crosses else '%H:%M:%S'
+    else:
+        pat = None                          # sub-second: milliseconds below
+
+    def fmt(v, lo, hi):
+        stamp = stamp_at(v)
+        if pat:
+            return format(stamp, pat)
+        return f'{stamp:%H:%M:%S}.{stamp.microsecond // 1000:03d}'
+
+    return values, fmt
+
+
+def _axis_step(d):
+    """Mean spacing of the active channel axis — the one number a texture or an
+    `imshow` extent can use, since neither can be placed on a gappy axis."""
+    axis = d.channel_axis
+    if axis.size < 2:
+        return 1.0
+    return float(axis[-1] - axis[0]) / (axis.size - 1)
 
 
 def sample_at(d, t_sec, channel):
@@ -229,10 +295,13 @@ def sample_at(d, t_sec, channel):
     indexes the in-memory array directly — no GPU readback, no texture lookup.
     Returns `(row, col, amplitude)`.
     """
-    row = int(round((channel - d.ch0) / d.dch))
+    axis = d.channel_axis
     col = int(round((t_sec - d.t0_sec) / d.dt))
-    if not (0 <= row < d.nx and 0 <= col < d.nt):
+    if not (0 <= col < d.nt) or axis.size == 0:
         return None
+    row = int(np.argmin(np.abs(axis - channel)))
+    if abs(float(axis[row]) - channel) > 0.5 * _axis_step(d):
+        return None                      # pointer is past either end of the axis
     return row, col, float(d.data[row, col])
 
 
@@ -271,11 +340,26 @@ def _row(title, *widgets):
                   layout=w.Layout(align_items='center', margin='1px 0'))
 
 
-def view(d, style: str = 'seismic', ncol: int = 2800, perc: float = 99.5,
-         figsize=(1000, 720), chain=None):
+def view(
+        d,
+        style: str = 'seismic',
+        ncol: int = 2800,
+        perc: float = 99.5,
+        figsize=(1000, 720),
+        chain=None,
+        panels: str = 'both',
+        usedatetime: bool = False,
+    ):
     """Interactive viewer for an in-memory `DASdata`. Returns the canvas widget.
 
-    Waterfall over wiggles, sharing one axis. `pip install 'dasio[viewer]'`
+    Waterfall over wiggles, sharing one axis. `panels` drops one of them:
+    `'both'` (default), `'image'` for the waterfall alone, `'wiggle'` for the
+    traces alone — the surviving panel gets the whole canvas, and the controls
+    that belong to the missing one are omitted. `'image'` also skips building
+    the trace stack, and `'wiggle'` skips the pooling and the texture upload,
+    which is where a big window spends its time.
+
+    `pip install 'dasio[viewer]'`
     makes the environment usable as a Jupyter kernel; run it from VSCode or a
     browser JupyterLab, whichever you already have — the extra does not pull
     the JupyterLab application itself. `rendercanvas` picks its anywidget
@@ -286,6 +370,11 @@ def view(d, style: str = 'seismic', ncol: int = 2800, perc: float = 99.5,
     with wiggle traces hanging vertically side by side. `'normal'` puts time on
     x and channels on y — easier to read as a stack of time-series, and the
     better choice for a long window across few channels.
+
+    `usedatetime` labels the time ruler in wall clock rather than seconds, as
+    `dasio.plot` does, with the precision following the visible span. Only the
+    labels change: the range boxes below stay in seconds, since that is what
+    they are typed in and what `truncate` takes.
 
     **The view is set by typing ranges, not by dragging.** Mouse pan/zoom is
     off by default, on purpose: it silently desynchronises the range boxes from
@@ -319,7 +408,16 @@ def view(d, style: str = 'seismic', ncol: int = 2800, perc: float = 99.5,
     # after fastplotlib and a GPU context have been brought up.
     if style not in ('seismic', 'normal'):
         raise ValueError(f"style must be 'seismic' or 'normal', got {style!r}")
+    if panels not in ('both', 'image', 'wiggle'):
+        raise ValueError(
+            f"panels must be 'both', 'image' or 'wiggle', got {panels!r}")
     seismic = style == 'seismic'
+
+    # Bind matplotlib's FreeType before fastplotlib can claim the symbols:
+    # pygfx brings its own via freetype-py, and whichever loads first serves the
+    # whole process. The wrong ABI makes some later, unrelated `plt.plot` raise
+    # "FT_Render_Glyph ... raster overflow".
+    from matplotlib import ft2font                            # noqa: F401
 
     try:
         import fastplotlib as fpl
@@ -341,10 +439,18 @@ def view(d, style: str = 'seismic', ncol: int = 2800, perc: float = 99.5,
           'lim': None, 'clim': 1.0, 'ka': 1}
 
     _white = (1.0, 1.0, 1.0, 1.0)
-    fig = fpl.Figure(shape=(2, 1), size=figsize,
-                     names=[[f'waterfall  ({style})'], [f'wiggles  ({style})']])
-    wf, wig = fig[0, 0], fig[1, 0]
-    for sp in (wf, wig):
+    names = ([f'waterfall  ({style})'] if panels != 'wiggle' else []) + \
+            ([f'wiggles  ({style})'] if panels != 'image' else [])
+    fig = fpl.Figure(
+        shape=(len(names), 1), size=figsize, names=[[n] for n in names]
+    )
+    wf = fig[0, 0] if panels != 'wiggle' else None
+    wig = fig[len(names) - 1, 0] if panels != 'image' else None
+    panes = tuple(sp for sp in (wf, wig) if sp is not None)
+    # Pointer handlers live on one subplot — the waterfall when there is one,
+    # since that is where the rubber band belongs.
+    main = wf if wf is not None else wig
+    for sp in panes:
         sp.camera.maintain_aspect = False
         sp.controller.enabled = False                  # typed ranges are authoritative
         sp.background_color = (1, 1, 1, 1)             # default is black
@@ -366,11 +472,18 @@ def view(d, style: str = 'seismic', ncol: int = 2800, perc: float = 99.5,
         sp.frame.plane.material.color = _white
         sp.frame.title_graphic.face_color = '#111111'
 
+    # 'seismic' runs time down y, 'normal' across x; the other ruler keeps its
+    # plain numbers. Refreshed per draw: step and precision follow the span.
+    time_rulers = []
+    if usedatetime:
+        time_rulers = [sp.axes.y if seismic else sp.axes.x for sp in panes]
+
     # ---- widgets -----------------------------------------------------------
     t0 = w.FloatText(value=round(base.t0_sec, 3), **_NUM)
     t1 = w.FloatText(value=round(t_end, 3), **_NUM)
-    c0 = w.IntText(value=base.ch0, **_NUM)
-    c1 = w.IntText(value=base.ch0 + base.nx * base.dch, **_NUM)
+    _ax0, _ax1 = int(base.channel_axis[0]), int(base.channel_axis[-1]) + 1
+    c0 = w.IntText(value=_ax0, **_NUM)
+    c1 = w.IntText(value=_ax1, **_NUM)
     zoom_btn = w.Button(description='Zoom', button_style='info',
                         layout=w.Layout(width='72px'))
     full_btn = w.Button(description='Full', layout=w.Layout(width='60px'))
@@ -385,7 +498,7 @@ def view(d, style: str = 'seismic', ncol: int = 2800, perc: float = 99.5,
                      layout=w.Layout(width='104px'))
     bp_on = w.Checkbox(value=True, description='band-pass', indent=False,
                        layout=w.Layout(width='98px'))
-    dt_on = w.Checkbox(value=True, description='detrend', indent=False,
+    dt_on = w.Checkbox(value=False, description='detrend', indent=False,
                        layout=w.Layout(width='84px'))
     di_on = w.Checkbox(value=False, description='d/dt', indent=False,
                        layout=w.Layout(width='64px'))
@@ -393,8 +506,8 @@ def view(d, style: str = 'seismic', ncol: int = 2800, perc: float = 99.5,
                        layout=w.Layout(width='62px'))
     cm_on = w.Checkbox(value=False, description='common-mode', indent=False,
                        layout=w.Layout(width='120px'))
-    cm0 = w.IntText(value=base.ch0, **_NUM)
-    cm1 = w.IntText(value=base.ch0 + base.nx * base.dch, **_NUM)
+    cm0 = w.IntText(value=_ax0, **_NUM)
+    cm1 = w.IntText(value=_ax1, **_NUM)
     tap = w.FloatText(value=0.0, **_NUM)
     mt = w.IntText(value=0, **_NUM)
     mx = w.IntText(value=0, **_NUM)
@@ -445,9 +558,10 @@ def view(d, style: str = 'seismic', ncol: int = 2800, perc: float = 99.5,
         p = state['proc']
         step = max(1, int(trace_stride.value))
         _, _, a0, _ = _bounds()
-        amp = 0.5 * step * p.dch * wig_gain.value
+        axis = p.channel_axis
+        amp = 0.5 * step * _axis_step(p) * wig_gain.value
         for i, g in enumerate(state['stack'].graphics):
-            ch = p.ch0 + (a0 + i * step) * p.dch
+            ch = float(axis[a0 + i * step])
             if seismic:                      # traces run down the page, side by side
                 g.world_object.local.position = (ch, 0.0, 0.0)
                 g.world_object.local.scale = (amp, 1.0, 1.0)
@@ -456,7 +570,7 @@ def view(d, style: str = 'seismic', ncol: int = 2800, perc: float = 99.5,
                 g.world_object.local.scale = (1.0, amp, 1.0)
 
     def _draw(*_):
-        """Re-pool and rebuild both panels.
+        """Re-pool and rebuild whichever panels are shown.
 
         In pan mode the texture covers the WHOLE array rather than just the
         visible window, so dragging reveals real data instead of running off
@@ -464,102 +578,124 @@ def view(d, style: str = 'seismic', ncol: int = 2800, perc: float = 99.5,
         budget; press Zoom to come back to full detail for a window.
         """
         p = state['proc']
+        axis = p.channel_axis
         i0, i1, a0, a1 = _bounds()
-        if pan_on.value:
-            # Load everything, at the finest resolution the budget allows —
-            # scaled up for a zoomed-in view so panning does not also mean
-            # losing detail.
-            s_i0, s_i1, s_a0, s_a1 = 0, p.nt, 0, p.nx
-            zoom = p.nt / max(1, i1 - i0)
-            ncol_eff = int(min(ncol * zoom, _MAX_TEXELS / max(1, s_a1 - s_a0), 16384))
-            ncol_eff = max(ncol_eff, 256)
-        else:
-            s_i0, s_i1, s_a0, s_a1 = i0, i1, a0, a1
-            ncol_eff = ncol
-        sub = np.ascontiguousarray(p.data[s_a0:s_a1, s_i0:s_i1])
-        pooled, kt = pool_maxabs(sub, ncol_eff)
-        # Pool channels by the same rule. Left to the GPU the channel axis gets
-        # nearest-neighbour minification, which is what `pool_maxabs` exists to
-        # avoid: on 15686 channels over an ~800 px panel it kept 5 % of the
-        # strongest texels and lost 21 % of peak amplitude. It also pays for
-        # itself — the extra pass runs on the already-reduced array (+13 ms) and
-        # shrinks the texture 20x, 75 -> 3.8 MB, for ~70 ms less upload.
-        if pooled.shape[0] > _MAX_ROWS:
-            pooled, ka = pool_maxabs(pooled.T, _MAX_ROWS)
-            pooled = np.ascontiguousarray(pooled.T)
-        else:
-            ka = 1
-        # Colour limit from the samples, not from the texture: pooling keeps
-        # per-bin maxima, so a percentile of `pooled` sits well above the same
-        # percentile of the data — 6.7x on a 2 min x 15686 ch window — and the
-        # waterfall washes out the more it pools. A strided subsample is ample
-        # for a percentile and costs ~1 ms against a full pass over gigabytes.
-        state['ka'] = ka
-        state['clim'] = clim_of(
-            sub[::max(1, sub.shape[0] // 256), ::max(1, sub.shape[1] // 4096)], perc)
+        panning = pan_on.value
+        step = max(1, int(trace_stride.value))
+        # What gets loaded, which is more than the view in pan mode: the whole
+        # array, so dragging lands on data rather than on blank canvas.
+        loaded = wf is not None and panning
+        s_i0, s_i1, s_a0, s_a1 = (0, p.nt, 0, p.nx) if loaded else (i0, i1, a0, a1)
         ts, te = p.t0_sec + s_i0 * p.dt, p.t0_sec + s_i1 * p.dt
 
-        # The graphic is rebuilt rather than reassigned: a re-pool at a new
-        # window generally changes the array shape, which a texture cannot
-        # absorb in place.
-        wf.clear()
-        # 'seismic' transposes so image rows are time; since fastplotlib draws
-        # row 0 at the top, time then runs down the page with no extra flip.
-        state['img'] = wf.add_image(pooled.T if seismic else pooled, cmap=cmap.value,
-                                 vmin=-state['clim'], vmax=state['clim'])
-        wo = state['img'].world_object.local
-        ch_img = p.ch0 + s_a0 * p.dch
-        # One texel now spans `ka` channels and `kt` samples.
-        wo.scale = ((p.dch * ka, p.dt * kt, 1.0) if seismic
-                    else (p.dt * kt, p.dch * ka, 1.0))
-        wo.position = (ch_img, ts, -1.0) if seismic else (ts, ch_img, -1.0)
-        _set_clim()
+        # What is on screen, which in pan mode is a window into the above.
+        vts, vte = p.t0_sec + i0 * p.dt, p.t0_sec + i1 * p.dt
+
+        def rect(lo, hi, t_lo, t_hi):
+            """A channel range and a time span, in `style`'s axis order — the
+            one mapping the rubber-band clamp and both cameras need."""
+            return (lo, hi, t_lo, t_hi) if seismic else (t_lo, t_hi, lo, hi)
+
+        kt = ka = 1
+        if wf is not None:
+            if panning:
+                # Finest resolution the texel budget allows, scaled up for a
+                # zoomed-in view so panning does not also mean losing detail.
+                zoom = p.nt / max(1, i1 - i0)
+                ncol_eff = max(256, int(min(ncol * zoom, 16384,
+                                            _MAX_TEXELS / max(1, p.nx))))
+            else:
+                ncol_eff = ncol
+            sub = np.ascontiguousarray(p.data[s_a0:s_a1, s_i0:s_i1])
+            pooled, kt = pool_maxabs(sub, ncol_eff)
+            # Pool channels by the same rule. Left to the GPU the channel axis gets
+            # nearest-neighbour minification, which is what `pool_maxabs` exists to
+            # avoid: on 15686 channels over an ~800 px panel it kept 5 % of the
+            # strongest texels and lost 21 % of peak amplitude. It also pays for
+            # itself — the extra pass runs on the already-reduced array (+13 ms) and
+            # shrinks the texture 20x, 75 -> 3.8 MB, for ~70 ms less upload.
+            if pooled.shape[0] > _MAX_ROWS:
+                pooled, ka = pool_maxabs(pooled.T, _MAX_ROWS)
+                pooled = np.ascontiguousarray(pooled.T)
+            # Colour limit from the samples, not from the texture: pooling keeps
+            # per-bin maxima, so a percentile of `pooled` sits well above the same
+            # percentile of the data — 6.7x on a 2 min x 15686 ch window — and the
+            # waterfall washes out the more it pools. A strided subsample is ample
+            # for a percentile and costs ~1 ms against a full pass over gigabytes.
+            state['ka'] = ka
+            state['clim'] = clim_of(
+                sub[::max(1, sub.shape[0] // 256),
+                    ::max(1, sub.shape[1] // 4096)], perc)
+            # The graphic is rebuilt rather than reassigned: a re-pool at a new
+            # window generally changes the array shape, which a texture cannot
+            # absorb in place.
+            wf.clear()
+            # 'seismic' transposes so image rows are time; since fastplotlib draws
+            # row 0 at the top, time then runs down the page with no extra flip.
+            state['img'] = wf.add_image(pooled.T if seismic else pooled,
+                                        cmap=cmap.value, vmin=-state['clim'],
+                                        vmax=state['clim'])
+            wo = state['img'].world_object.local
+            ch_img = float(axis[s_a0])
+            # One texel now spans `ka` channels and `kt` samples. A texture is a
+            # uniform grid, so a gappy axis gets its mean step.
+            dch_px = _axis_step(p)
+            wo.scale = ((dch_px * ka, p.dt * kt, 1.0) if seismic
+                        else (p.dt * kt, dch_px * ka, 1.0))
+            wo.position = (ch_img, ts, -1.0) if seismic else (ts, ch_img, -1.0)
+            _set_clim()
 
         # Clamp the rubber band to what is actually loaded, not to the view.
-        ch_lo = p.ch0 + s_a0 * p.dch
-        ch_hi = p.ch0 + s_a1 * p.dch
-        state['lim'] = ((ch_lo, ch_hi, ts, te) if seismic else (ts, te, ch_lo, ch_hi))
+        state['lim'] = rect(float(axis[s_a0]), float(axis[s_a1 - 1]), ts, te)
         state['band'] = None                # rubber band belongs to the old frame
 
-        step = max(1, int(trace_stride.value))
-        sel = p.data[a0:a1:step, i0:i1]
-        tstep = max(1, sel.shape[1] // 4000)          # screen-resolution cap
-        tr = sel[:, ::tstep].astype(np.float32)
-        tr = tr / np.maximum(np.abs(tr).max(axis=1, keepdims=True), 1e-30)
-        t_vis = p.t0_sec + i0 * p.dt
-        tt = (t_vis + np.arange(0, sel.shape[1], tstep) * p.dt).astype(np.float32)
-        wig.clear()
-        state['stack'] = wig.add_line_stack(
-            [np.column_stack([y, tt] if seismic else [tt, y]) for y in tr],
-            separation=0.0, colors='black')
-        _set_wiggle_gain()
+        if wig is not None:
+            sel = p.data[a0:a1:step, i0:i1]
+            tstep = max(1, sel.shape[1] // 4000)          # screen-resolution cap
+            tr = sel[:, ::tstep].astype(np.float32)
+            tr = tr / np.maximum(np.abs(tr).max(axis=1, keepdims=True), 1e-30)
+            t_vis = p.t0_sec + i0 * p.dt
+            tt = (t_vis + np.arange(0, sel.shape[1], tstep) * p.dt).astype(np.float32)
+            wig.clear()
+            state['stack'] = wig.add_line_stack(
+                [np.column_stack([y, tt] if seismic else [tt, y]) for y in tr],
+                separation=0.0, colors='black')
+            _set_wiggle_gain()
 
         # `fit_view` adds the margin: show_rect fits the camera to exactly the
         # rectangle it is given, and the rulers are drawn over the viewport
         # edges, so an exact fit hides the first row/column behind the axes.
-        v_lo, v_hi = p.ch0 + a0 * p.dch, p.ch0 + a1 * p.dch
-        wig_lo = v_lo - step * p.dch * 0.6
-        wig_hi = v_hi + step * p.dch * 0.6
-        panning = pan_on.value
-        if seismic:
-            fit_view(wf, v_lo, v_hi, ts, te, panning)
-            fit_view(wig, wig_lo, wig_hi, ts, te, panning)
-        else:
-            fit_view(wf, ts, te, v_lo, v_hi, panning)
-            fit_view(wig, ts, te, wig_lo, wig_hi, panning)
+        # Only 'seismic' puts time on the left, and only a wall-clock label
+        # needs the wider margin; anything else renders clipped.
+        # The camera follows the *view*, never the loaded extent — fitting to
+        # the latter zoomed time out to the whole record on every pointer-up.
+        t_margin = 92.0 if usedatetime and seismic else 52.0
+        v_lo, v_hi = float(axis[a0]), float(axis[a1 - 1])
+        pad = step * _axis_step(p) * 0.6    # room for the outermost wiggles
+        if wf is not None:
+            fit_view(wf, *rect(v_lo, v_hi, vts, vte), panning, t_margin)
+        if wig is not None:
+            fit_view(wig, *rect(v_lo - pad, v_hi + pad, vts, vte), panning, t_margin)
+        for ruler in time_rulers:
+            ruler.ticks, ruler.tick_format = datetime_ticks(
+                p.begin_time, p.t0_sec, vts, vte)
+
         # Force the down-the-page direction on both panels. fastplotlib flips y
         # for image subplots but not for line subplots, so left alone the two
         # panels would disagree about which way time (or channel) grows.
-        for sp in (wf, wig):
+        for sp in panes:
             sp.camera.local.scale_y = -abs(sp.camera.local.scale[1])
 
-        status.value = (f"<code style='font-size:11px'>{te - ts:.3g} s x "
-                        f"{a1 - a0} ch | {kt} smp/px | {state['ka']} ch/px | "
-                        f"{state['proc'].units}</code>")
+        px = f"{kt} smp/px | {state['ka']} ch/px | " if wf is not None else ''
+        status.value = (f"<code style='font-size:11px'>{vte - vts:.3g} s x "
+                        f"{a1 - a0} ch | {px}{state['proc'].units}</code>")
 
     def _full(_=None):
+        # Read the axis now, not at construction: `set_channel_axis` can have
+        # flipped it since, and the boxes would then hold the other axis.
+        ax = base.channel_axis
         t0.value, t1.value = round(base.t0_sec, 3), round(t_end, 3)
-        c0.value, c1.value = base.ch0, base.ch0 + base.nx * base.dch
+        c0.value, c1.value = int(ax[0]), int(ax[-1]) + 1
         _draw()
 
     def _apply(_=None):
@@ -571,8 +707,12 @@ def view(d, style: str = 'seismic', ncol: int = 2800, perc: float = 99.5,
         "my own chain".
         """
         status.value = "<span style='color:#b60'>processing…</span>"
+        # Release the previous result before building its replacement: the
+        # chain's output is a second full array, so holding both peaks at 3x
+        # the window where 2x will do — gigabytes, on a real read.
+        state['proc'] = base
         try:
-            state['proc'] = chain(base) if chain else apply_chain(
+            proc = chain(base) if chain else apply_chain(
                 base,
                 differentiate=di_on.value, detrend=dt_on.value,
                 taper_sec=tap.value or None,
@@ -580,13 +720,14 @@ def view(d, style: str = 'seismic', ncol: int = 2800, perc: float = 99.5,
                 bandpass=((f0.value, f1.value, order.value, zph.value)
                           if bp_on.value else None),
                 integrate=in_on.value,
-                common_mode=(((cm0.value - base.ch0) // base.dch,
-                              -(-(cm1.value - base.ch0) // base.dch))
+                common_mode=(tuple(np.searchsorted(
+                                 base.channel_axis, [cm0.value, cm1.value]))
                              if cm_on.value else None),
             )
         except ValueError as e:                    # bad corner, inverted band…
             status.value = f"<span style='color:#c00'>{e}</span>"
-            return
+            return                                 # `proc` is `base`: raw, but valid
+        state['proc'] = proc
         _draw()
 
     def _apply_box(x0, x1, y0, y1):
@@ -609,7 +750,7 @@ def view(d, style: str = 'seismic', ncol: int = 2800, perc: float = 99.5,
     drag = {}
 
     def _world(ev):
-        return screen_to_world(wf, ev)
+        return screen_to_world(main, ev)
 
     def _clamp(p):
         return clamp_to_rect(p, state.get('lim'))
@@ -625,12 +766,12 @@ def view(d, style: str = 'seismic', ncol: int = 2800, perc: float = 99.5,
         pts = np.array([[x0, y0], [x1, y0], [x1, y1], [x0, y1], [x0, y0]],
                        dtype=np.float32)
         if state.get('band') is None:
-            state['band'] = wf.add_line(pts, colors='red', thickness=2.0)
+            state['band'] = main.add_line(pts, colors='red', thickness=2.0)
         else:
             state['band'].data[:, :2] = pts
 
     def _view_rect():
-        return view_rect(wf)
+        return view_rect(main)
 
     def _sync_boxes():
         """Write the camera's view back into the range boxes.
@@ -646,9 +787,9 @@ def view(d, style: str = 'seismic', ncol: int = 2800, perc: float = 99.5,
         t_end_ = p.t0_sec + p.nt * p.dt
         t0.value = round(max(p.t0_sec, min(t_lo, t_end_)), 3)
         t1.value = round(max(p.t0_sec, min(t_hi, t_end_)), 3)
-        ch_max = p.ch0 + p.nx * p.dch
-        c0.value = int(round(max(p.ch0, min(c_lo, ch_max))))
-        c1.value = int(round(max(p.ch0, min(c_hi, ch_max))))
+        ch_min, ch_max = float(p.channel_axis[0]), float(p.channel_axis[-1])
+        c0.value = int(round(max(ch_min, min(c_lo, ch_max))))
+        c1.value = int(round(max(ch_min, min(c_hi, ch_max))))
 
     def _pan_end():
         """After a pan or zoom gesture: adopt the new view and re-pool for it.
@@ -695,7 +836,7 @@ def view(d, style: str = 'seismic', ncol: int = 2800, perc: float = 99.5,
         sx, sy = drag.pop('start')
         p = _world(ev)
         if state.get('band') is not None:
-            wf.remove_graphic(state['band'])
+            main.remove_graphic(state['band'])
             state['band'] = None
         if p is None:
             return
@@ -713,7 +854,7 @@ def view(d, style: str = 'seismic', ncol: int = 2800, perc: float = 99.5,
         one pending event, so a fast sweep does not queue up sixty of them.
         """
         q = _world(ev)
-        if q is None:                       # pointer is outside the waterfall
+        if q is None:                       # pointer is outside the panel
             return
         x, y = q
         t_sec, ch = (y, x) if seismic else (x, y)
@@ -741,7 +882,7 @@ def view(d, style: str = 'seismic', ncol: int = 2800, perc: float = 99.5,
         a whole-array one, which is what makes dragging show data rather than
         blank canvas.
         """
-        for sp in (wf, wig):
+        for sp in panes:
             sp.controller.enabled = pan_on.value
         _draw()
 
@@ -775,16 +916,23 @@ def view(d, style: str = 'seismic', ncol: int = 2800, perc: float = 99.5,
              apply_btn),
     ]
 
+    gain_rows = []
+    if wf is not None:
+        gain_rows.append(_row(
+            'waterfall', _lbl('gain', 28), img_gain, img_gain_n, cmap,
+            cb_lo, cbar_img, cb_hi))
+    if wig is not None:
+        gain_rows.append(_row(
+            'wiggles', _lbl('every', 34), trace_stride, _lbl('ch', 16),
+            _lbl('gain', 28), wig_gain, wig_gain_n))
+
     panel = w.VBox([
         _row('view', _lbl('t', 12), t0, _lbl('–'), t1, _lbl('s', 14),
              _lbl('ch', 20), c0, _lbl('–'), c1, zoom_btn, full_btn, pan_on,
              status),
         *filter_rows,
         _row('cursor', hover),
-        _row('waterfall', _lbl('gain', 28), img_gain, img_gain_n, cmap,
-             cb_lo, cbar_img, cb_hi),
-        _row('wiggles', _lbl('every', 34), trace_stride, _lbl('ch', 16),
-             _lbl('gain', 28), wig_gain, wig_gain_n),
+        *gain_rows,
     ], layout=w.Layout(border='1px solid #ddd', padding='4px', margin='0 0 4px 0'))
 
     display(panel)
@@ -792,9 +940,9 @@ def view(d, style: str = 'seismic', ncol: int = 2800, perc: float = 99.5,
     # orientation `_draw` sets — so realise the canvas first and populate it
     # after. Drawing before show() left time running up the page in 'seismic'.
     canvas = fig.show()
-    # `_apply`, not `_draw`: the filter checkboxes start ticked, so the first
-    # frame has to be the filtered data. Drawing raw here contradicted the
-    # panel, and raw DAS strain carries per-channel offsets large enough that
-    # the untouched array renders as meaningless banding.
+    # `_apply`, not `_draw`: band-pass starts ticked, so the first frame has to
+    # be the filtered data — drawing raw here contradicted the panel. Detrend
+    # starts off, so a raw strain window keeps its per-channel DC offsets; tick
+    # it if the waterfall opens as flat banding.
     _apply()
     return canvas
