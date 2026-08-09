@@ -105,7 +105,8 @@ def _anchored(nx=12, nt=200, ch0=2000, dch=4):
     return DASdata(
         data=np.random.default_rng(0).standard_normal((nx, nt)).astype(np.float32),
         fs=100.0, dt=0.01, nt=nt, nx=nx, dx=4.0,
-        begin_time=t0, end_time=t0, units="strain/s", ch0=ch0, dch=dch,
+        begin_time=t0, end_time=t0, units="strain/s",
+        channels={'raw': ch0 + np.arange(nx) * dch},
     )
 
 
@@ -132,3 +133,21 @@ def test_wiggle_places_traces_at_their_channel_numbers():
     centres = sorted(float(np.median(s[:, 1]))
                      for s in ax.collections[0].get_segments())
     assert centres == pytest.approx([2000, 2004, 2008, 2012], abs=1.0)
+
+
+def test_plot_reads_the_channel_axis_after_a_non_uniform_selection():
+    """`ch0 + row*dch` only equals the channel axis while the rows are a ramp,
+    and `select_channels` can break that. Rebuilt from the pair, these traces
+    landed on 2000/2012/2024 — plausible numbers for channels that do not
+    exist in the selection."""
+    d = _anchored(nx=12, dch=4).select(ch_index=[2000, 2016, 2044])
+    np.testing.assert_array_equal(d.channel_axis, [2000, 2016, 2044])
+
+    ax = d.plot.wiggle(style="normal", normalize=True, n_max_ch=None)
+    centres = sorted(
+        float(np.median(s[:, 1])) for s in ax.collections[0].get_segments())
+    assert centres == pytest.approx([2000, 2016, 2044], abs=2.0)
+
+    _, im = d.plot.imshow(style="normal")           # endpoints, at least, exact
+    left, right, bottom, top = im.get_extent()
+    assert sorted((top, bottom)) == [2000, 2044]

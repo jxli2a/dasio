@@ -95,16 +95,6 @@ class DASdata:
     # event." `begin_time` stays the absolute anchor, `t0_sec` is the
     # seconds-frame anchor; the two together pin both views.
     t0_sec:          float = 0.0
-    # Channel index of row 0 — the channel-axis counterpart to `t0_sec`.
-    # A read with `min_ch=2000` returns rows that are really fiber channels
-    # 2000.., and without this anchor that offset is lost: plots and picks come
-    # out shifted by a constant with nothing to reveal it. `select_channels`
-    # leaves it meaningless (arbitrary subset), exactly as it does `dx`.
-    ch0:             int = 0
-    # Channel stride: 1 normally, `step` after `skip_ch`. Without it
-    # `channel_axis` would report consecutive numbers for a decimated view and
-    # be quietly wrong by a growing amount.
-    dch:             int = 1
     # Physical unit of `data`, from the controlled VALID_UNITS vocabulary
     # ("unknown" = not tagged). Set by the readers; `differentiate`/`integrate`
     # propagate the rate (strain <-> strain/s).
@@ -114,6 +104,15 @@ class DASdata:
     # by `DASFile.read(with_factor=True)`, the default; `to_physical` applies
     # it together with the strain->microstrain 1e6 and resets it to 1.0.
     physical_factor: float = 1.0
+    # Channel number of every row, `{name: array}`. 'raw' is `index_raw` and is
+    # always present; `select_taptest` adds 'taptest'. `ch0`/`dch` derive from it.
+    channels:        Optional[dict] = None
+    channel_axis_name: str = 'raw'   # which label `channel_axis` reports
+
+    def __post_init__(self):
+        # So no caller ever has to ask whether the axis was filled in.
+        if self.channels is None:
+            self.channels = {'raw': np.arange(self.nx)}
 
     # ---- Read-only accessors ----------------------------------------------
 
@@ -141,15 +140,6 @@ class DASdata:
         return self.t0_sec + np.arange(self.nt) * self.dt
 
     @property
-    def channel_axis(self) -> np.ndarray:
-        """Channel indices for the rows, anchored at `ch0`.
-
-        Strided by the `skip_ch` factor implied by `dx`, so a decimated view
-        still reports the true fiber channel numbers.
-        """
-        return self.ch0 + np.arange(self.nx) * self.dch
-
-    @property
     def datetime_axis(self) -> np.ndarray:
         """Time axis as numpy `datetime64[ns]` (absolute, naive UTC).
 
@@ -161,6 +151,53 @@ class DASdata:
         step = np.timedelta64(int(round(self.dt * 1e9)), 'ns')
         anchor = np.datetime64(self.begin_time.replace(tzinfo=None))
         return anchor + np.arange(self.nt) * step
+
+    @property
+    def channel_axis(self) -> np.ndarray:
+        """Channel number of every row, in the axis `channel_axis_name` selects.
+        This is what `select`'s `ch_range` and `ch_index` match against.
+        """
+        return self.channels[self.channel_axis_name]
+
+    def set_channel_axis(self, name: str) -> 'DASdata':
+        """Switch `channel_axis` to the `name` labels. Mutates, returns self.
+        Args:
+            name: 'raw' (the reader's index, always present) or a label
+                `select_taptest` attached, i.e. 'taptest'.
+        Returns:
+            self.
+        Raises:
+            ValueError: if `name` was never attached.
+        Unlike `truncate` or `skip_ch` this changes no samples, so it mutates
+        rather than returning a copy — `d.set_channel_axis('taptest')` as a bare
+        statement has to work.
+        """
+        if name not in self.channels:
+            raise ValueError(
+                f'no {name!r} channel labels on this DASdata '
+                f'(have {sorted(self.channels)}). '
+                f'`select_taptest(dasinfo)` is what attaches them.'
+            )
+        self.channel_axis_name = name
+        return self
+
+    @property
+    def ch0(self) -> int:
+        """Optical channel of row 0, read off `channels['raw']`."""
+        axis = self.channels['raw']
+        return int(axis[0]) if axis.size else 0
+
+    @property
+    def dch(self) -> int:
+        """Mean raw channel step; exact while the rows are a ramp.
+
+        Kept because a texture and an `imshow` extent can only be placed on a
+        uniform grid, so they need one spacing rather than a list.
+        """
+        axis = self.channels['raw']
+        if axis.size < 2:
+            return 1
+        return max(1, int(round(float(np.diff(axis).mean()))))
 
     @property
     def plot(self):
@@ -175,46 +212,62 @@ class DASdata:
 
     # ---- Window selection -------------------------------------------------
 
-    def truncate(
-            self,
-            ch_range: Optional[Tuple[int, int]] = None,
-            t_range:  Optional[Tuple[Union[datetime, float], Union[datetime, float]]] = None,
-        ) -> 'DASdata':
-        """Slice a contiguous channel range and / or time window, returning a fresh DASdata.
+    def select(self, ch_range=None, ch_index=None, t_range=None) -> 'DASdata':
+        """Cut a time window and / or pick channels, in one call.
+        Args:
+            ch_range: `(min_ch, max_ch)`, max exclusive, in the channel numbers
+                `channel_axis` reports. Ends outside the array are clipped.
+            ch_index: explicit channel numbers, in the order wanted, or a
+                length-`nx` boolean mask (which selects by row position). A
+                number the array does not hold raises.
+            t_range: `(begin, end)`, both `datetime`, or both seconds in this
+                DASdata's own frame where `t0_sec` is the value at sample 0.
+        Returns:
+            A fresh DASdata. `dt`, `fs` and `dx` are unchanged — this selects,
+            it does not decimate — and `data` is C-contiguous.
+        Raises:
+            ValueError: if the two channel arguments together select nothing.
 
-        For an arbitrary (non-contiguous) set of channels, use
-        `select_channels`.
-
-        Parameters
-        ----------
-        ch_range : (min_ch, max_ch), optional
-            Contiguous channel-index range, `max_ch` exclusive.
-            Out-of-bounds values are clipped to `[0, self.nx]`. `None`
-            keeps all.
-        t_range : (begin, end), optional
-            Time range. The two ends must be the same type, either:
-            `datetime` — absolute timestamps, clipped to overlap with
-            `[self.begin_time, self.end_time]`. `int` or `float` —
-            seconds in the DASdata's own frame, where `self.t0_sec`
-            is the value at sample 0; `t_range=(-2, 10)` on event
-            data with `t0_sec=-30` selects 2 s before to 10 s after
-            the event. `None` keeps the full window.
-
-        Returns a new DASdata with `data`, `nx`, `nt`, `begin_time`,
-        `end_time`, and `t0_sec` updated. `dt`, `fs`, `dx` are
-        unchanged (no decimation). The `data` array is C-contiguous
-        (a copy when the slice was strided, a view otherwise) so
-        downstream `bandpass()` etc. don't hit the silent-stride bug.
+        The kept channels are the intersection: `ch_range` filters, `ch_index`
+        requests, and either may be `None` for no constraint. A channel named
+        by `ch_index` but excluded by `ch_range` is dropped rather than raising
+        — that is what the pair is for.
         """
-        # Channel range
-        if ch_range is None:
-            c0, c1 = 0, self.nx
-        else:
-            c0, c1 = ch_range
-            c0 = max(0, int(c0))
-            c1 = min(self.nx, int(c1))
-
-        # Time range → sample-index bounds, in self's seconds frame
+        axis = self.channel_axis
+        rows = np.arange(self.nx)
+        if ch_index is not None:
+            req = np.asarray(ch_index)
+            if req.dtype == bool:
+                if req.shape != (self.nx,):
+                    raise ValueError(
+                        f"a boolean mask needs one entry per channel "
+                        f"({self.nx}), got {req.size}"
+                    )
+                rows = np.flatnonzero(req)
+            else:
+                # `sorter=`, since an earlier pick may have left the axis
+                # unsorted — searchsorted would then return wrong rows.
+                req = req.astype(np.int64, copy=False).ravel()
+                order = np.argsort(axis, kind="stable")
+                hit = np.searchsorted(axis, req, sorter=order)
+                rows = order[np.clip(hit, 0, self.nx - 1)]
+                miss = axis[rows] != req
+                if miss.any():
+                    bad = np.unique(req[miss]).tolist()
+                    raise ValueError(
+                        f"{len(bad)} channel(s) not in this DASdata: {bad[:8]}"
+                        f"{'...' if len(bad) > 8 else ''} "
+                        f"(channel_axis spans {axis.min()}..{axis.max()})"
+                    )
+        if ch_range is not None:
+            lo, hi = ch_range
+            rows = rows[(axis[rows] >= lo) & (axis[rows] < hi)]
+        if self.nx and rows.size == 0:
+            raise ValueError(
+                f'no channel selected (ch_range={ch_range}); {self.channel_axis_name} '
+                f'channel_axis spans {axis.min()}..{axis.max()}'
+            )
+        # Time range -> sample-index bounds, in self's seconds frame
         if t_range is None:
             t0_idx, t1_idx = 0, self.nt
         else:
@@ -227,47 +280,59 @@ class DASdata:
             t0_idx = max(0, int(round((t0_sec_in - self.t0_sec) / self.dt)))
             t1_idx = min(self.nt, int(round((t1_sec_in - self.t0_sec) / self.dt)))
 
-        new_data = np.ascontiguousarray(self.data[c0:c1, t0_idx:t1_idx])
+        new_data = np.ascontiguousarray(self.data[rows][:, t0_idx:t1_idx])
         new_nt = new_data.shape[1]
-        new_nx = new_data.shape[0]
         new_begin = self.begin_time + timedelta(seconds=t0_idx * self.dt)
         new_end = (
             new_begin + timedelta(seconds=(new_nt - 1) * self.dt)
             if new_nt else new_begin
         )
-        new_t0 = self.t0_sec + t0_idx * self.dt
         return replace(
-            self, data=new_data, nx=new_nx, nt=new_nt,
-            begin_time=new_begin, end_time=new_end, t0_sec=new_t0,
-            ch0=self.ch0 + c0 * self.dch,
+            self, data=new_data, nx=new_data.shape[0], nt=new_nt,
+            begin_time=new_begin, end_time=new_end,
+            t0_sec=self.t0_sec + t0_idx * self.dt,
+            channels={k: v[rows] for k, v in self.channels.items()},
         )
 
-    def select_channels(self, channels) -> 'DASdata':
-        """Select an arbitrary set of channels, returning a fresh DASdata.
+    def truncate(self, ch_range=None, t_range=None) -> 'DASdata':
+        """A contiguous window — `select(ch_range=..., t_range=...)`."""
+        return self.select(ch_range=ch_range, t_range=t_range)
 
-        Parameters
-        ----------
-        channels : array-like
-            Integer index array or a length-`nx` boolean mask (e.g. a
-            list of good channels). Channels are returned in the given
-            order. For a contiguous channel range or a time window,
-            use `truncate`.
+    def select_taptest(self, dasinfo) -> 'DASdata':
+        """Keep the surveyed channels a `DASinfo` lists, and report their index.
 
-        Only `data` and `nx` change; the time axis is untouched. Note
-        that an arbitrary selection generally leaves the channel axis
-        non-uniformly spaced, so `dx` no longer describes the true
-        inter-channel spacing. The returned `data` is C-contiguous.
+        Args:
+            dasinfo: the catalog. Pass `dasinfo.active()` to drop bad-quality
+                channels too; `located()` on that subset is a no-op.
+        Returns:
+            A fresh DASdata carrying both 'raw' and 'taptest' labels, with
+            `channel_axis` already switched to 'taptest'.
+
+        Intersected, not demanded: a catalog covers the whole deployment and
+        this window holds a part of it.
         """
-        new_data = np.ascontiguousarray(self.data[np.asarray(channels)])
-        return replace(self, data=new_data, nx=new_data.shape[0])
+        info = dasinfo.located()
+        raw = self.channels['raw']
+        want = np.asarray(info.index_raw, dtype=np.int64)
+        rows = np.flatnonzero(np.isin(raw, want))
+        # `index_taptest` is in the catalog's row order; reindex onto ours
+        tap = info.df['index_taptest'].to_numpy()
+        at = {int(r): i for i, r in enumerate(want)}
+        labels = {k: v[rows] for k, v in self.channels.items()}
+        labels['taptest'] = np.array([tap[at[int(c)]] for c in raw[rows]])
+        out = replace(
+            self, data=np.ascontiguousarray(self.data[rows]),
+            nx=rows.size, channels=labels
+        )
+        return out.set_channel_axis('taptest')
 
     def skip_ch(self, step: int) -> 'DASdata':
         """Keep every `step`-th channel (uniform decimation), updating `dx`.
 
         A coarse, faster channel view — `d.skip_ch(5)` keeps 1 channel in 5.
         Because the stride is uniform, `dx` scales by `step` so the channel
-        axis stays physically correct (unlike `select_channels`, whose
-        arbitrary picks leave `dx` meaningless). No spatial anti-alias
+        axis stays physically correct (unlike an arbitrary `select`, which
+        leaves `dx` meaningless). No spatial anti-alias
         filter is applied, so this is for display/preview, not analysis.
         `step <= 1` returns an unchanged copy. `data` is C-contiguous.
         """
@@ -276,8 +341,10 @@ class DASdata:
             return replace(self)
         new_data = np.ascontiguousarray(self.data[::step])
         new_dx = self.dx * step if self.dx is not None else None
-        return replace(self, data=new_data, nx=new_data.shape[0], dx=new_dx,
-                       dch=self.dch * step)
+        return replace(
+            self, data=new_data, nx=new_data.shape[0], dx=new_dx,
+            channels={k: v[::step] for k, v in self.channels.items()},
+        )
 
     def skip_t(self, step: int) -> 'DASdata':
         """Keep every `step`-th time sample (uniform decimation), updating `dt`/`fs`.
@@ -300,8 +367,10 @@ class DASdata:
             self.begin_time + timedelta(seconds=(new_nt - 1) * new_dt)
             if new_nt else self.begin_time
         )
-        return replace(self, data=new_data, nt=new_nt, dt=new_dt,
-                       fs=self.fs / step, end_time=new_end)
+        return replace(
+            self, data=new_data, nt=new_nt, dt=new_dt,
+            fs=self.fs / step, end_time=new_end
+        )
 
     def to_physical(self) -> "DASdata":
         """Return a copy in microstrain (or microstrain/s), whatever the vendor.
@@ -409,5 +478,7 @@ class DASdata:
         `processing.downsample`.
         """
         from .processing import downsample as _ds
-        return _ds(self, factor, anti_alias=anti_alias, order=order,
-                   zerophase=zerophase, copy=copy, nthreads=nthreads)
+        return _ds(
+            self, factor, anti_alias=anti_alias, order=order,
+            zerophase=zerophase, copy=copy, nthreads=nthreads
+        )

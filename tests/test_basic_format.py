@@ -25,7 +25,8 @@ def make(units="microstrain", nx=6, nt=40, **kw):
         fs=100.0, dt=0.01, nt=nt, nx=nx, dx=2.5,
         begin_time=T0, end_time=T0 + timedelta(seconds=(nt - 1) * 0.01),
         gauge_length_m=10.0, format="Proc", origin="OptaSense", units=units,
-        t0_sec=-3.0, ch0=2000, dch=4, physical_factor=1.0,
+        t0_sec=-3.0, physical_factor=1.0,
+        channels={'raw': 2000 + np.arange(nx) * 4},
     )
     fields.update(kw)
     return DASdata(**fields)
@@ -137,3 +138,64 @@ def test_write_data_proc_accepts_raw_payloads(tmp_path, units):
     """Raw vendor units are what Proc exists to hold; "unknown" makes no claim
     and is what synthetic test payloads carry."""
     write_data_proc(tmp_path / f"ok_{units.replace('/', '_')}.h5", make(units=units))
+
+
+def test_basic_round_trips_a_gappy_channel_axis(tmp_path):
+    """The format persists `(ch0, dch)`, which is a ramp; a `select` can leave
+    the axis gappy, and rounding it back onto a ramp relabels real channels."""
+    from dasio.readers.basic import read_basic, write_basic
+
+    t0 = datetime(2023, 1, 1, tzinfo=timezone.utc)
+    opt = np.array([2000, 2004, 2009, 2015])
+    src = DASdata(
+        data=np.repeat(opt[:, None].astype(np.float32), 20, axis=1),
+        fs=100.0, dt=0.01, nt=20, nx=4, dx=2.0, begin_time=t0, end_time=t0,
+        units="strain/s",
+        channels={"raw": opt, "taptest": np.arange(4)},
+    )
+    f = tmp_path / "gappy.h5"
+    write_basic(f, src)
+
+    back = read_basic(f)
+    np.testing.assert_array_equal(back.channels["raw"], opt)
+    np.testing.assert_array_equal(back.channels["taptest"], np.arange(4))
+    # the labels must still describe the rows they came with
+    np.testing.assert_array_equal(back.data[:, 0], opt)
+
+    half = read_basic(f, min_ch=1, max_ch=3)
+    np.testing.assert_array_equal(half.channels["raw"], [2004, 2009])
+    np.testing.assert_array_equal(half.data[:, 0], [2004, 2009])
+
+
+def test_basic_writes_no_label_arrays_for_a_plain_ramp(tmp_path):
+    """A ramp is fully described by `(ch0, dch)`, so a normal read writes the
+    same bytes it always did and an older reader loses nothing."""
+    import h5py
+    from dasio.readers.basic import write_basic
+
+    t0 = datetime(2023, 1, 1, tzinfo=timezone.utc)
+    d = DASdata(
+        data=np.zeros((4, 20), np.float32), fs=100.0, dt=0.01, nt=20, nx=4,
+        dx=2.0, begin_time=t0, end_time=t0, units="strain/s",
+        channels={"raw": 2000 + np.arange(4)},
+    )
+    f = tmp_path / "ramp.h5"
+    write_basic(f, d)
+    with h5py.File(f) as h:
+        assert "channels" not in h
+        assert h["data"].attrs["ch0"] == 2000 and h["data"].attrs["dch"] == 1
+
+
+def test_basic_read_defaults_channel_by_for_a_legacy_file(tmp_path):
+    """Files written before `channel_axis_name` was persisted have no such attr."""
+    import h5py
+    from dasio.readers.basic import read_basic, write_basic
+
+    t0 = datetime(2023, 1, 1, tzinfo=timezone.utc)
+    d = DASdata(data=np.zeros((4, 20), np.float32), fs=100.0, dt=0.01, nt=20,
+                nx=4, dx=2.0, begin_time=t0, end_time=t0, units="strain/s")
+    f = tmp_path / "legacy.h5"
+    write_basic(f, d)
+    with h5py.File(f, "a") as h:
+        del h["data"].attrs["channel_axis_name"]
+    assert read_basic(f).channel_axis_name == "raw"

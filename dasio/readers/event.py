@@ -107,6 +107,7 @@ def read_event(
         gauge_length_m=None, format='Event', origin='Event',
         raw_meta=raw_meta, t0_sec=t0_sec,
         units=normalize_unit(attrs.get("unit")),
+        channels={'raw': int(min_ch) + np.arange(nx)},
     )
 
 

@@ -732,7 +732,8 @@ class DASdb:
         out_end = out_begin + timedelta(seconds=(nt - 1) * dt) if nt else out_begin
         return DASdata(
             data=data, fs=fs, dt=dt, nt=nt, nx=nx,
-            dx=first_read.dx, ch0=int(min_ch),
+            dx=first_read.dx,
+            channels={'raw': int(min_ch) + np.arange(nx)},
             begin_time=out_begin, end_time=out_end,
             # Format from the catalog, vendor from the file it read.
             gauge_length_m=first_read.gauge_length_m,

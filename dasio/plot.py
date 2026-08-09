@@ -44,7 +44,7 @@ def imshow(
     ch_range, t_range : tuples, optional
         Forwarded to `DASdata.truncate` for the displayed window.
         For an arbitrary channel subset, pre-select with
-        `d.select_channels(...)` and plot the result.
+        `d.select(ch_index=...)` and plot the result.
     skip_ch, skip_t : int, default 1
         Plot only every `skip_ch`-th channel / `skip_t`-th time sample —
         a coarser, faster raster for big arrays (e.g. `skip_t=5` on a wide
@@ -95,10 +95,11 @@ def imshow(
     # skip below only coarsens the rasterized array, not the coordinates.
     nx_full = sub.nx
     # Channel numbers of the first and last row, captured before `skip_ch`
-    # below multiplies `dch`. On a min_ch=2000 read these are 2000 and up,
-    # so the axis labels the fiber rather than the array.
-    ch_lo = sub.ch0
-    ch_hi = sub.ch0 + (nx_full - 1) * sub.dch
+    # below multiplies `dch`. On a min_ch=2000 read these are 2000 and up, so
+    # the axis labels the fiber rather than the array. From `channel_axis`, the
+    # authority — `ch0 + i*dch` only matches it while the rows are a ramp.
+    ch_axis = sub.channel_axis
+    ch_lo, ch_hi = int(ch_axis[0]), int(ch_axis[-1])
     if usedatetime:
         dt_axis = sub.datetime_axis
         t_left = mdates.date2num(dt_axis[0].astype('datetime64[us]').astype(object))
@@ -227,7 +228,7 @@ def wiggle(
         t_step = 1
 
     # Rows select the traces; channel numbers place them on the axis.
-    ch_vals = sub.ch0 + ch_indices * sub.dch
+    ch_vals = sub.channel_axis[ch_indices]
     data = sub.data[ch_indices][:, ::t_step]
     if normalize:
         peak = np.maximum(np.abs(data).max(axis=1, keepdims=True), 1e-30)

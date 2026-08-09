@@ -63,7 +63,7 @@ def test_pick_phases_returns_picks(mocked):
         "phase_score",
     ]
     assert res.df["channel_index"].tolist() == [2, 5]
-    assert res.df["channel"].tolist() == [2, 5]          # ch0=0, dch=1 here
+    assert res.df["channel"].tolist() == [2, 5]      # plain read: row == channel
     assert set(res.df["phase_type"]) == {"P", "S"}
     assert res.df["phase_index"].dtype.kind == "i" and res.df["phase_score"].dtype.kind == "f"
     assert res.scores is None  # default: no heatmap
@@ -110,7 +110,8 @@ def test_picks_plot_applies_t0_offset():
 
     matplotlib.use("Agg")
     df = pd.DataFrame(
-        {"channel_index": [2], "phase_type": ["P"], "phase_index": [100], "phase_score": [0.9]}
+        {"channel_index": [2], "channel": [2], "phase_type": ["P"],
+         "phase_index": [100], "phase_score": [0.9]}
     )
     p = pk.Picks(df=df, fs=100.0, model="m", begin_time=None, nx=8, nt=400, t0_sec=-30.0)
     ax = p.plot()  # y = t0_sec + sample/fs = -30 + 1.0, matching DASdata.time_axis
@@ -122,9 +123,8 @@ def test_picks_carry_the_channel_anchor(mocked):
     row position stays available as `channel_index` because it indexes
     `scores`."""
     d = _d()
-    d.ch0, d.dch = 2000, 4
+    d.channels = {'raw': 2000 + np.arange(d.nx) * 4}
     res = pk.pick_phases(d, device="cpu")
-    assert res.ch0 == 2000 and res.dch == 4
     assert res.df["channel_index"].tolist() == [2, 5]
     assert res.df["channel"].tolist() == [2008, 2020]
 
@@ -134,7 +134,7 @@ def test_picks_plot_uses_channel_numbers(mocked):
 
     matplotlib.use("Agg")
     d = _d()
-    d.ch0, d.dch = 2000, 4
+    d.channels = {'raw': 2000 + np.arange(d.nx) * 4}
     ax = pk.pick_phases(d, device="cpu").plot()
     xs = sorted(c.get_offsets()[0][0] for c in ax.collections)
     assert xs == [2008, 2020]

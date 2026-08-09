@@ -12,10 +12,11 @@ import pytest
 from dasio.dasdata import DASdata
 
 
-def make(nx=10, nt=20, ch0=0):
+def make(nx=10, nt=20, ch0=0, dch=1):
     t0 = datetime(2023, 1, 1, tzinfo=timezone.utc)
     return DASdata(data=np.zeros((nx, nt), dtype=np.float32), fs=100.0, dt=0.01,
-                   nt=nt, nx=nx, dx=2.0, begin_time=t0, end_time=t0, ch0=ch0)
+                   nt=nt, nx=nx, dx=2.0, begin_time=t0, end_time=t0,
+                   channels={'raw': ch0 + np.arange(nx) * dch})
 
 
 def test_channel_axis_starts_at_ch0():
@@ -28,10 +29,24 @@ def test_default_ch0_is_zero_so_existing_behaviour_is_unchanged():
     np.testing.assert_array_equal(make(nx=3).channel_axis, [0, 1, 2])
 
 
-def test_truncate_shifts_ch0_by_the_slice_start():
-    d = make(nx=100, ch0=2000).truncate(ch_range=(10, 40))
+def test_truncate_takes_channel_numbers_not_row_indices():
+    """`ch_range` is in the numbers `channel_axis` reports, like `read`'s
+    min_ch/max_ch and like `select_channels` — not positions in the array."""
+    d = make(nx=100, ch0=2000).truncate(ch_range=(2010, 2040))
     assert d.ch0 == 2010 and d.nx == 30
     assert d.channel_axis[0] == 2010 and d.channel_axis[-1] == 2039
+
+
+def test_truncate_raises_when_the_range_misses_the_array():
+    """Row indices used to be silently clipped to an empty result; the units
+    now agree, so a range that selects nothing is a mistake worth naming."""
+    with pytest.raises(ValueError, match="no channel selected"):
+        make(nx=100, ch0=2000).truncate(ch_range=(10, 40))
+
+
+def test_truncate_clips_a_partly_overlapping_range():
+    d = make(nx=100, ch0=2000).truncate(ch_range=(2090, 9999))
+    assert d.nx == 10 and d.channel_axis[0] == 2090
 
 
 def test_truncate_on_time_only_leaves_ch0_alone():
@@ -57,3 +72,125 @@ def test_dasdb_read_records_min_ch(proc_file):
     out = db.read(meta["begin_time"], meta["end_time"], min_ch=1, max_ch=3)
     assert out.ch0 == 1
     assert out.channel_axis[0] == 1
+
+
+# --- two names for one row: raw (index_raw) and taptest ------------------
+#
+# `ch0`/`dch` describe the reader's raw array, which shifts when fiber is added
+# or removed. `index_taptest` is frozen at survey time and is what dasinfo
+# joins on. A window that has been cut down to located channels needs both.
+
+def _dasinfo(tmp_path, n=12, unlocated=(2, 5, 9)):
+    """A catalog where a few raw channels never got a taptest geolocation."""
+    import pandas as pd
+    from dasio import DASinfo
+
+    rows = [
+        {
+            'index': i,
+            'status': 0 if i in unlocated else 1,
+            'lat': 37.0 + i * 1e-4,
+            'lon': -118.0,
+        }
+        for i in range(n)
+    ]
+    path = tmp_path / 'info.csv'
+    pd.DataFrame(rows).to_csv(path, index=False)
+    return DASinfo.from_csv(path)
+
+
+def test_select_channels_with_a_dasinfo_records_both_labels(tmp_path):
+    info = _dasinfo(tmp_path)
+    d = make(nx=12, ch0=0).select_taptest(info)
+
+    assert d.nx == 9                                     # 3 unlocated dropped
+    np.testing.assert_array_equal(
+        d.channels['raw'], [0, 1, 3, 4, 6, 7, 8, 10, 11])
+    np.testing.assert_array_equal(d.channels['taptest'], np.arange(9))
+    # raw has gaps where the survey did not reach; taptest does not
+    assert not np.all(np.diff(d.channels['raw']) == 1)
+    assert np.all(np.diff(d.channels['taptest']) == 1)
+
+
+def test_a_catalog_is_intersected_not_demanded(tmp_path):
+    """A list of numbers is a request and a missing one is a mistake; a catalog
+    describes a whole deployment, of which a window holds a part."""
+    info = _dasinfo(tmp_path, n=12)
+    d = make(nx=6, ch0=0).select_taptest(info)   # catalog runs past nx
+    assert d.nx == 4                                        # 2 and 5 are unlocated
+    np.testing.assert_array_equal(d.channels['raw'], [0, 1, 3, 4])
+
+
+def test_set_channel_axis_mutates_in_place_and_returns_self(tmp_path):
+    """Not a fresh DASdata: it relabels rather than transforms, and a version
+    that returned a copy would make the bare statement a silent no-op."""
+    info = _dasinfo(tmp_path)
+    d = make(nx=12, ch0=0).select_taptest(info)
+
+    assert d.channel_axis_name == 'taptest'                 # select_taptest set it
+    out = d.set_channel_axis('raw')                # no rebinding
+    assert out is d
+    np.testing.assert_array_equal(d.channel_axis, [0, 1, 3, 4, 6, 7, 8, 10, 11])
+    d.set_channel_axis('taptest')
+    np.testing.assert_array_equal(d.channel_axis, np.arange(9))
+
+
+def test_set_channel_axis_raises_rather_than_falling_back(tmp_path):
+    d = make(nx=5)
+    with pytest.raises(ValueError, match="no 'taptest' channel labels"):
+        d.set_channel_axis('taptest')
+    assert d.channel_axis_name == 'raw'                 # unchanged after the raise
+
+
+def test_slicing_keeps_every_label_aligned(tmp_path):
+    info = _dasinfo(tmp_path)
+    d = make(nx=12, ch0=0).select_taptest(info).set_channel_axis('taptest')
+
+    sub = d.truncate(ch_range=(2, 8)).skip_ch(2)
+    np.testing.assert_array_equal(sub.channels['taptest'], [2, 4, 6])
+    np.testing.assert_array_equal(sub.channels['raw'], [3, 6, 8])
+    assert sub.channel_axis_name == 'taptest'               # carried through the slice
+    np.testing.assert_array_equal(sub.channel_axis, [2, 4, 6])
+
+
+def test_select_channels_selects_in_the_active_axis(tmp_path):
+    """Whatever `channel_axis` reports is what you select by."""
+    info = _dasinfo(tmp_path)
+    d = make(nx=12, ch0=0).select_taptest(info)
+
+    by_taptest = d.select(ch_index=[2, 5])           # taptest is active
+    d.set_channel_axis('raw')
+    by_raw = d.select(ch_index=[3, 7])           # the same two rows
+    np.testing.assert_array_equal(
+        by_raw.channels['raw'],
+        by_taptest.channels['raw'])
+
+
+def test_truncate_follows_set_channel_axis(tmp_path):
+    """The whole point of the unification: one rule, and `ch_range` obeys
+    whichever axis is active."""
+    info = _dasinfo(tmp_path)
+    d = make(nx=12, ch0=0).select_taptest(info)
+    # raw 0,1,3,4,6,7,8,10,11  <->  taptest 0..8
+
+    by_taptest = d.truncate(ch_range=(2, 6))         # taptest is active
+    np.testing.assert_array_equal(
+        by_taptest.channels['raw'], [3, 4, 6, 7])
+    np.testing.assert_array_equal(by_taptest.channel_axis, [2, 3, 4, 5])
+
+    d.set_channel_axis('raw')
+    by_raw = d.truncate(ch_range=(3, 8))
+    np.testing.assert_array_equal(
+        by_raw.channels['raw'], [3, 4, 6, 7])
+
+
+def test_ch0_tracks_the_raw_labels_through_a_slice(tmp_path):
+    """`ch0 + c0*dch` is the row's raw number only while the rows are a
+    ramp. After a gappy selection it drifts, and the viewer and picker read
+    `ch0` directly."""
+    info = _dasinfo(tmp_path)
+    d = make(nx=12, ch0=0).select_taptest(info)
+    for sub in (d.truncate(ch_range=(3, 8)),
+                d.set_channel_axis('taptest').truncate(ch_range=(2, 7)),
+                d.skip_ch(2)):
+        assert sub.ch0 == sub.channels['raw'][0]

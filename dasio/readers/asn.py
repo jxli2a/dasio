@@ -187,7 +187,7 @@ def read_asn_raw(
 
     return DASdata(
         data=data,
-        ch0=int(min_ch),
+        channels={'raw': int(min_ch) + np.arange(nx)},
         fs=fs, dt=dt, nt=nt, nx=nx, dx=dx,
         begin_time=begin_time, end_time=end_time,
         gauge_length_m=gauge_length_m, format='ASN', origin='ASN',

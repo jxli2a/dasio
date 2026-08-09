@@ -255,6 +255,7 @@ def desample_window(
     fs_out = raw_fs / fsRatio
 
     out_chunks: list = []
+    axis_chunks: list = []      # channel labels, chunked the same way
     first_data: Optional[DASdata] = None
     begin_time_out: Optional[datetime] = None
     it_left_cached: Optional[int] = None
@@ -308,6 +309,9 @@ def desample_window(
 
         data = data[:, it_left_cached:it_right_cached]
         out_chunks.append(data.astype(np.float32, copy=False))
+        # this chunk covers c0..c1; the labels have to be concatenated with it,
+        # not taken from the first chunk, which holds at most `nchbuffer` of them
+        axis_chunks.append(reads[0].channels['raw'])
         if first_data is None:
             first_data = reads[0]
 
@@ -325,15 +329,11 @@ def desample_window(
         end_time=end_time_out,
         gauge_length_m=first_data.gauge_length_m,
         raw_meta=first_data.raw_meta,
-        # `format` is the input format this run dispatched on; `origin` is the
-        # interrogator, which a Proc -> Proc cascade must carry forward or the
-        # vendor is lost after one generation. Desample concatenates, filters
-        # and decimates but never scales, so `units` passes straight through
-        # too — without it the output was always "unknown" and
-        # `write_data_proc` had no way to tell raw from converted.
+        # Carried, not re-derived: a Proc -> Proc cascade loses the interrogator
+        # after one generation, and filtering/decimating never changes units.
         format=format, origin=first_data.origin,
         units=first_data.units,
-        ch0=first_data.ch0, dch=first_data.dch,
+        channels={'raw': np.concatenate(axis_chunks)} if axis_chunks else None,
     )
 
 
