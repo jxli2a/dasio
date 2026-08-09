@@ -94,12 +94,9 @@ def list_das_files(raw_dir: Path, format: str) -> List[Path]:
             files = list_data_files(raw_dir, ('*.hdf5', '*/*.hdf5'))
         return files
     if format == 'Proc':
-        # Two layouts coexist: flat (legacy desample output, before
-        # --out-date-subdir landed) and <YYYYMMDD>/ProcASN-*.h5 (the
-        # new layout the cron uses on Santorini-scale deployments to
-        # keep readdir on Processed/ from blowing up). Cover both —
-        # without the date-subdir branch, building a Proc dasdb from
-        # the new layout returns zero files.
+        # Two layouts coexist: flat, and <YYYYMMDD>/ subdirectories, which
+        # keep readdir on Processed/ tractable at deployment scale. Both are
+        # walked; without the second, a Proc dasdb over it finds nothing.
         files = list(list_data_files(raw_dir, _H5))
         for sub in raw_dir.iterdir():
             if sub.is_dir() and _ASN_DAY_DIR_RE.match(sub.name):
@@ -346,11 +343,9 @@ class DASdb:
             expected = np.where(fs_prev > 0, 1.0 / fs_prev, 0.0)
         gap = (df['begin_time']
                 - df['end_time'].shift(1)).dt.total_seconds().to_numpy()
-        # Use np.isclose directly (array-valued atol via broadcasting)
-        # so NaN gaps — possible if end_time has NaT mid-stream — are
-        # treated as "not close" and produce a break, matching the
-        # scalar reference's `not np.isclose(NaN, ...) is True` behavior.
-        # np.abs() based comparison would silently swallow NaN as False.
+        # `np.isclose` (array atol by broadcasting) rather than an `np.abs`
+        # comparison, so a NaN gap — an NaT `end_time` mid-stream — counts as
+        # not-close and breaks the segment instead of being swallowed.
         timing_break = ~np.isclose(
             gap, expected, atol=gap_factor * expected,
         )

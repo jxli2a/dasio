@@ -35,14 +35,10 @@ from typing import Union
 import numpy as np
 import pandas as pd
 
-# CSV column renames applied on load. The source column is dropped after
-# the rename. `status` -> `taptest` is included; if the renamed column
-# arrives with string dtype (i.e. 'good' / 'bad' values), it is converted
-# to 1/0 ints inside `_set_taptest_quality`.
-#
-# `spiky` is NOT a pure rename — it's a polarity-flipped derivation of
-# `quality` (spiky=0 means good, quality=1 means good). That conversion
-# happens in `_set_taptest_quality` rather than in `_apply_rename_aliases`.
+# CSV column renames applied on load; the source column is then dropped.
+# `status` -> `taptest` may arrive as 'good'/'bad' strings, converted in
+# `_set_taptest_quality`. `spiky` is not a pure rename but a polarity flip of
+# `quality` (spiky=0 == quality=1), also done there.
 _RENAME_ALIASES = {
     "status": "taptest",
     "index": "index_raw",
@@ -266,17 +262,10 @@ class DASinfo:
 
     @staticmethod
     def _apply_rename_aliases(df: pd.DataFrame) -> pd.DataFrame:
-        # Build the rename map in `_RENAME_ALIASES` insertion order.
-        # Two precedence rules guard against duplicate-target collisions:
-        #   1. The canonical target already exists in the CSV ->
-        #      skip the rename; the source column is dropped as a stray.
-        #   2. Another alias earlier in the dict already maps to this
-        #      target (e.g. both `ichan_after_taptest` and
-        #      `taptest_channel_index` mapping to `index_taptest`) ->
-        #      first one wins; later ones become strays. Without this
-        #      check `pd.rename` would silently produce two columns of
-        #      the same name and `df['index_taptest']` would return a
-        #      DataFrame instead of a Series.
+        # First alias wins, and an existing canonical column wins over any
+        # alias; losers are dropped as strays. Without that, two aliases for one
+        # target (`ichan_after_taptest` and `taptest_channel_index`) would leave
+        # two columns of the same name and `df['index_taptest']` a DataFrame.
         rename: dict[str, str] = {}
         targets_taken: set[str] = set(df.columns)
         for src, dst in _RENAME_ALIASES.items():
@@ -306,15 +295,10 @@ class DASinfo:
     def _set_taptest_quality(df: pd.DataFrame) -> pd.DataFrame:
         df = df.copy()
         if "taptest" in df.columns:
-            # When renamed from `status`, the column arrives as strings
-            # ('good' / 'bad' / ...). Convert to 1 / 0. Match BOTH
-            # numpy object dtype AND pandas/pyarrow string dtypes —
-            # pandas 2.x with the PyArrow backend stores post-read_csv
-            # strings as `string[pyarrow]`, NOT `object`, so the
-            # narrow `dtype == object` check silently skipped the
-            # conversion and the later `.astype("int8")` raised
-            # `invalid literal for int() with base 10: 'good'` on
-            # the Santorini deployment.
+            # Renamed from `status`, so it may arrive as 'good'/'bad'. Test
+            # both object and pandas string dtypes: with the PyArrow backend
+            # read_csv gives `string[pyarrow]`, and an `== object` check alone
+            # skipped the conversion until `.astype("int8")` raised.
             if (df["taptest"].dtype == object
                     or pd.api.types.is_string_dtype(df["taptest"])):
                 df["taptest"] = (df["taptest"] == "good").astype("int8")

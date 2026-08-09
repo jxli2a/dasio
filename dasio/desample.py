@@ -58,10 +58,8 @@ def _dasdb_path_loadable(path: Optional[Path]) -> bool:
 
 # --- Output naming convention ---
 #
-# Lives here (with the writer) rather than in dasdb so the existence
-# check and the actual write share one definition; iter_unprocessed
-# below and desample_and_write_window both call this. dasdb stays
-# free of any desample-output knowledge.
+# Lives with the writer, not in dasdb, so the existence check and the write
+# share one definition and dasdb stays free of desample-output knowledge.
 
 def _proc_out_path(out_dir: Path, format: str, begin: datetime,
                     date_subdir: bool) -> Path:
@@ -533,13 +531,9 @@ def main(argv=None):
             )
             db.to_file(args.dasdb)
 
-    # Proc dasdb resume marker. The proc dasdb's only purpose here is
-    # to carry a "stop sign" — the latest end_time across already-
-    # desampled files. We trim the raw catalog in-place so the segment
-    # walker re-runs on a clean post-cutoff view; no special anchor
-    # logic, no in-segment shifting. The first window that lands gets
-    # whatever 60-s grid the standard walker would produce on a fresh
-    # deployment seeded with raw files starting just after the cutoff.
+    # The proc dasdb is only a stop sign: the latest end_time already
+    # desampled. Trim the raw catalog to that, so the ordinary segment walker
+    # runs on a clean post-cutoff view with no special anchoring.
     proc_db = None
     if args.proc_dasdb is not None:
         if _dasdb_path_loadable(args.proc_dasdb):

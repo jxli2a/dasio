@@ -20,13 +20,9 @@ _ASN_DIR_RE   = re.compile(r'^(\d{8})$')
 
 
 # ----- skip-logging policy ----------------------------------------------
-# Catalog rebuilds + desample crawls can hit hundreds-to-thousands of
-# truncated / zero-byte / partially-written HDF5 files. Logging every
-# one of them spams desample.log and webview.log to uselessness. Policy:
-#   - print the first N skips verbatim (so the operator sees what's
-#     going wrong)
-#   - then suppress; emit one summary line every M additional skips
-#   - set env DASIO_ASN_QUIET_SKIPS=0 to log all skips verbatim
+# A crawl can hit thousands of truncated or partially-written files, and
+# logging each one drowns the log. Print the first N verbatim, then one summary
+# line every M; DASIO_ASN_QUIET_SKIPS=0 logs them all.
 _SKIP_VERBOSE_FIRST = 5
 _SKIP_SUMMARY_EVERY = 100
 _skip_count = 0
@@ -131,13 +127,10 @@ def read_asn_raw(
         header = f['header']
         sens_arr = np.asarray(header['sensitivities'])
         data_scale = float(header['dataScale'][()])
-        # header/dt reports the acquisition-side rate (e.g. 500 Hz for Santorini),
-        # NOT the rate of the data actually written to disk after any
-        # TemporalDecimation step in the processingChain. The true per-sample
-        # time step is recorded at header/dimensionRanges/dimension0/unitScale
-        # and accounts for all processing-chain decimations. Iceland has
-        # unitScale == header.dt (no late decimation) so both sources agree;
-        # Santorini has unitScale = 5 * header.dt.
+        # header/dt is the acquisition rate, before any TemporalDecimation in
+        # the processing chain; dimension0/unitScale is the rate actually
+        # written. They agree without late decimation, and differ by 5x on
+        # Santorini, so prefer unitScale.
         unit_scale = f.get('header/dimensionRanges/dimension0/unitScale')
         if unit_scale is not None:
             dt = float(unit_scale[()])

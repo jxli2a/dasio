@@ -102,12 +102,9 @@ def read_data_proc(
             data = dset[int(first_sample):int(t_end), int(min_ch):int(max_ch)].T
         origin = detect_origin(f)
         gauge_length_m = _gauge_length(f, attrs)
-        # Carry /Acquisition_origin forward. `detect_origin` above already
-        # reads this group, and dropping it made a Proc -> Proc desample write
-        # an origin-less file: the second generation detects as 'Unknown' and
-        # its units are then inferred wrong. The attrs are already in the
-        # flattened dotted form `_flatten_dict` produces, so they write back
-        # unchanged.
+        # Carried forward, already flattened, so it writes back unchanged.
+        # Dropping it made a Proc -> Proc desample emit an origin-less file,
+        # which the next generation reads as 'Unknown' and mis-infers units.
         origin_grp = f.get('Acquisition_origin')
         raw_meta = dict(origin_grp.attrs) if origin_grp is not None else None
 
@@ -220,12 +217,9 @@ def write_data_proc(
         )
     file = Path(file)
     tmp = file.with_suffix(file.suffix + '.lock')
-    # libver=('earliest', 'latest') lifts the 64 KB object-header cap
-    # (which otherwise overflows when the full Acquisition_origin
-    # flattened tree with 300+ attrs is written) while staying portable
-    # across h5py builds. The legacy Desample_DAS.py value 'v200' is
-    # only understood by HDF5 ≥ 2.0; h5py 3.15 / HDF5 1.14.6 accepts
-    # only earliest, latest, v108, v110, v112, v114.
+    # The legacy Desample_DAS.py wrote libver='v200', which h5py rejects here
+    # (HDF5 1.14); ('earliest', 'latest') is the portable spelling and lets the
+    # newest object-header format hold the large flattened Acquisition_origin.
     with h5py.File(tmp, 'w', libver=('earliest', 'latest')) as hf:
         ds = hf.create_dataset('Data', data=d.data, chunks=True, compression=compress)
         ds.attrs['fs'] = d.fs

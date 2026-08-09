@@ -77,32 +77,24 @@ class DASdata:
     begin_time:      datetime
     end_time:        datetime
     gauge_length_m:  Optional[float] = None
-    # The same pair `DASFile` carries, so `d.format == DASFile(p).format` and
-    # likewise for origin. `format` is the on-disk format that picked the
-    # reader ('Proc', 'OptaSense', 'Basic', ...); `origin` is the interrogator
-    # the samples came off, which for a Proc file is recovered from
-    # /Acquisition_origin and is the only one of the two that survives
-    # desampling. They coincide for raw vendor files and differ for everything
-    # else — a Proc capture from a QuantX reads format='Proc', origin='OptaSense'.
+    # `format` is the on-disk format that picked the reader; `origin` the
+    # interrogator the samples came off (/Acquisition_origin for Proc), and the
+    # only one of the two that survives desampling. A Proc capture from a
+    # QuantX reads format='Proc', origin='OptaSense'. Both mirror `DASFile`.
     format:          str = 'unknown'
     origin:          str = 'unknown'
     raw_meta:        Optional[dict] = None
-    # `t0_sec` is the seconds-axis value at sample 0. Default 0 so a
-    # bare `time_axis()` reads "0, dt, 2·dt, …". Event-data readers
-    # set it negative (e.g. -30.00) so sample 0 lands at t = −30.00 s
-    # and the event origin lands at t = 0 — making
-    # `truncate(t_range=(-2, 10))` mean "2 s before to 10 s after the
-    # event." `begin_time` stays the absolute anchor, `t0_sec` is the
-    # seconds-frame anchor; the two together pin both views.
+    # Seconds-axis value at sample 0; `begin_time` is the absolute anchor and
+    # this the seconds-frame one. Event readers set it negative (e.g. -30) so
+    # the event origin lands at t = 0, making `truncate(t_range=(-2, 10))` mean
+    # 2 s before to 10 s after the event.
     t0_sec:          float = 0.0
-    # Physical unit of `data`, from the controlled VALID_UNITS vocabulary
-    # ("unknown" = not tagged). Set by the readers; `differentiate`/`integrate`
-    # propagate the rate (strain <-> strain/s).
+    # Physical unit of `data`, from VALID_UNITS ("unknown" = not tagged). Set by
+    # the readers; `differentiate`/`integrate` propagate the rate.
     units:           str = "unknown"
     # The vendor's raw->strain constant (OptaSense count->strain, AP Sensing
-    # radian/s->strain/s; 1.0 for ASN, which already stores strain). Attached
-    # by `DASFile.read(with_factor=True)`, the default; `to_physical` applies
-    # it together with the strain->microstrain 1e6 and resets it to 1.0.
+    # radian/s->strain/s; 1.0 for ASN, already strain). Attached by
+    # `DASFile.read(with_factor=True)`; `to_physical` applies it with the 1e6.
     physical_factor: float = 1.0
     # Channel number of every row, `{name: array}`. 'raw' is `index_raw` and is
     # always present; `select_taptest` adds 'taptest'. `ch0`/`dch` derive from it.
