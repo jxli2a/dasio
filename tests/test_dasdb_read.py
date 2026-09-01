@@ -160,18 +160,51 @@ def test_cli_format_is_optional_for_both_create_and_update(tmp_path, proc_file, 
     assert DASdb.from_file(cat, format="Proc").n_files == 1
 
 
-def test_scan_warns_when_no_file_matches_the_format(tmp_path, proc_file, capsys):
-    """Readers return [] for a file failing their signature check so a mixed
-    directory scans cleanly; every file failing means the format is wrong, and
-    the only symptom used to be an empty catalog."""
+def test_desample_cli_detects_the_format_like_dasdb_does(tmp_path, proc_file):
+    """It was required here but optional in the dasdb CLI, same directory."""
+    import shutil
+    from dasio.desample import main
+
+    raw = tmp_path / "raw"; raw.mkdir()
+    shutil.copy(proc_file, raw / "a.h5")
+    out = tmp_path / "out"
+
+    main(["--from", str(raw), "--to", str(out), "--dry-run"])
+
+
+def test_extract_events_cli_takes_named_arguments(tmp_path):
+    """They were bare positionals -- catalog, dasdb, out_dir -- in the one CLI
+    whose siblings are all flags."""
+    from dasio.extract_events import main
+
+    argv = ["--catalog", "c.csv", "--dasdb", "d.parquet", "--to", str(tmp_path)]
+    with pytest.raises(SystemExit):                  # --to missing
+        main(argv[:4])
+    with pytest.raises(FileNotFoundError):           # parsed, then opened c.csv
+        main(argv)
+
+
+def test_scan_rejects_the_wrong_format_before_reading_everything(tmp_path, proc_file):
+    """The symptom used to be an empty catalog, after opening every file to get
+    there — 27681 of them on Alameda."""
     import shutil
     from dasio.dasdb import scan_metadata
 
     raw = tmp_path / "raw"; raw.mkdir()
-    shutil.copy(proc_file, raw / "a.h5")
+    for i in range(3):
+        shutil.copy(proc_file, raw / f"a{i}.h5")
 
+    with pytest.raises(ValueError, match=r"holds 'Proc' files, not 'OptaSense'"):
+        scan_metadata(raw, "OptaSense", progress=False)
+    assert len(scan_metadata(raw, "Proc", progress=False)) == 3
+
+
+def test_scan_leaves_an_empty_directory_alone(tmp_path):
+    """No files is not a format mismatch."""
+    from dasio.dasdb import scan_metadata
+
+    raw = tmp_path / "raw"; raw.mkdir()
     assert scan_metadata(raw, "OptaSense", progress=False).empty
-    assert "none matched that format" in capsys.readouterr().err
 
 
 @pytest.mark.parametrize("layout,fmt", [

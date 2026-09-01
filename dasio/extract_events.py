@@ -131,35 +131,42 @@ def extract_events(
     return pd.DataFrame(results)
 
 
-def main():
+def main(argv=None):
     import argparse
     from .dasdb import DASdb
-    p = argparse.ArgumentParser(
+    ap = argparse.ArgumentParser(
+        prog='python -m dasio.extract_events',
         description='Extract single-event DAS files from continuous data',
     )
-    p.add_argument('catalog_csv')
-    p.add_argument('dasdb')
-    p.add_argument('out_dir')
-    p.add_argument('--format', default=None)
-    p.add_argument('--before', type=float, default=30.0)
-    p.add_argument('--after', type=float, default=90.0)
-    p.add_argument('--min-ch', type=int, default=0)
-    p.add_argument('--max-ch', type=int, default=None)
-    p.add_argument('--overwrite', action='store_true')
-    p.add_argument('--n-jobs', type=int, default=1)
-    p.add_argument(
+    ap.add_argument(
+        '--catalog', required=True,
+        help=f'event catalog CSV; needs the columns {_REQUIRED}',
+    )
+    ap.add_argument('--dasdb', required=True, help='catalog of the data to cut')
+    ap.add_argument(
+        '--to', dest='out_dir', required=True,
+        help='output directory, one <event_id>.h5 per event',
+    )
+    ap.add_argument('--format', default=None)
+    ap.add_argument('--before', type=float, default=30.0)
+    ap.add_argument('--after', type=float, default=90.0)
+    ap.add_argument('--min-ch', type=int, default=0)
+    ap.add_argument('--max-ch', type=int, default=None)
+    ap.add_argument('--overwrite', action='store_true')
+    ap.add_argument('--n-jobs', type=int, default=1)
+    ap.add_argument(
         '--progress', action=argparse.BooleanOptionalAction, default=None,
         help='show a tqdm bar. Default: auto — on when stderr is a TTY '
             '(interactive), off when redirected (cron, systemd).',
     )
-    a = p.parse_args()
-    cat = pd.read_csv(a.catalog_csv)
-    db = DASdb.from_file(a.dasdb, format=a.format)
+    args = ap.parse_args(argv)
+    catalog = pd.read_csv(args.catalog)
+    db = DASdb.from_file(args.dasdb, format=args.format)
     m = extract_events(
-        cat, db, a.out_dir,
-        before=a.before, after=a.after,
-        min_ch=a.min_ch, max_ch=a.max_ch,
-        overwrite=a.overwrite, n_jobs=a.n_jobs, progress=a.progress,
+        catalog, db, args.out_dir,
+        before=args.before, after=args.after,
+        min_ch=args.min_ch, max_ch=args.max_ch,
+        overwrite=args.overwrite, n_jobs=args.n_jobs, progress=args.progress,
     )
     print(m['status'].value_counts().to_string())
 

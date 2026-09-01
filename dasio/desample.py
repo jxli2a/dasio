@@ -25,7 +25,7 @@ from .dasdata import DASdata
 from .dasfile import DASFile
 from .readers.proc import write_data_proc
 from .signal import bandpass2d, unwrap_int32
-from .dasdb import DASdb
+from .dasdb import DASdb, detect_dir_format
 from .schema import RawWindow
 
 
@@ -393,8 +393,10 @@ def main(argv=None):
     ap.add_argument('--from', dest='raw_dir', required=True, type=Path)
     ap.add_argument('--to', dest='out_dir', required=True, type=Path)
     ap.add_argument(
-        '--format',
-        choices=['ASN', 'OptaSense', 'APSensing', 'Proc'], required=True,
+        '--format', default=None,
+        choices=['ASN', 'OptaSense', 'APSensing', 'Proc'],
+        help='format of --from. Detected from the first file when omitted; '
+            'pass it to force one on a mixed directory.',
     )
     ap.add_argument('--fmax', type=float, default=0.4)
     ap.add_argument('--order', type=int, default=14)
@@ -491,6 +493,9 @@ def main(argv=None):
     )
     args = ap.parse_args(argv)
 
+    # One open of the first file, as dasdb's CLI already does.
+    fmt = args.format or detect_dir_format(args.raw_dir)
+
     # Auto-detect: on for interactive shells, off for cron / systemd /
     # any redirected stderr. Per-tick progress bars in cron logs would
     # spam thousands of carriage-return frames; per-startup interactive
@@ -510,7 +515,7 @@ def main(argv=None):
     # `db.next_unprocessed` below. Built / updated catalog is
     # written to the file specified by --dasdb.
     if _dasdb_path_loadable(args.dasdb):
-        db = DASdb.from_file(args.dasdb, format=args.format)
+        db = DASdb.from_file(args.dasdb, format=fmt)
         n_before = db.n_files
         n_new = db.update_from_dir(
             args.raw_dir, workers=args.scan_workers, progress=progress,
@@ -522,7 +527,7 @@ def main(argv=None):
             db.to_file(args.dasdb)
     else:
         db = DASdb.from_dir(
-            args.raw_dir, args.format,
+            args.raw_dir, fmt,
             workers=args.scan_workers, progress=progress,
         )
         if args.dasdb is not None:
@@ -599,7 +604,7 @@ def main(argv=None):
             return 0
         for begin, end in windows:
             out_path = _proc_out_path(
-                args.out_dir, args.format, begin, args.out_date_subdir,
+                args.out_dir, fmt, begin, args.out_date_subdir,
             )
             print(f'would write: {out_path}  '
                   f'window=[{begin.isoformat()}, {end.isoformat()})')
@@ -608,7 +613,7 @@ def main(argv=None):
 
     def _run_one(begin, end):
         return desample_and_write_window(
-            db, begin, end, args.out_dir, args.format,
+            db, begin, end, args.out_dir, fmt,
             fmax=args.fmax, order=args.order,
             min_ch=args.min_ch, max_ch=args.max_ch,
             nchbuffer=args.nchbuffer,

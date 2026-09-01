@@ -222,9 +222,23 @@ def scan_metadata(
     cwd. Without this, a catalog written from a relative `--from`
     would only resolve correctly when re-read from the same working
     dir.
+
+    Raises ValueError when the first readable file is not `format`,
+    rather than opening thousands of them to produce an empty catalog.
     """
     raw_dir = Path(raw_dir).resolve()
     files = list_das_files(raw_dir, format)
+    for probe in files:
+        try:
+            found = DASFile(probe).format
+        except OSError:
+            continue                    # unreadable: judge on the next one
+        if found != format:
+            raise ValueError(
+                f'{raw_dir} holds {found!r} files, not {format!r}; '
+                f'pass the right format, or omit it to detect from the files.'
+            )
+        break
     rows = _read_metadata_batch(
         files, format, workers=workers, progress=progress,
     )
@@ -785,9 +799,7 @@ def main(argv=None):
         '--format', default=None,
         choices=['ASN', 'OptaSense', 'APSensing', 'Proc', 'Event', 'Basic'],
         help='on-disk format. Detected from the first file when omitted; pass '
-            'it to skip that open, or to force a format on a mixed directory. '
-            'Forcing the wrong one is silent -- every file fails its signature '
-            'check and the catalog comes out empty.',
+            'it to skip that open, or to force a format on a mixed directory.',
     )
     ap.add_argument(
         '--overwrite', action='store_true',
