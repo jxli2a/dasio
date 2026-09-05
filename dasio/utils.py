@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import os
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterable, List, Union
@@ -118,6 +119,10 @@ def list_data_files(root: Union[str, Path],
     return out
 
 
+# An ISO stamp carrying more than microseconds, split at the sixth digit.
+_SUBMICRO = re.compile(r'(.*\.\d{6})\d+(.*)')
+
+
 def iso_timestamp(dt: datetime) -> str:
     """Serialize a timezone-aware datetime as `YYYY-MM-DDTHH:MM:SS.ffffff+00:00`.
 
@@ -128,7 +133,15 @@ def iso_timestamp(dt: datetime) -> str:
 
 
 def parse_iso(s) -> datetime:
-    """Parse an ISO-8601 timestamp back into an aware datetime."""
-    return datetime.fromisoformat(str(s))
+    """Parse an ISO-8601 timestamp back into an aware datetime.
+
+    Sub-microsecond digits are dropped: `datetime` stops at microseconds, and
+    `fromisoformat` before 3.11 rejects any other count outright, so a
+    nanosecond stamp -- what `pandas.Timestamp.isoformat` writes -- made a file
+    readable on 3.12 and unreadable on 3.10.
+    """
+    s = str(s)
+    m = _SUBMICRO.match(s)
+    return datetime.fromisoformat(f'{m[1]}{m[2]}' if m else s)
 
 
