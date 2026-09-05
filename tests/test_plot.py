@@ -67,8 +67,8 @@ def test_imshow_skip_decimates_raster_but_keeps_full_extent():
     assert im.get_array().shape == (200, 20)         # raster decimated (nt/10, nx/5)
     x0, x1, y0, y1 = im.get_extent()
     assert (x0, x1) == (0, 99)                        # channel axis spans full range
-    assert y0 == pytest.approx(d.time_axis[-1])       # time axis spans full range
-    assert y1 == pytest.approx(d.time_axis[0])
+    assert y0 == pytest.approx(d.times()[-1])       # time axis spans full range
+    assert y1 == pytest.approx(d.times()[0])
 
 
 def test_plot_xcorr_extent_and_clim():

@@ -114,7 +114,7 @@ def test_picks_plot_applies_t0_offset():
          "phase_index": [100], "phase_score": [0.9]}
     )
     p = pk.Picks(df=df, fs=100.0, model="m", begin_time=None, nx=8, nt=400, t0_sec=-30.0)
-    ax = p.plot()  # y = t0_sec + sample/fs = -30 + 1.0, matching DASdata.time_axis
+    ax = p.plot()  # y = t0_sec + sample/fs = -30 + 1.0, matching DASdata.times()
     assert ax.collections[0].get_offsets()[0][1] == pytest.approx(-29.0)
 
 

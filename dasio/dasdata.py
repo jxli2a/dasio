@@ -127,23 +127,33 @@ class DASdata:
         )
         return {k: getattr(self, k) for k in keys}
 
-    @property
-    def time_axis(self) -> np.ndarray:
-        """Time axis in seconds (`t0_sec` at sample 0; advances by `dt`)."""
-        return self.t0_sec + np.arange(self.nt) * self.dt
+    def times(self, reftime: Optional[datetime] = None, type: str = 'seconds') -> np.ndarray:
+        """The time of every sample.
 
-    @property
-    def datetime_axis(self) -> np.ndarray:
-        """Time axis as numpy `datetime64[ns]` (absolute, naive UTC).
-
-        `numpy.datetime64` is timezone-naive; we strip `begin_time`'s
-        tzinfo before conversion to avoid the noisy "no explicit
-        representation of timezones" warning. All DASdata timestamps
-        are UTC by convention so the strip is a label change only.
+        `type='seconds'`: floats in the record's own frame (`t0_sec` at sample
+        0), or since `reftime` when one is given -- as `obspy.Trace.times`,
+        nothing on the record changes. `type='datetime'`: absolute
+        `datetime64[ns]`, naive UTC, since numpy carries no zone and every
+        DASdata time is UTC.
         """
-        step = np.timedelta64(int(round(self.dt * 1e9)), 'ns')
-        anchor = np.datetime64(self.begin_time.replace(tzinfo=None))
-        return anchor + np.arange(self.nt) * step
+        if type == 'datetime':
+            step = np.timedelta64(int(round(self.dt * 1e9)), 'ns')
+            return np.datetime64(self.begin_time.replace(tzinfo=None)) + np.arange(self.nt) * step
+        if type != 'seconds':
+            raise ValueError(f"type must be 'seconds' or 'datetime', got {type!r}")
+        start = self.t0_sec if reftime is None else (self.begin_time - reftime).total_seconds()
+        return start + np.arange(self.nt) * self.dt
+
+    @property
+    def reftime(self) -> datetime:
+        """The instant at t = 0 of the seconds frame: what `times()`, `plot`
+        labels and a float `t_range` count from. Assign a datetime to move it,
+        an event's origin time usually; it only rewrites `t0_sec`."""
+        return self.begin_time - timedelta(seconds=self.t0_sec)
+
+    @reftime.setter
+    def reftime(self, when: datetime):
+        self.t0_sec = (self.begin_time - when).total_seconds()
 
     @property
     def channel_axis(self) -> np.ndarray:

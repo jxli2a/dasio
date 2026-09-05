@@ -60,7 +60,7 @@ class Picks:
     begin_time: Optional[datetime]
     nx: int
     nt: int
-    t0_sec: float = 0.0  # seconds-axis value at sample 0, matching DASdata.time_axis
+    t0_sec: float = 0.0  # seconds-axis value at sample 0, matching DASdata.times()
     # `channel_index` is the row position, so it indexes `scores`; `channel` is
     # the active `channel_axis` value, which joins to a DASinfo.
     scores: Optional[np.ndarray] = None
@@ -81,7 +81,7 @@ class Picks:
             sub = self.df[self.df["phase_type"] == phase]
             ax.scatter(
                 sub["channel"],
-                self.t0_sec + sub["phase_index"] / self.fs,  # match DASdata.time_axis
+                self.t0_sec + sub["phase_index"] / self.fs,  # match DASdata.times()
                 s=s,
                 c=color,
                 label=f"{phase} ({len(sub)})",

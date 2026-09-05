@@ -101,11 +101,11 @@ def imshow(
     ch_axis = sub.channel_axis
     ch_lo, ch_hi = int(ch_axis[0]), int(ch_axis[-1])
     if usedatetime:
-        dt_axis = sub.datetime_axis
+        dt_axis = sub.times(type='datetime')
         t_left = mdates.date2num(dt_axis[0].astype('datetime64[us]').astype(object))
         t_right = mdates.date2num(dt_axis[-1].astype('datetime64[us]').astype(object))
     else:
-        tax = sub.time_axis
+        tax = sub.times()
         t_left, t_right = float(tax[0]), float(tax[-1])
 
     # Decimate the raster — every `skip_ch`-th channel and `skip_t`-th sample,
@@ -247,10 +247,10 @@ def wiggle(
     if usedatetime:
         from matplotlib import dates as mdates
         t_vals = mdates.date2num(
-            sub.datetime_axis[::t_step].astype('datetime64[us]').astype(object)
+            sub.times(type='datetime')[::t_step].astype('datetime64[us]').astype(object)
         )
     else:
-        t_vals = sub.time_axis[::t_step]
+        t_vals = sub.times()[::t_step]
 
     if ax is None:
         if figsize is None:
