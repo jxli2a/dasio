@@ -39,6 +39,11 @@ from .readers.optasense import (
 from .readers.detector import detect_format, detect_origin
 from .readers.passcal_segy import read_passcal_segy, read_passcal_segy_metadata
 from .readers.proc import read_data_proc, read_metadata_proc
+from .readers.silixa import (
+    read_silixa_metadata,
+    read_silixa_raw,
+    silixa_count2strainrate_factor,
+)
 
 
 # SEG-Y is not HDF5, so it is detected by suffix rather than by sniffing
@@ -56,6 +61,7 @@ _DATA_READERS = {
     'Basic':        read_basic,
     'OptaSense':    read_optasense_raw,
     'APSensing':    read_apsensing_raw,
+    'Silixa':       read_silixa_raw,
     'Proc':         read_data_proc,
     'Event':        read_event,
     'PASSCAL_SEGY': read_passcal_segy,
@@ -66,6 +72,7 @@ _METADATA_READERS = {
     'Basic':        read_basic_metadata,
     'OptaSense':    read_optasense_metadata,
     'APSensing':    read_apsensing_metadata,
+    'Silixa':       read_silixa_metadata,
     'Proc':         read_metadata_proc,
     'Event':        read_event_metadata,
     'PASSCAL_SEGY': read_passcal_segy_metadata,
@@ -78,6 +85,7 @@ _METADATA_READERS = {
 _FACTOR_FNS = {
     'OptaSense': optasense_count2strain_factor,
     'APSensing': apsensing_radians2strain_factor,
+    'Silixa':    silixa_count2strainrate_factor,
 }
 
 

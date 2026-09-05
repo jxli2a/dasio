@@ -102,7 +102,7 @@ def list_das_files(raw_dir: Path, format: str) -> List[Path]:
             if sub.is_dir() and _ASN_DAY_DIR_RE.match(sub.name):
                 files.extend(list_data_files(sub, _H5))
         return files or list_data_files(raw_dir, _H5_NESTED)
-    if format in ('OptaSense', 'APSensing'):
+    if format in ('OptaSense', 'APSensing', 'Silixa'):
         # Flat is the common layout, but arcata_usgs nests by date
         # (`2024-12-04/sensor_*.h5`) and south_korea_urban writes `.hdf5`.
         # Both scanned to an empty catalog before this.
@@ -423,7 +423,7 @@ class DASdb:
             raise ValueError(
                 f"DASdb.from_csv: cannot infer format from {file.name!r} "
                 "(no `format` column and no `format=` kwarg). Pass "
-                "format='ASN' | 'OptaSense' | 'APSensing' | 'Proc' "
+                "format='ASN' | 'OptaSense' | 'APSensing' | 'Silixa' | 'Proc' "
                 "explicitly. Catalogs from desample.py are 'Proc'."
             )
         if 'segment_id' in df.columns:
@@ -484,7 +484,7 @@ class DASdb:
             raise ValueError(
                 f"DASdb.from_parquet: cannot infer format from {file.name!r} "
                 "(no 'format' file metadata and no format= kwarg). Pass "
-                "format='ASN' | 'OptaSense' | 'APSensing' | 'Proc' "
+                "format='ASN' | 'OptaSense' | 'APSensing' | 'Silixa' | 'Proc' "
                 "explicitly."
             )
         df = pd.read_parquet(file)
@@ -797,7 +797,7 @@ def main(argv=None):
     )
     ap.add_argument(
         '--format', default=None,
-        choices=['ASN', 'OptaSense', 'APSensing', 'Proc', 'Event', 'Basic'],
+        choices=['ASN', 'OptaSense', 'APSensing', 'Silixa', 'Proc', 'Event', 'Basic'],
         help='on-disk format. Detected from the first file when omitted; pass '
             'it to skip that open, or to force a format on a mixed directory.',
     )

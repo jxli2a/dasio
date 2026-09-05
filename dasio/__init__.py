@@ -28,6 +28,7 @@ __all__ = [
     "read_basic", "read_basic_metadata", "write_basic",
     "read_optasense_raw", "read_optasense_metadata", "optasense_count2strain_factor",
     "read_apsensing_raw", "read_apsensing_metadata", "apsensing_radians2strain_factor",
+    "read_silixa_raw", "read_silixa_metadata", "silixa_count2strainrate_factor",
     "read_event", "read_event_metadata",
     "read_passcal_segy", "read_passcal_segy_metadata",
     "detect_format", "detect_origin",
@@ -58,6 +59,9 @@ from .readers.optasense import (
 )
 from .readers.detector import detect_format, detect_origin
 from .readers.passcal_segy import read_passcal_segy, read_passcal_segy_metadata
+from .readers.silixa import (
+    read_silixa_raw, read_silixa_metadata, silixa_count2strainrate_factor,
+)
 from .schema import RawWindow
 
 

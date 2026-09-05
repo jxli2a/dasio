@@ -1,7 +1,7 @@
 # dasio
 
 Lightweight, standalone IO + basic processing for DAS (Distributed Acoustic
-Sensing) data: vendor HDF5 readers (ASN/OptoDAS, OptaSense/QuantX, AP Sensing),
+Sensing) data: vendor HDF5 readers (ASN/OptoDAS, OptaSense/QuantX, AP Sensing, Silixa iDAS),
 a `Proc` concatenate/downsample format, a `Basic` format for converted analysis
 products, an `Event` format, a numpy `DASdata` container, a file catalog
 (`DASdb`), and signal processing including a C++/OpenMP bandpass.
@@ -61,7 +61,7 @@ d = d.to_physical()                          # vendor units -> microstrain (or /
 ```
 
 Readers return the instrument's own units (OptaSense counts, AP Sensing
-radian/s, ASN strain/s); `to_physical()` is the one conversion step, and a no-op
+radian/s, Silixa iDAS counts, ASN strain/s); `to_physical()` is the one conversion step, and a no-op
 if already converted. Raw OptaSense can roll over at 2**32 — call `d.unwrap()`
 first, on the concatenated window rather than per file.
 

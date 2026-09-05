@@ -33,7 +33,7 @@ from ..utils import iso_timestamp, parse_iso
 # fall through to strain/s: files written by `write_data_proc` without raw_meta
 # carry no origin marker, and legacy readFile_HDF likewise treated everything
 # non-OptaSense / non-AP Sensing as already-strain.
-_ORIGIN_UNITS = {"OptaSense": "count", "APSensing": "radian/s"}
+_ORIGIN_UNITS = {"OptaSense": "count", "APSensing": "radian/s", "Silixa": "count/s"}
 _DEFAULT_UNITS = "strain/s"
 
 # Proc re-derives units from /Acquisition_origin on read, so a payload is only

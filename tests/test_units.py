@@ -28,7 +28,7 @@ def test_integrate_reverses_units():
 
 def test_vocabulary_contents():
     assert set(VALID_UNITS) == {
-        "count", "radian", "radian/s", "strain", "strain/s",
+        "count", "count/s", "radian", "radian/s", "strain", "strain/s",
         "microstrain", "microstrain/s",
     }
 

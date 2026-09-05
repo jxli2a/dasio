@@ -216,7 +216,7 @@ def desample_window(
     ) -> DASdata:
     """Read padded window, bandpass over full span, decimate, trim to target.
 
-    Accepts `format` in {'ASN', 'OptaSense', 'APSensing', 'Proc'}. With 'Proc'
+    Accepts `format` in {'ASN', 'OptaSense', 'APSensing', 'Silixa', 'Proc'}. With 'Proc'
     the input files are themselves the output of an earlier desample run, and
     the int32 unwrap is skipped: an OptaSense-origin Proc file still holds
     counts, but they were unwrapped when that file was written and the
@@ -394,7 +394,7 @@ def main(argv=None):
     ap.add_argument('--to', dest='out_dir', required=True, type=Path)
     ap.add_argument(
         '--format', default=None,
-        choices=['ASN', 'OptaSense', 'APSensing', 'Proc'],
+        choices=['ASN', 'OptaSense', 'APSensing', 'Silixa', 'Proc'],
         help='format of --from. Detected from the first file when omitted; '
             'pass it to force one on a mixed directory.',
     )

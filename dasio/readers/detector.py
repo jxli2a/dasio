@@ -20,7 +20,7 @@ import h5py
 
 def detect_format(f: h5py.File) -> str:
     """Return one of: 'Basic', 'Proc', 'ASN', 'OptaSense', 'APSensing',
-    'Event', or 'Unknown'.
+    'Silixa', 'Event', or 'Unknown'.
     """
     if 'Data' in f:
         return 'Proc'
@@ -30,6 +30,8 @@ def detect_format(f: h5py.File) -> str:
         return 'OptaSense'
     if 'ProcessingServer' in f:
         return 'APSensing'
+    if 'Acoustic' in f and 'SamplingFrequency[Hz]' in f['Acoustic'].attrs:
+        return 'Silixa'
     # ASN's payload is also `/data`, but it is caught above; the two formats
     # that reach here name themselves in the attrs.
     if 'data' in f:
@@ -42,7 +44,7 @@ def detect_format(f: h5py.File) -> str:
 
 
 def detect_origin(f: h5py.File) -> str:
-    """Return one of: 'ASN', 'OptaSense', 'APSensing', 'Sintela',
+    """Return one of: 'ASN', 'OptaSense', 'APSensing', 'Silixa', 'Sintela',
     or 'Unknown'. Mirrors the 'system' component of the legacy
     DASutils._get_data_system (external name, unchanged).
     """
@@ -57,6 +59,8 @@ def detect_origin(f: h5py.File) -> str:
             return 'ASN'
         if 'ProcessingServer.ClassifierVersion' in attrs:
             return 'APSensing'
+        if 'SamplingFrequency[Hz]' in attrs:
+            return 'Silixa'
         if 'acquisition.num_channels' in attrs:
             return 'Sintela'
     return 'Unknown'

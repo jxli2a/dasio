@@ -14,6 +14,7 @@ _TO_MICROSTRAIN = {
     "count":    "microstrain",       # OptaSense phase counts
     "radian":   "microstrain",
     "radian/s": "microstrain/s",     # AP Sensing
+    "count/s":  "microstrain/s",     # Silixa iDAS differential counts
     "strain":   "microstrain",       # ASN: physical already, owes only the 1e6
     "strain/s": "microstrain/s",
 }
@@ -21,7 +22,7 @@ _TO_MICROSTRAIN = {
 # The instrument units above — meaningless until a vendor `physical_factor` is
 # applied, where strain merely needs scaling. `dasfile.read` attaches the
 # factor for exactly these.
-_NEEDS_FACTOR = ("count", "radian", "radian/s")
+_NEEDS_FACTOR = ("count", "count/s", "radian", "radian/s")
 
 # Everything `normalize_unit` accepts: the convertible units plus the two they
 # land on. Longest first, because it takes the first substring match and

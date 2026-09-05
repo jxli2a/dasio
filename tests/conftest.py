@@ -99,3 +99,24 @@ def event_file(tmp_path):
         d.attrs["magnitude"] = 3.0
         d.attrs["unit"] = "microstrain/s"
     return p
+
+
+@pytest.fixture
+def silixa_file(tmp_path):
+    """Silixa iDAS layout: one root dataset, every parameter an attr on it."""
+    p = tmp_path / "DF__UTC_20231114_221320.000.h5"
+    with h5py.File(p, "w") as f:
+        d = f.create_dataset("Acoustic", data=np.arange(NT * NX, dtype=np.int16).reshape(NT, NX))
+        d.attrs["Acoustic Output"] = "Differential"
+        d.attrs["SamplingFrequency[Hz]"] = FS
+        d.attrs["SpatialResolution[m]"] = 4.0
+        d.attrs["Fibre Length Multiplier"] = 1.02
+        d.attrs["Start Distance (m)"] = -126.0
+        d.attrs["Stop Distance (m)"] = -126.0 + 3 * 4.08
+        d.attrs["GaugeLength"] = 10.0
+        d.attrs["Unit Calibration (nm)"] = 116.0
+        d.attrs["GPSTimeStamp"] = "14/11/2023 22:13:20.000 (UTC)"
+        d.attrs["CPUTimeStamp"] = "14/11/2023 22:13:19.871 (UTC)"
+        d.attrs["ISO8601 Timestamp"] = "2023-11-14T22:13:20.000+00:00"
+        d.attrs["iDASVersion"] = "2.4.1.111"
+    return p
