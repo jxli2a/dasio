@@ -1,0 +1,1123 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html">
+
+    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+        <title>dasio.plot - dasio documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=fd6457a4" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  --content-width: 60em;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../index.html"><div class="brand">dasio  documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
+  
+  <span class="sidebar-brand-text">dasio  documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../auto_examples/index.html">Examples</a><input aria-label="Toggle navigation of Examples" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../auto_examples/plot_das_basics.html">Basic processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../auto_examples/plot_local_earthquake.html">Local earthquake on the Ridgecrest South array</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../auto_examples/plot_noise_xcorr.html">Ambient-noise cross-correlation on the Ridgecrest South array</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <h1>Source code for dasio.plot</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Minimal plotting helpers for DASdata.</span>
+
+<span class="sd">Two free functions (`imshow`, `wiggle`) and a bound `_PlotAccessor`</span>
+<span class="sd">exposed via `DASdata.plot`. Matplotlib is imported lazily inside each</span>
+<span class="sd">function body so a bare `import dasio` (or `import dasdata`) stays</span>
+<span class="sd">free of the matplotlib startup cost — the load only fires when an</span>
+<span class="sd">actual plot is requested.</span>
+
+<span class="sd">`plot_xcorr` images a cross-correlation gather (the `cc` array of a</span>
+<span class="sd">`dasio.noise.CCGather`); `CCGather.plot()` is the convenience wrapper</span>
+<span class="sd">around it. `plot_spectrogram` images the `(freq, times, S)` result of</span>
+<span class="sd">`psd.spectrogram` / `psd.spectrogram_cwt`, and `plot_fk` / `plot_fc`</span>
+<span class="sd">the f-k and dispersion panels from `dasio.fk`.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+
+<div class="viewcode-block" id="imshow">
+<a class="viewcode-back" href="../../api.html#dasio.plot.imshow">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">imshow</span><span class="p">(</span>
+        <span class="n">d</span><span class="p">,</span>
+        <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">ch_range</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">t_range</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">skip_ch</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">skip_t</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">style</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;seismic&#39;</span><span class="p">,</span>
+        <span class="n">usedatetime</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">perc</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">99.5</span><span class="p">,</span>
+        <span class="n">vmin</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">vmax</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">cmap</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;seismic&#39;</span><span class="p">,</span>
+        <span class="n">cbar</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">figsize</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Color-mapped image of a `DASdata` (regular grid).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    d : DASdata</span>
+<span class="sd">    ax : matplotlib Axes, optional</span>
+<span class="sd">        Plot target; one is created if not given.</span>
+<span class="sd">    ch_range, t_range : tuples, optional</span>
+<span class="sd">        Forwarded to `DASdata.truncate` for the displayed window.</span>
+<span class="sd">        For an arbitrary channel subset, pre-select with</span>
+<span class="sd">        `d.select(ch_index=...)` and plot the result.</span>
+<span class="sd">    skip_ch, skip_t : int, default 1</span>
+<span class="sd">        Plot only every `skip_ch`-th channel / `skip_t`-th time sample —</span>
+<span class="sd">        a coarser, faster raster for big arrays (e.g. `skip_t=5` on a wide</span>
+<span class="sd">        window). Reuses `DASdata.skip_ch` / `.skip_t`. The percentile and</span>
+<span class="sd">        the image both run on the decimated array, so this genuinely speeds</span>
+<span class="sd">        the plot up; the channel/time axes still span the full range. `1`</span>
+<span class="sd">        (default) draws every sample.</span>
+<span class="sd">    style : {&#39;seismic&#39;, &#39;normal&#39;}</span>
+<span class="sd">        `&#39;seismic&#39;` (default, matches legacy DASutils) puts channels</span>
+<span class="sd">        on the x-axis and time on the y-axis with time growing</span>
+<span class="sd">        downward — the traditional seismic-record orientation.</span>
+<span class="sd">        `&#39;normal&#39;` puts time on the x-axis and channels on the y-axis</span>
+<span class="sd">        — easier to read as a stack of time-series.</span>
+<span class="sd">    usedatetime : bool</span>
+<span class="sd">        Show the time axis as `datetime64` ticks (True) instead of</span>
+<span class="sd">        seconds-from-`t0_sec` (False, default).</span>
+<span class="sd">    perc : float</span>
+<span class="sd">        Percentile (of `|data|`) used to set symmetric `vmin` / `vmax`</span>
+<span class="sd">        when the latter aren&#39;t provided. Default 99.5 trims out the</span>
+<span class="sd">        loudest 0.5 % so background noise stays visible.</span>
+<span class="sd">    vmin, vmax : floats, optional</span>
+<span class="sd">        Manual color-scale bounds; bypass `perc` when both are given.</span>
+<span class="sd">    cmap : str or Colormap</span>
+<span class="sd">        Default `&#39;seismic&#39;` (red-white-blue), matches legacy DASutils.</span>
+<span class="sd">    cbar : bool</span>
+<span class="sd">    figsize : (w, h), optional</span>
+<span class="sd">        Figure size when `ax` is created here. Defaults to (8, 4)</span>
+<span class="sd">        for `style=&#39;seismic&#39;` and (4, 8) for `style=&#39;normal&#39;`.</span>
+<span class="sd">        Ignored when `ax` is supplied.</span>
+<span class="sd">    **kwargs : forwarded to `ax.imshow`</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    (ax, im) so callers can attach annotations / set titles / etc.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">dates</span> <span class="k">as</span> <span class="n">mdates</span>
+
+    <span class="k">if</span> <span class="n">style</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;seismic&#39;</span><span class="p">,</span> <span class="s1">&#39;normal&#39;</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;style must be &#39;seismic&#39; or &#39;normal&#39;, got </span><span class="si">{</span><span class="n">style</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">sub</span> <span class="o">=</span> <span class="n">d</span> <span class="k">if</span> <span class="p">(</span><span class="n">ch_range</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">t_range</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="k">else</span> <span class="n">d</span><span class="o">.</span><span class="n">truncate</span><span class="p">(</span>
+        <span class="n">ch_range</span><span class="o">=</span><span class="n">ch_range</span><span class="p">,</span> <span class="n">t_range</span><span class="o">=</span><span class="n">t_range</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Channel count and time-axis extent come from the *full* window, before</span>
+    <span class="c1"># any skip, so the axes always label the true channel / time range; the</span>
+    <span class="c1"># skip below only coarsens the rasterized array, not the coordinates.</span>
+    <span class="n">nx_full</span> <span class="o">=</span> <span class="n">sub</span><span class="o">.</span><span class="n">nx</span>
+    <span class="c1"># Channel numbers of the first and last row, captured before `skip_ch`</span>
+    <span class="c1"># below multiplies `dch`. On a min_ch=2000 read these are 2000 and up, so</span>
+    <span class="c1"># the axis labels the fiber rather than the array. From `channels()`, the</span>
+    <span class="c1"># authority — `ch0 + i*dch` only matches it while the rows are a ramp.</span>
+    <span class="n">ch_axis</span> <span class="o">=</span> <span class="n">sub</span><span class="o">.</span><span class="n">channels</span><span class="p">()</span>
+    <span class="n">ch_lo</span><span class="p">,</span> <span class="n">ch_hi</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ch_axis</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">ch_axis</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">usedatetime</span><span class="p">:</span>
+        <span class="n">dt_axis</span> <span class="o">=</span> <span class="n">sub</span><span class="o">.</span><span class="n">times</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s1">&#39;datetime&#39;</span><span class="p">)</span>
+        <span class="n">t_left</span> <span class="o">=</span> <span class="n">mdates</span><span class="o">.</span><span class="n">date2num</span><span class="p">(</span><span class="n">dt_axis</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;datetime64[us]&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">object</span><span class="p">))</span>
+        <span class="n">t_right</span> <span class="o">=</span> <span class="n">mdates</span><span class="o">.</span><span class="n">date2num</span><span class="p">(</span><span class="n">dt_axis</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;datetime64[us]&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">object</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">tax</span> <span class="o">=</span> <span class="n">sub</span><span class="o">.</span><span class="n">times</span><span class="p">()</span>
+        <span class="n">t_left</span><span class="p">,</span> <span class="n">t_right</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">tax</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">tax</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="c1"># Decimate the raster — every `skip_ch`-th channel and `skip_t`-th sample,</span>
+    <span class="c1"># reusing DASdata.skip_ch / .skip_t. The percentile and imshow then run on</span>
+    <span class="c1"># the smaller array (the real speedup); the extent above keeps the axes.</span>
+    <span class="n">sub</span> <span class="o">=</span> <span class="n">sub</span><span class="o">.</span><span class="n">skip_ch</span><span class="p">(</span><span class="n">skip_ch</span><span class="p">)</span><span class="o">.</span><span class="n">skip_t</span><span class="p">(</span><span class="n">skip_t</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">vmin</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">vmax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nanpercentile</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">sub</span><span class="o">.</span><span class="n">data</span><span class="p">),</span> <span class="n">perc</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">vmin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">vmin</span> <span class="o">=</span> <span class="o">-</span><span class="n">v</span>
+        <span class="k">if</span> <span class="n">vmax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">vmax</span> <span class="o">=</span> <span class="n">v</span>
+
+    <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">figsize</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">figsize</span> <span class="o">=</span> <span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span> <span class="k">if</span> <span class="n">style</span> <span class="o">==</span> <span class="s1">&#39;seismic&#39;</span> <span class="k">else</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">style</span> <span class="o">==</span> <span class="s1">&#39;normal&#39;</span><span class="p">:</span>
+        <span class="c1"># data shape (nx, nt) — imshow it directly: rows=channels, cols=time.</span>
+        <span class="c1"># extent = (left, right, bottom, top); first channel at top.</span>
+        <span class="n">extent</span> <span class="o">=</span> <span class="p">(</span><span class="n">t_left</span><span class="p">,</span> <span class="n">t_right</span><span class="p">,</span> <span class="n">ch_hi</span><span class="p">,</span> <span class="n">ch_lo</span><span class="p">)</span>
+        <span class="n">im</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span>
+            <span class="n">sub</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span>
+            <span class="n">vmin</span><span class="o">=</span><span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">extent</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;time&#39;</span> <span class="k">if</span> <span class="n">usedatetime</span> <span class="k">else</span> <span class="s1">&#39;t (s)&#39;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;channel&#39;</span><span class="p">)</span>
+        <span class="n">date_axis</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span> <span class="k">if</span> <span class="n">usedatetime</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># &#39;seismic&#39;: transpose so rows=time, cols=channels; flip y so</span>
+        <span class="c1"># time grows downward (small-time at top, large-time at bottom).</span>
+        <span class="n">extent</span> <span class="o">=</span> <span class="p">(</span><span class="n">ch_lo</span><span class="p">,</span> <span class="n">ch_hi</span><span class="p">,</span> <span class="n">t_right</span><span class="p">,</span> <span class="n">t_left</span><span class="p">)</span>
+        <span class="n">im</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span>
+            <span class="n">sub</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span>
+            <span class="n">vmin</span><span class="o">=</span><span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">extent</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;channel&#39;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;time&#39;</span> <span class="k">if</span> <span class="n">usedatetime</span> <span class="k">else</span> <span class="s1">&#39;t (s)&#39;</span><span class="p">)</span>
+        <span class="n">date_axis</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span> <span class="k">if</span> <span class="n">usedatetime</span> <span class="k">else</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="n">date_axis</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">date_axis</span><span class="o">.</span><span class="n">axis_date</span><span class="p">()</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">date_axis</span><span class="p">,</span> <span class="s1">&#39;axis_date&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="n">date_axis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">mdates</span><span class="o">.</span><span class="n">AutoDateLocator</span><span class="p">())</span>
+        <span class="n">date_axis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span>
+            <span class="n">mdates</span><span class="o">.</span><span class="n">AutoDateFormatter</span><span class="p">(</span><span class="n">date_axis</span><span class="o">.</span><span class="n">get_major_locator</span><span class="p">())</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">cbar</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="nb">getattr</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="s1">&#39;units&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">ax</span><span class="p">,</span> <span class="n">im</span></div>
+
+
+
+<div class="viewcode-block" id="wiggle">
+<a class="viewcode-back" href="../../api.html#dasio.plot.wiggle">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">wiggle</span><span class="p">(</span>
+        <span class="n">d</span><span class="p">,</span>
+        <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">ch_range</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">t_range</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">n_max_ch</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="n">max_nt</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">,</span>
+        <span class="n">style</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;seismic&#39;</span><span class="p">,</span>
+        <span class="n">scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span>
+        <span class="n">lw</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.6</span><span class="p">,</span>
+        <span class="n">usedatetime</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">normalize</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">figsize</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Per-channel wiggle traces of a `DASdata`.</span>
+
+<span class="sd">    Each retained channel becomes a line offset by its (original)</span>
+<span class="sd">    channel index, optionally amplitude-normalized so all traces</span>
+<span class="sd">    share the same visual range.</span>
+
+<span class="sd">    `style=&#39;seismic&#39;` (default) places channels on the x-axis and</span>
+<span class="sd">    time on the y-axis growing downward — the traditional seismic</span>
+<span class="sd">    record orientation. `style=&#39;normal&#39;` places time on the x-axis</span>
+<span class="sd">    and channel on the y-axis (descending), which reads more like</span>
+<span class="sd">    a stack of time-series.</span>
+
+<span class="sd">    `n_max_ch` caps the number of traces drawn — when</span>
+<span class="sd">    `sub.nx &gt; n_max_ch` the channels are decimated with stride</span>
+<span class="sd">    `ceil(sub.nx / n_max_ch)`. Defaults to 100; pass `None` to draw</span>
+<span class="sd">    every channel. This stops a casual `d.plot.wiggle()` on a</span>
+<span class="sd">    full-array DASdata from rendering thousands of overlapping lines.</span>
+<span class="sd">    Use `ch_range` first if you want a specific window.</span>
+
+<span class="sd">    `max_nt` caps the number of time samples drawn *per trace* — when</span>
+<span class="sd">    `sub.nt &gt; max_nt` the time axis is strided by `ceil(sub.nt / max_nt)`.</span>
+<span class="sd">    Wiggle render cost scales with `n_traces * n_samples`, and at screen</span>
+<span class="sd">    resolution a few thousand points per trace is already pixel-lossless,</span>
+<span class="sd">    so this is the main speed lever on wide time windows. Defaults to</span>
+<span class="sd">    5000; pass `None` to draw every sample.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+    <span class="k">if</span> <span class="n">style</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;seismic&#39;</span><span class="p">,</span> <span class="s1">&#39;normal&#39;</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;style must be &#39;seismic&#39; or &#39;normal&#39;, got </span><span class="si">{</span><span class="n">style</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">sub</span> <span class="o">=</span> <span class="n">d</span> <span class="k">if</span> <span class="p">(</span><span class="n">ch_range</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">t_range</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="k">else</span> <span class="n">d</span><span class="o">.</span><span class="n">truncate</span><span class="p">(</span>
+        <span class="n">ch_range</span><span class="o">=</span><span class="n">ch_range</span><span class="p">,</span> <span class="n">t_range</span><span class="o">=</span><span class="n">t_range</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">n_max_ch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">sub</span><span class="o">.</span><span class="n">nx</span> <span class="o">&gt;</span> <span class="n">n_max_ch</span><span class="p">:</span>
+        <span class="n">step</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">sub</span><span class="o">.</span><span class="n">nx</span> <span class="o">/</span> <span class="n">n_max_ch</span><span class="p">))</span>
+        <span class="n">ch_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">sub</span><span class="o">.</span><span class="n">nx</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">step</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">ch_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">sub</span><span class="o">.</span><span class="n">nx</span><span class="p">)</span>
+
+    <span class="c1"># Decimate the time axis for display. Wiggle cost scales with</span>
+    <span class="c1"># n_traces * n_samples; at screen resolution a few thousand points per</span>
+    <span class="c1"># trace is already pixel-lossless, so striding wide windows is the main</span>
+    <span class="c1"># speedup (analogous to n_max_ch for channels).</span>
+    <span class="k">if</span> <span class="n">max_nt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">sub</span><span class="o">.</span><span class="n">nt</span> <span class="o">&gt;</span> <span class="n">max_nt</span><span class="p">:</span>
+        <span class="n">t_step</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">sub</span><span class="o">.</span><span class="n">nt</span> <span class="o">/</span> <span class="n">max_nt</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">t_step</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="c1"># Rows select the traces; channel numbers place them on the axis.</span>
+    <span class="n">ch_vals</span> <span class="o">=</span> <span class="n">sub</span><span class="o">.</span><span class="n">channels</span><span class="p">()[</span><span class="n">ch_indices</span><span class="p">]</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">sub</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">ch_indices</span><span class="p">][:,</span> <span class="p">::</span><span class="n">t_step</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">normalize</span><span class="p">:</span>
+        <span class="n">peak</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="mf">1e-30</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span> <span class="o">/</span> <span class="n">peak</span>
+    <span class="c1"># Scale by the plotted spacing (`step` traces apart, `dch` channels each)</span>
+    <span class="c1"># so a peak ±1 normalized trace just fills the gap between neighbours —</span>
+    <span class="c1"># keeps visual density constant regardless of decimation.</span>
+    <span class="n">gap</span> <span class="o">=</span> <span class="n">step</span> <span class="o">*</span> <span class="n">sub</span><span class="o">.</span><span class="n">dch</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span> <span class="o">*</span> <span class="n">scale</span> <span class="o">*</span> <span class="n">gap</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">LineCollection</span>
+
+    <span class="c1"># Numeric time axis for the line geometry. A LineCollection bypasses</span>
+    <span class="c1"># matplotlib&#39;s datetime unit conversion, so convert explicitly here and</span>
+    <span class="c1"># flip the relevant axis into date mode afterwards.</span>
+    <span class="k">if</span> <span class="n">usedatetime</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">dates</span> <span class="k">as</span> <span class="n">mdates</span>
+        <span class="n">t_vals</span> <span class="o">=</span> <span class="n">mdates</span><span class="o">.</span><span class="n">date2num</span><span class="p">(</span>
+            <span class="n">sub</span><span class="o">.</span><span class="n">times</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s1">&#39;datetime&#39;</span><span class="p">)[::</span><span class="n">t_step</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;datetime64[us]&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">t_vals</span> <span class="o">=</span> <span class="n">sub</span><span class="o">.</span><span class="n">times</span><span class="p">()[::</span><span class="n">t_step</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">figsize</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">n_ch</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ch_indices</span><span class="p">)</span>
+            <span class="n">figsize</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">n_ch</span> <span class="o">*</span> <span class="mf">0.25</span><span class="p">),</span> <span class="mi">10</span><span class="p">)</span> <span class="k">if</span> <span class="n">style</span> <span class="o">==</span> <span class="s1">&#39;seismic&#39;</span>
+                <span class="k">else</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">n_ch</span> <span class="o">*</span> <span class="mf">0.25</span><span class="p">))</span>
+            <span class="p">)</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
+
+    <span class="c1"># One LineCollection (single artist) instead of an `ax.plot` per channel —</span>
+    <span class="c1"># the per-trace Python loop is the wiggle bottleneck on wide windows.</span>
+    <span class="n">offs</span> <span class="o">=</span> <span class="n">data</span> <span class="o">+</span> <span class="n">ch_vals</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span>                        <span class="c1"># (n_lines, nt) offset traces</span>
+    <span class="n">tt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">broadcast_to</span><span class="p">(</span><span class="n">t_vals</span><span class="p">,</span> <span class="n">offs</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>              <span class="c1"># (n_lines, nt)</span>
+    <span class="k">if</span> <span class="n">style</span> <span class="o">==</span> <span class="s1">&#39;seismic&#39;</span><span class="p">:</span>
+        <span class="n">segs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">offs</span><span class="p">,</span> <span class="n">tt</span><span class="p">],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>              <span class="c1"># x = amplitude, y = time</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">segs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">tt</span><span class="p">,</span> <span class="n">offs</span><span class="p">],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>              <span class="c1"># x = time, y = amplitude</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">add_collection</span><span class="p">(</span><span class="n">LineCollection</span><span class="p">(</span><span class="n">segs</span><span class="p">,</span> <span class="n">colors</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">linewidths</span><span class="o">=</span><span class="n">lw</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">style</span> <span class="o">==</span> <span class="s1">&#39;seismic&#39;</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">ch_vals</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">gap</span><span class="p">,</span> <span class="n">ch_vals</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">gap</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">t_vals</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">t_vals</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>                <span class="c1"># inverted (time grows down)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;channel&#39;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;time&#39;</span> <span class="k">if</span> <span class="n">usedatetime</span> <span class="k">else</span> <span class="s1">&#39;t (s)&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">usedatetime</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">yaxis_date</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">t_vals</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">t_vals</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">ch_vals</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">gap</span><span class="p">,</span> <span class="n">ch_vals</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">gap</span><span class="p">)</span>  <span class="c1"># inverted (first ch at top)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;time&#39;</span> <span class="k">if</span> <span class="n">usedatetime</span> <span class="k">else</span> <span class="s1">&#39;t (s)&#39;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;channel&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">usedatetime</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">xaxis_date</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">ax</span></div>
+
+
+
+<div class="viewcode-block" id="plot_xcorr">
+<a class="viewcode-back" href="../../api.html#dasio.plot.plot_xcorr">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_xcorr</span><span class="p">(</span>
+        <span class="n">cc</span><span class="p">,</span>
+        <span class="n">lag_s</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">fs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">offsets</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">perc</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">99.0</span><span class="p">,</span>
+        <span class="n">vmin</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">vmax</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">cmap</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;seismic&#39;</span><span class="p">,</span>
+        <span class="n">cbar</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">figsize</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Image a cross-correlation gather — pair (x) vs lag time (y, downward).</span>
+
+<span class="sd">    Plots the ``(npair, nlag)`` array returned by `dasio.noise.xcorr_stack`</span>
+<span class="sd">    (the first tuple element) or `xcorr_dataset` (``result[&#39;cc&#39;]``): each column</span>
+<span class="sd">    is one channel pair&#39;s stacked correlation, zero lag at the centre row. Lag</span>
+<span class="sd">    time runs down the vertical axis (seismic-gather convention) and pairs along</span>
+<span class="sd">    the horizontal axis, so a common-shot gather shows the virtual-source moveout</span>
+<span class="sd">    fanning out symmetrically in +/- lag.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    cc : ``(npair, nlag)`` array.</span>
+<span class="sd">    lag_s : lag axis in seconds (e.g. ``xcorr_dataset``&#39;s ``result[&#39;lag_s&#39;]``).</span>
+<span class="sd">        If None it is built from `fs` (or falls back to sample indices), with</span>
+<span class="sd">        zero lag at the centre. Drawn on the vertical axis, increasing downward.</span>
+<span class="sd">    fs : sample rate, used to label the lag axis in seconds when `lag_s` is None.</span>
+<span class="sd">    offsets : optional per-pair x values (e.g. inter-channel offset in km for a</span>
+<span class="sd">        common-offset gather); defaults to the pair index.</span>
+<span class="sd">    perc, vmin, vmax, cmap, cbar, figsize : as in `imshow` — `perc` sets</span>
+<span class="sd">        symmetric colour limits from the `perc`-th percentile of ``|cc|`` unless</span>
+<span class="sd">        `vmin`/`vmax` are given.</span>
+<span class="sd">    **kwargs : forwarded to `ax.imshow`.</span>
+
+<span class="sd">    Returns ``(ax, im)``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+    <span class="n">cc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
+    <span class="n">npair</span><span class="p">,</span> <span class="n">nlag</span> <span class="o">=</span> <span class="n">cc</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">half</span> <span class="o">=</span> <span class="p">(</span><span class="n">nlag</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
+    <span class="k">if</span> <span class="n">lag_s</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">lag_s</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">nlag</span><span class="p">)</span> <span class="o">-</span> <span class="n">half</span><span class="p">)</span> <span class="o">/</span> <span class="n">fs</span> <span class="k">if</span> <span class="n">fs</span> <span class="k">else</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">nlag</span><span class="p">)</span> <span class="o">-</span> <span class="n">half</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">lag_s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">lag_s</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">npair</span><span class="p">)</span> <span class="k">if</span> <span class="n">offsets</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">offsets</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">vmin</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">vmax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nanpercentile</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">cc</span><span class="p">),</span> <span class="n">perc</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">vmin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">vmin</span> <span class="o">=</span> <span class="o">-</span><span class="n">v</span>
+        <span class="k">if</span> <span class="n">vmax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">vmax</span> <span class="o">=</span> <span class="n">v</span>
+
+    <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span> <span class="ow">or</span> <span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+
+    <span class="c1"># lag on the vertical axis, increasing downward (top = first/most-negative lag)</span>
+    <span class="n">extent</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">lag_s</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">lag_s</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+    <span class="n">im</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">cc</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span><span class="p">,</span>
+                   <span class="n">extent</span><span class="o">=</span><span class="n">extent</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;offset&#39;</span> <span class="k">if</span> <span class="n">offsets</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s1">&#39;pair index&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;lag (s)&#39;</span> <span class="k">if</span> <span class="p">(</span><span class="n">lag_s</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">fs</span><span class="p">)</span> <span class="k">else</span> <span class="s1">&#39;lag (samples)&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">cbar</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;cross-correlation&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ax</span><span class="p">,</span> <span class="n">im</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_period_ticks</span><span class="p">(</span><span class="n">fmin</span><span class="p">,</span> <span class="n">fmax</span><span class="p">,</span> <span class="n">nmax</span><span class="o">=</span><span class="mi">8</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Round periods (1-2-5 series, seconds) inside a frequency band.&quot;&quot;&quot;</span>
+    <span class="n">cands</span> <span class="o">=</span> <span class="p">[</span><span class="n">m</span> <span class="o">*</span> <span class="mf">10.0</span> <span class="o">**</span> <span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">)]</span>
+    <span class="n">ticks</span> <span class="o">=</span> <span class="p">[</span><span class="n">T</span> <span class="k">for</span> <span class="n">T</span> <span class="ow">in</span> <span class="n">cands</span> <span class="k">if</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">fmax</span> <span class="o">&lt;=</span> <span class="n">T</span> <span class="o">&lt;=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">fmin</span><span class="p">]</span>
+    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">ticks</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">nmax</span><span class="p">:</span>
+        <span class="n">ticks</span> <span class="o">=</span> <span class="n">ticks</span><span class="p">[::</span><span class="mi">2</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">ticks</span>
+
+
+<div class="viewcode-block" id="plot_spectrogram">
+<a class="viewcode-back" href="../../api.html#dasio.plot.plot_spectrogram">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_spectrogram</span><span class="p">(</span>
+        <span class="n">S</span><span class="p">,</span>
+        <span class="n">freq</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">times</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">ich</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">t0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">usedatetime</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">log_color</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">period_axis</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">perc</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">99.5</span><span class="p">,</span>
+        <span class="n">vmin</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">vmax</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">cmap</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;turbo&#39;</span><span class="p">,</span>
+        <span class="n">cbar</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">units</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+        <span class="n">figsize</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Image a time-resolved PSD from `psd.spectrogram` or `psd.spectrogram_cwt`.</span>
+
+<span class="sd">    Data first, like the other plotters here — either the whole result or the</span>
+<span class="sd">    array plus its axes:</span>
+
+<span class="sd">        plot_spectrogram(spectrogram_cwt(d.data, d.fs, 1/200, 0.5))</span>
+<span class="sd">        plot_spectrogram(S, freq, times, t0=d.start_time)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    S : ``(nchan, nfreq, ntime)`` or ``(nfreq, ntime)`` array, or the whole</span>
+<span class="sd">        ``(freq, times, S)`` tuple those functions return (accepted as-is</span>
+<span class="sd">        when `freq`/`times` are not given).</span>
+<span class="sd">    freq, times : the frequency (Hz) and time (s) axes; taken from the result</span>
+<span class="sd">        tuple, or bin/sample indices when absent.</span>
+<span class="sd">    ich : channel to draw when ``S`` is 3-D.</span>
+<span class="sd">    t0 : optional absolute start time — ``np.datetime64``, datetime, ISO</span>
+<span class="sd">        string, or unix seconds. Turns the x-axis into calendar time.</span>
+<span class="sd">    usedatetime : calendar-time x-axis, as in `imshow`. Default None means</span>
+<span class="sd">        &quot;whenever `t0` is given&quot;. True without `t0` raises — ``times`` holds</span>
+<span class="sd">        seconds from the record start, so the epoch must come from somewhere.</span>
+<span class="sd">        False keeps the seconds axis even when `t0` is passed.</span>
+<span class="sd">    log_color : color by ``log10(S)`` (default) rather than linear PSD.</span>
+<span class="sd">    period_axis : log-frequency axis labeled in seconds of period. Default</span>
+<span class="sd">        None auto-enables it for a log-spaced grid (`spectrogram_cwt`) and</span>
+<span class="sd">        leaves a linear grid (`spectrogram`) on a linear frequency axis.</span>
+<span class="sd">    perc, vmin, vmax : color limits; unless given, the `perc`-th and</span>
+<span class="sd">        ``(100-perc)``-th percentiles of the finite color values.</span>
+<span class="sd">    cmap, cbar, figsize : as in `imshow`.</span>
+<span class="sd">    units : physical unit of the data (e.g. ``&#39;Pa&#39;``) for the colorbar label,</span>
+<span class="sd">        shown as units^2/Hz.</span>
+<span class="sd">    **kwargs : forwarded to `ax.pcolormesh` (`rasterized` defaults to True —</span>
+<span class="sd">        thousands of quads otherwise swamp vector backends).</span>
+
+<span class="sd">    NaN cells — e.g. the cone of influence that `spectrogram_cwt` masks —</span>
+<span class="sd">    are left blank. Returns ``(ax, im)``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+    <span class="k">if</span> <span class="n">freq</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">times</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">))</span> \
+            <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">S</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">freq</span><span class="p">,</span> <span class="n">times</span><span class="p">,</span> <span class="n">S</span> <span class="o">=</span> <span class="n">S</span>
+    <span class="n">S</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">S</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">S</span> <span class="o">=</span> <span class="n">S</span><span class="p">[</span><span class="n">ich</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">S</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;S must be 2-D or 3-D, got shape </span><span class="si">{</span><span class="n">S</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">freq</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">S</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">if</span> <span class="n">freq</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
+    <span class="n">times</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">S</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">if</span> <span class="n">times</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">freq</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="n">S</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],)</span> <span class="ow">or</span> <span class="n">times</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="n">S</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;axis lengths </span><span class="si">{</span><span class="n">freq</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">times</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2"> do not match S </span><span class="si">{</span><span class="n">S</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">period_axis</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">freq</span><span class="p">))</span> <span class="k">if</span> <span class="p">(</span><span class="n">freq</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span> <span class="ow">and</span> <span class="n">freq</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="n">period_axis</span> <span class="o">=</span> <span class="n">r</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="n">np</span><span class="o">.</span><span class="n">errstate</span><span class="p">(</span><span class="n">divide</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="n">invalid</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">):</span>
+        <span class="n">C</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">S</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">))</span> <span class="k">if</span> <span class="n">log_color</span> <span class="k">else</span> <span class="n">S</span>
+    <span class="n">finite</span> <span class="o">=</span> <span class="n">C</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">C</span><span class="p">)]</span>
+    <span class="k">if</span> <span class="n">finite</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;spectrogram holds no positive finite value&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">vmax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">vmax</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">finite</span><span class="p">,</span> <span class="n">perc</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">vmin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">vmin</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">finite</span><span class="p">,</span> <span class="mf">100.0</span> <span class="o">-</span> <span class="n">perc</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">usedatetime</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">usedatetime</span> <span class="o">=</span> <span class="n">t0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">usedatetime</span> <span class="ow">and</span> <span class="n">t0</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;usedatetime=True needs t0 — `times` holds seconds from the &quot;</span>
+            <span class="s2">&quot;record start, so the absolute epoch must be supplied&quot;</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">usedatetime</span><span class="p">:</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.dates</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mdates</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">t0</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
+            <span class="n">t0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">datetime64</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">t0</span><span class="p">)),</span> <span class="s1">&#39;s&#39;</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">mdates</span><span class="o">.</span><span class="n">date2num</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">datetime64</span><span class="p">(</span><span class="n">t0</span><span class="p">))</span> <span class="o">+</span> <span class="n">times</span> <span class="o">/</span> <span class="mf">86400.0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">times</span>
+
+    <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span> <span class="ow">or</span> <span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+    <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;rasterized&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;shading&#39;</span><span class="p">,</span> <span class="s1">&#39;auto&#39;</span><span class="p">)</span>
+    <span class="n">im</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">period_axis</span><span class="p">:</span>
+        <span class="n">fpos</span> <span class="o">=</span> <span class="n">freq</span><span class="p">[</span><span class="n">freq</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>           <span class="c1"># a linear grid&#39;s DC row has no period</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">fpos</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">fpos</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+        <span class="n">ticks</span> <span class="o">=</span> <span class="n">_period_ticks</span><span class="p">(</span><span class="n">fpos</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">fpos</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">ticks</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">T</span> <span class="k">for</span> <span class="n">T</span> <span class="ow">in</span> <span class="n">ticks</span><span class="p">])</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_yticklabels</span><span class="p">([</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">T</span><span class="si">:</span><span class="s1">g</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">T</span> <span class="ow">in</span> <span class="n">ticks</span><span class="p">])</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">minorticks_off</span><span class="p">()</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Period (s)&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;f (Hz)&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">usedatetime</span><span class="p">:</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.dates</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mdates</span>
+        <span class="n">loc</span> <span class="o">=</span> <span class="n">mdates</span><span class="o">.</span><span class="n">AutoDateLocator</span><span class="p">()</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">loc</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">mdates</span><span class="o">.</span><span class="n">ConciseDateFormatter</span><span class="p">(</span><span class="n">loc</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;t (s)&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">cbar</span><span class="p">:</span>
+        <span class="n">ub</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">units</span><span class="si">}</span><span class="s1">$^2$/Hz&#39;</span> <span class="k">if</span> <span class="n">units</span> <span class="k">else</span> <span class="s1">&#39;data$^2$/Hz&#39;</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;log$_</span><span class="se">{{</span><span class="s1">10</span><span class="se">}}</span><span class="s1">$ PSD (</span><span class="si">{</span><span class="n">ub</span><span class="si">}</span><span class="s1">)&#39;</span> <span class="k">if</span> <span class="n">log_color</span> <span class="k">else</span> <span class="sa">f</span><span class="s1">&#39;PSD (</span><span class="si">{</span><span class="n">ub</span><span class="si">}</span><span class="s1">)&#39;</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ax</span><span class="p">,</span> <span class="n">im</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_db_label</span><span class="p">(</span><span class="n">db</span><span class="p">,</span> <span class="n">scaling</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Colour-bar label matching the scaling `_fk_amplitude` applied.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">db</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;amplitude&#39;</span>
+    <span class="k">return</span> <span class="s1">&#39;dB re max&#39;</span> <span class="k">if</span> <span class="n">scaling</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="s1">&#39;dB&#39;</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_fk_amplitude</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">db</span><span class="p">,</span> <span class="n">perc</span><span class="p">,</span> <span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="p">,</span> <span class="n">scaling</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Amplitude in dB (or linear), plus the percentile colour limits.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        A: complex or real panel.</span>
+<span class="sd">        db: convert to dB.</span>
+<span class="sd">        perc: percentile for `vmax` when it is not given.</span>
+<span class="sd">        vmin: lower colour limit, or None to derive it.</span>
+<span class="sd">        vmax: upper colour limit, or None to derive it.</span>
+<span class="sd">        scaling: what `A` is, which fixes both the dB law and the reference.</span>
+<span class="sd">            None treats it as a raw, uncalibrated amplitude and scales to the</span>
+<span class="sd">            panel maximum. &#39;density&#39; treats it as the calibrated power spectral</span>
+<span class="sd">            density `fk(scaling=&#39;density&#39;)` returns — 10*log10, since it is a</span>
+<span class="sd">            power, against one unit rather than the panel peak.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        A: magnitude, in dB if requested.</span>
+<span class="sd">        vmin: resolved lower colour limit.</span>
+<span class="sd">        vmax: resolved upper colour limit.</span>
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: if the panel holds no positive finite value, or `scaling`</span>
+<span class="sd">            is neither None nor &#39;density&#39;.</span>
+
+<span class="sd">    The default normalises to the panel&#39;s own maximum, because a raw f-k</span>
+<span class="sd">    amplitude carries whatever scaling the gather and the transform size gave</span>
+<span class="sd">    it — only the contrast means anything, and `vmax` sits at 0 by</span>
+<span class="sd">    construction. The consequence is that two panels cannot be compared with</span>
+<span class="sd">    each other: each is measured against its own peak. Pass the `scaling`</span>
+<span class="sd">    that `fk` produced the panel with to keep absolute, comparable numbers.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">A</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">db</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">scaling</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">factor</span><span class="p">,</span> <span class="n">denom</span> <span class="o">=</span> <span class="mf">20.0</span><span class="p">,</span> <span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="ow">or</span> <span class="mf">1.0</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">scaling</span> <span class="o">==</span> <span class="s1">&#39;density&#39;</span><span class="p">:</span>
+            <span class="n">factor</span><span class="p">,</span> <span class="n">denom</span> <span class="o">=</span> <span class="mf">10.0</span><span class="p">,</span> <span class="mf">1.0</span>      <span class="c1"># a power, so 10*log10, absolute</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;scaling must be None or &#39;density&#39;, got </span><span class="si">{</span><span class="n">scaling</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">np</span><span class="o">.</span><span class="n">errstate</span><span class="p">(</span><span class="n">divide</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">):</span>
+            <span class="n">A</span> <span class="o">=</span> <span class="n">factor</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">A</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span> <span class="o">/</span> <span class="n">denom</span><span class="p">)</span>
+    <span class="n">finite</span> <span class="o">=</span> <span class="n">A</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">A</span><span class="p">)]</span>
+    <span class="k">if</span> <span class="n">finite</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;the panel holds no positive finite value&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">vmax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">vmax</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">finite</span><span class="p">,</span> <span class="n">perc</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">vmin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">vmin</span> <span class="o">=</span> <span class="n">vmax</span> <span class="o">-</span> <span class="mf">60.0</span> <span class="k">if</span> <span class="n">db</span> <span class="k">else</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">finite</span><span class="p">,</span> <span class="mf">100.0</span> <span class="o">-</span> <span class="n">perc</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">A</span><span class="p">,</span> <span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span>
+
+
+<div class="viewcode-block" id="plot_fk">
+<a class="viewcode-back" href="../../api.html#dasio.plot.plot_fk">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_fk</span><span class="p">(</span><span class="n">F</span><span class="p">,</span> <span class="n">f</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">db</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">perc</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">100.0</span><span class="p">,</span>
+            <span class="n">vmin</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">vmax</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">scaling</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">cmap</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;turbo&#39;</span><span class="p">,</span>
+            <span class="n">cbar</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">velocities</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">figsize</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Image the f-k plane from `dasio.fk.fk`.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        F: f-k amplitude from `fk`, or the whole `(F, f, k)` result.</span>
+<span class="sd">        f: frequency axis [Hz]; taken from `F` when it is the whole result.</span>
+<span class="sd">        k: wavenumber axis [rad/m]; likewise.</span>
+<span class="sd">        ax: axes to draw on; a new figure is made when None.</span>
+<span class="sd">        db: scale to dB re the panel maximum.</span>
+<span class="sd">        perc: percentile for the upper colour limit.</span>
+<span class="sd">        vmin: lower colour limit; defaults to 60 dB below `vmax`.</span>
+<span class="sd">        vmax: upper colour limit.</span>
+<span class="sd">        scaling: what the panel is, matching how `fk` produced it — the same</span>
+<span class="sd">            token in both places. None (default) is a raw complex amplitude:</span>
+<span class="sd">            dB is taken relative to the panel maximum, because the absolute</span>
+<span class="sd">            level of a raw transform has no meaning (it moves with the sample</span>
+<span class="sd">            count), and the consequence is that two panels cannot be compared</span>
+<span class="sd">            with each other. &#39;density&#39; is what `fk(..., scaling=&#39;density&#39;)`</span>
+<span class="sd">            returns: a power, so 10*log10 against one unit, absolute and</span>
+<span class="sd">            comparable between panels.</span>
+<span class="sd">        cmap: colormap name.</span>
+<span class="sd">        cbar: draw the colour bar.</span>
+<span class="sd">        velocities: `c = 2*pi*f/k` guide lines [m/s] — positive values draw</span>
+<span class="sd">            both directions, signed values draw one.</span>
+<span class="sd">        figsize: figure size when `ax` is None.</span>
+<span class="sd">        **kwargs: forwarded to `pcolormesh`.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        ax: the axes drawn on.</span>
+<span class="sd">        im: the `QuadMesh`, for a colour bar or limit tweak.</span>
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: if `F` is not 2-D or the axes do not match it.</span>
+
+<span class="sd">    Data first, like the other plotters here — either the whole result or the</span>
+<span class="sd">    array plus its axes:</span>
+
+<span class="sd">        plot_fk(*fk(d.data, d.dx, d.dt))</span>
+<span class="sd">        plot_fk(F, f, k, velocities=[1500, 3000])</span>
+
+<span class="sd">    Frequency runs along x and wavenumber along y, so the apparent-velocity</span>
+<span class="sd">    fans open sideways and a dispersive arrival reads left to right. `db`</span>
+<span class="sd">    scales relative to the panel maximum, since an f-k amplitude inherits the</span>
+<span class="sd">    gather&#39;s units and only its contrast means anything.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+    <span class="k">if</span> <span class="n">f</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">k</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">F</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">))</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">F</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">F</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="n">F</span>
+    <span class="n">F</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">F</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">F</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;F must be 2-D, got shape </span><span class="si">{</span><span class="n">F</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">if</span> <span class="n">f</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">k</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],)</span> <span class="ow">or</span> <span class="n">f</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;axis lengths </span><span class="si">{</span><span class="n">k</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">f</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1"> do not match F </span><span class="si">{</span><span class="n">F</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="n">A</span><span class="p">,</span> <span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span> <span class="o">=</span> <span class="n">_fk_amplitude</span><span class="p">(</span><span class="n">F</span><span class="p">,</span> <span class="n">db</span><span class="p">,</span> <span class="n">perc</span><span class="p">,</span> <span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="p">,</span> <span class="n">scaling</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span> <span class="ow">or</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+    <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;rasterized&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;shading&#39;</span><span class="p">,</span> <span class="s1">&#39;auto&#39;</span><span class="p">)</span>
+    <span class="n">im</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="n">vs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">velocities</span> <span class="k">if</span> <span class="n">velocities</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[])</span>
+    <span class="k">if</span> <span class="n">vs</span><span class="o">.</span><span class="n">size</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">vs</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="n">vs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">vs</span><span class="p">,</span> <span class="o">-</span><span class="n">vs</span><span class="p">])</span>      <span class="c1"># unsigned means &quot;both fans&quot;</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">vs</span><span class="p">:</span>
+        <span class="c1"># k = 2*pi*f/c is a line through the origin; drawing it against the</span>
+        <span class="c1"># frequency axis keeps it right whatever the k limits are.</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">f</span> <span class="o">/</span> <span class="n">c</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+        <span class="n">xlabel</span><span class="o">=</span><span class="s1">&#39;f (Hz)&#39;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s1">&#39;k (rad/m)&#39;</span><span class="p">,</span>
+        <span class="n">xlim</span><span class="o">=</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">f</span><span class="o">.</span><span class="n">max</span><span class="p">()),</span> <span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="n">k</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">k</span><span class="o">.</span><span class="n">max</span><span class="p">()),</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">cbar</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">_db_label</span><span class="p">(</span><span class="n">db</span><span class="p">,</span> <span class="n">scaling</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">ax</span><span class="p">,</span> <span class="n">im</span></div>
+
+
+
+<div class="viewcode-block" id="plot_fc">
+<a class="viewcode-back" href="../../api.html#dasio.plot.plot_fc">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_fc</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">f</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">db</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">perc</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">100.0</span><span class="p">,</span>
+            <span class="n">vmin</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">vmax</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">scaling</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">cmap</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;turbo&#39;</span><span class="p">,</span> <span class="n">cbar</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">picks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">figsize</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Image the dispersion panel from `dasio.fk.fk2fc`.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        A: dispersion panel from `fk2fc`, or the whole `(A, f, c)` result.</span>
+<span class="sd">        f: frequency axis [Hz]; taken from `A` when it is the whole result.</span>
+<span class="sd">        c: velocity axis [m/s]; likewise.</span>
+<span class="sd">        ax: axes to draw on; a new figure is made when None.</span>
+<span class="sd">        db: scale to dB re the panel maximum.</span>
+<span class="sd">        perc: percentile for the upper colour limit.</span>
+<span class="sd">        vmin: lower colour limit.</span>
+<span class="sd">        vmax: upper colour limit.</span>
+<span class="sd">        scaling: what the panel is, as in `plot_fk`; pass &#39;density&#39; for one</span>
+<span class="sd">            built from `fk(..., scaling=&#39;density&#39;)`.</span>
+<span class="sd">        cmap: colormap name.</span>
+<span class="sd">        cbar: draw the colour bar.</span>
+<span class="sd">        picks: `(f, c)` sequences to overlay, e.g. a picked dispersion curve.</span>
+<span class="sd">        figsize: figure size when `ax` is None.</span>
+<span class="sd">        **kwargs: forwarded to `pcolormesh`.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        ax: the axes drawn on.</span>
+<span class="sd">        im: the `QuadMesh`, for a colour bar or limit tweak.</span>
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: if `A` is not 2-D or the axes do not match it.</span>
+
+<span class="sd">        plot_fc(*fk2fc(F, f, k, 200, 5000))</span>
+
+<span class="sd">    Frequency on x, apparent velocity on y — the orientation dispersion curves</span>
+<span class="sd">    are picked in. Linear colour by default: a dispersion image is read by</span>
+<span class="sd">    where its ridge is, and dB flattens the contrast that makes it stand out.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+    <span class="k">if</span> <span class="n">f</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">c</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">))</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">A</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">A</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">A</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">A</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;A must be 2-D, got shape </span><span class="si">{</span><span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">if</span> <span class="n">f</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],)</span> <span class="ow">or</span> <span class="n">f</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;axis lengths </span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">f</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1"> do not match A </span><span class="si">{</span><span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="n">A</span><span class="p">,</span> <span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span> <span class="o">=</span> <span class="n">_fk_amplitude</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">db</span><span class="p">,</span> <span class="n">perc</span><span class="p">,</span> <span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="p">,</span> <span class="n">scaling</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span> <span class="ow">or</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+    <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;rasterized&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;shading&#39;</span><span class="p">,</span> <span class="s1">&#39;auto&#39;</span><span class="p">)</span>
+    <span class="n">im</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">picks</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">pf</span><span class="p">,</span> <span class="n">pc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">picks</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">picks</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">pf</span><span class="p">,</span> <span class="n">pc</span><span class="p">,</span> <span class="s1">&#39;w.-&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">ms</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+        <span class="n">xlabel</span><span class="o">=</span><span class="s1">&#39;f (Hz)&#39;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s1">&#39;c (m/s)&#39;</span><span class="p">,</span>
+        <span class="n">xlim</span><span class="o">=</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">f</span><span class="o">.</span><span class="n">max</span><span class="p">()),</span> <span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">c</span><span class="o">.</span><span class="n">max</span><span class="p">()),</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">cbar</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">_db_label</span><span class="p">(</span><span class="n">db</span><span class="p">,</span> <span class="n">scaling</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">ax</span><span class="p">,</span> <span class="n">im</span></div>
+
+
+
+<div class="viewcode-block" id="plot_timeline">
+<a class="viewcode-back" href="../../api.html#dasio.plot.plot_timeline">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_timeline</span><span class="p">(</span><span class="n">db</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">by_month</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Gantt-style coverage timeline for a `DASdb`.</span>
+
+<span class="sd">    Green where data exists, red for the acquisition gaps between.</span>
+
+<span class="sd">    With `by_month=True` each calendar month becomes its own row against a</span>
+<span class="sd">    shared day-of-month axis, which keeps a multi-month archive legible —</span>
+<span class="sd">    a year on one continuous axis compresses every gap into a hairline.</span>
+<span class="sd">    `None` (default) picks that layout automatically when the catalog spans</span>
+<span class="sd">    more than one month.</span>
+
+<span class="sd">    Bar geometry is computed in matplotlib date numbers rather than handed</span>
+<span class="sd">    over as Timestamp/Timedelta objects. Mixing the two lets the unit</span>
+<span class="sd">    machinery interpret a width in the same frame as a position, and a</span>
+<span class="sd">    single bad conversion is enough to push the axes limits far enough that</span>
+<span class="sd">    rendering a `bbox_inches=&#39;tight&#39;` figure asks for a canvas of millions</span>
+<span class="sd">    of pixels.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">dates</span> <span class="k">as</span> <span class="n">mdates</span>
+    <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
+            <span class="s1">&#39;plot_timeline needs matplotlib; already a core dep for &#39;</span>
+            <span class="s1">&#39;the monitor but was not found in this env&#39;</span>
+        <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+    <span class="c1"># Only this plotter needs pandas; `imshow` and `wiggle` are numpy-only and</span>
+    <span class="c1"># this module is imported for them far more often.</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+    <span class="n">segments</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">segments</span><span class="p">())</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">segments</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;DASdb is empty; nothing to plot&#39;</span><span class="p">)</span>
+
+    <span class="n">spans</span> <span class="o">=</span> <span class="p">[(</span><span class="n">s</span><span class="p">[</span><span class="s1">&#39;begin_time&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">s</span><span class="p">[</span><span class="s1">&#39;end_time&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+             <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">segments</span><span class="p">]</span>
+    <span class="n">gaps</span> <span class="o">=</span> <span class="p">[(</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">spans</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">spans</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span> <span class="k">if</span> <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+
+    <span class="n">months</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">period_range</span><span class="p">(</span><span class="n">spans</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">spans</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">freq</span><span class="o">=</span><span class="s1">&#39;M&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">by_month</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">by_month</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">months</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">by_month</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">),</span> <span class="n">layout</span><span class="o">=</span><span class="s1">&#39;constrained&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">t0</span><span class="p">,</span> <span class="n">t1</span> <span class="ow">in</span> <span class="n">spans</span><span class="p">:</span>
+            <span class="n">x0</span><span class="p">,</span> <span class="n">x1</span> <span class="o">=</span> <span class="n">mdates</span><span class="o">.</span><span class="n">date2num</span><span class="p">(</span><span class="n">t0</span><span class="p">),</span> <span class="n">mdates</span><span class="o">.</span><span class="n">date2num</span><span class="p">(</span><span class="n">t1</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">barh</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">x1</span> <span class="o">-</span> <span class="n">x0</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="n">x0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span>
+                    <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#66bb66&#39;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;#2e7d32&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.9</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">t0</span><span class="p">,</span> <span class="n">t1</span> <span class="ow">in</span> <span class="n">gaps</span><span class="p">:</span>
+            <span class="n">x0</span><span class="p">,</span> <span class="n">x1</span> <span class="o">=</span> <span class="n">mdates</span><span class="o">.</span><span class="n">date2num</span><span class="p">(</span><span class="n">t0</span><span class="p">),</span> <span class="n">mdates</span><span class="o">.</span><span class="n">date2num</span><span class="p">(</span><span class="n">t1</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">barh</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">x1</span> <span class="o">-</span> <span class="n">x0</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="n">x0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#d55&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.4</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">mdates</span><span class="o">.</span><span class="n">date2num</span><span class="p">(</span><span class="n">spans</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]),</span> <span class="n">mdates</span><span class="o">.</span><span class="n">date2num</span><span class="p">(</span><span class="n">spans</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([])</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span>
+            <span class="n">mdates</span><span class="o">.</span><span class="n">ConciseDateFormatter</span><span class="p">(</span><span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">get_major_locator</span><span class="p">()))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mf">0.42</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">months</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1.1</span><span class="p">),</span>
+                                 <span class="n">layout</span><span class="o">=</span><span class="s1">&#39;constrained&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">row</span><span class="p">,</span> <span class="n">month</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">months</span><span class="p">):</span>
+            <span class="n">m0</span> <span class="o">=</span> <span class="n">month</span><span class="o">.</span><span class="n">start_time</span><span class="o">.</span><span class="n">tz_localize</span><span class="p">(</span><span class="n">spans</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tz</span><span class="p">)</span>
+            <span class="n">m1</span> <span class="o">=</span> <span class="p">(</span><span class="n">month</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">start_time</span><span class="o">.</span><span class="n">tz_localize</span><span class="p">(</span><span class="n">spans</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tz</span><span class="p">)</span>
+            <span class="n">span_days</span> <span class="o">=</span> <span class="p">(</span><span class="n">m1</span> <span class="o">-</span> <span class="n">m0</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span> <span class="o">/</span> <span class="mf">86400.0</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">barh</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">span_days</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mf">0.62</span><span class="p">,</span>
+                    <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#f2f2f2&#39;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;#dddddd&#39;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">t0</span><span class="p">,</span> <span class="n">t1</span><span class="p">),</span> <span class="n">color</span><span class="p">,</span> <span class="n">alpha</span> <span class="ow">in</span> <span class="p">(</span>
+                    <span class="p">[(</span><span class="n">s</span><span class="p">,</span> <span class="s1">&#39;#66bb66&#39;</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">spans</span><span class="p">]</span>
+                    <span class="o">+</span> <span class="p">[(</span><span class="n">g</span><span class="p">,</span> <span class="s1">&#39;#d55&#39;</span><span class="p">,</span> <span class="mf">0.55</span><span class="p">)</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">gaps</span><span class="p">]):</span>
+                <span class="n">lo</span><span class="p">,</span> <span class="n">hi</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">t0</span><span class="p">,</span> <span class="n">m0</span><span class="p">),</span> <span class="nb">min</span><span class="p">(</span><span class="n">t1</span><span class="p">,</span> <span class="n">m1</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">hi</span> <span class="o">&lt;=</span> <span class="n">lo</span><span class="p">:</span>
+                    <span class="k">continue</span>          <span class="c1"># this bar does not reach into this month</span>
+                <span class="n">left</span> <span class="o">=</span> <span class="p">(</span><span class="n">lo</span> <span class="o">-</span> <span class="n">m0</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span> <span class="o">/</span> <span class="mf">86400.0</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">barh</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="p">(</span><span class="n">hi</span> <span class="o">-</span> <span class="n">lo</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span> <span class="o">/</span> <span class="mf">86400.0</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="n">left</span><span class="p">,</span>
+                        <span class="n">height</span><span class="o">=</span><span class="mf">0.62</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">months</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">)</span>      <span class="c1"># first month at the top</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">months</span><span class="p">)))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_yticklabels</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">m</span><span class="p">)</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">months</span><span class="p">],</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">9</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">31</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">31</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">d</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">31</span><span class="p">,</span> <span class="mi">5</span><span class="p">)])</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;day of month&#39;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;white&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">db</span><span class="o">.</span><span class="n">format</span><span class="si">}</span><span class="s1">  |  </span><span class="si">{</span><span class="n">db</span><span class="o">.</span><span class="n">n_files</span><span class="si">:</span><span class="s1">,</span><span class="si">}</span><span class="s1"> files  |  &#39;</span>
+        <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">db</span><span class="o">.</span><span class="n">n_segments</span><span class="si">}</span><span class="s1"> segments  |  &#39;</span>
+        <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">spans</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">%Y-%m-%d</span><span class="si">}</span><span class="s1"> to </span><span class="si">{</span><span class="n">spans</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s1">%Y-%m-%d</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">ax</span></div>
+
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">_PlotAccessor</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Bound plot interface for a single DASdata.</span>
+
+<span class="sd">    Reachable as `d.plot`. `d.plot()` is shorthand for `d.plot.imshow()`;</span>
+<span class="sd">    `d.plot.imshow(...)` and `d.plot.wiggle(...)` reach the named</span>
+<span class="sd">    plotters. `pcolormesh` will be added when a non-uniform channel</span>
+<span class="sd">    axis use case shows up (truncate + uniform `dx` covers the rest).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;_d&#39;</span><span class="p">,)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_d</span> <span class="o">=</span> <span class="n">d</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">imshow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">imshow</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">wiggle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">wiggle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+</pre></div>
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2026, Jiaxuan Li
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="../../_static/sg-tags.js?v=d80f6fa4"></script>
+    </body>
+</html>

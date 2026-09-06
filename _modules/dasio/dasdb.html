@@ -1,0 +1,1213 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html">
+
+    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+        <title>dasio.dasdb - dasio documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=fd6457a4" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  --content-width: 60em;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../index.html"><div class="brand">dasio  documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
+  
+  <span class="sidebar-brand-text">dasio  documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../auto_examples/index.html">Examples</a><input aria-label="Toggle navigation of Examples" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../auto_examples/plot_das_basics.html">Basic processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../auto_examples/plot_local_earthquake.html">Local earthquake on the Ridgecrest South array</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../auto_examples/plot_noise_xcorr.html">Ambient-noise cross-correlation on the Ridgecrest South array</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <h1>Source code for dasio.dasdb</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;`DASdb`: catalog of raw DAS files + `RawWindow` read-plan helpers.</span>
+
+<span class="sd">Model:</span>
+
+<span class="sd">DASmeta	one contiguous readable piece of raw data (one ASN / Proc</span>
+<span class="sd">		file, or one RawDataTime chunk within an OptaSense file).</span>
+<span class="sd">		Defined in `dasdata.py` as a TypedDict so scanners can</span>
+<span class="sd">		emit a list of dicts and pandas consumes them directly.</span>
+<span class="sd">DASdb		DataFrame of DASmeta rows for one vendor. Time-contiguous</span>
+<span class="sd">		runs are recomputed on the fly by `segments`;</span>
+<span class="sd">		nothing is persisted as a segment_id column.</span>
+<span class="sd">RawWindow	selected read plan that `desample.desample_window`</span>
+<span class="sd">		consumes — files + per-row slice offsets + pad flags.</span>
+
+<span class="sd">Vendor-specific logic lives only in `list_das_files` and the per-</span>
+<span class="sd">file metadata readers. The catalog and all queries (`select_window`,</span>
+<span class="sd">`read`, plus the desample-side `next_unprocessed` selector that</span>
+<span class="sd">consumes DASdb) work off DataFrame rows regardless of vendor.</span>
+
+<span class="sd">Time convention: `begin_time` and `end_time` are last-sample-inclusive</span>
+<span class="sd">timestamps, matching legacy DAS-utilities (`DAS_db.py`). Continuity</span>
+<span class="sd">between two rows is therefore `next.begin_time - prev.end_time ≈ 1/fs`,</span>
+<span class="sd">not `≈ 0`.</span>
+
+<span class="sd">File metadata (fs, nt, channel count, etc.) is populated at scan time</span>
+<span class="sd">from each file&#39;s HDF5 metadata — filename parsing is never used as a</span>
+<span class="sd">correctness fallback; a file that can&#39;t be read is skipped with a</span>
+<span class="sd">stderr warning.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">glob</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.dasdata</span><span class="w"> </span><span class="kn">import</span> <span class="n">DASdata</span><span class="p">,</span> <span class="n">DASmeta</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.dasfile</span><span class="w"> </span><span class="kn">import</span> <span class="n">DASFile</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">RawWindow</span><span class="p">,</span> <span class="n">_CSV_TO_DF</span><span class="p">,</span> <span class="n">_DF_COLUMNS</span><span class="p">,</span> <span class="n">_DF_TO_CSV</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">atomic_write</span><span class="p">,</span> <span class="n">list_data_files</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_catalog_format</span><span class="p">(</span><span class="n">file</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return &#39;parquet&#39; or &#39;csv&#39; from file extension; raise on unknown.&quot;&quot;&quot;</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">file</span><span class="p">)</span><span class="o">.</span><span class="n">suffix</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">s</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;.parquet&#39;</span><span class="p">,</span> <span class="s1">&#39;.parq&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;parquet&#39;</span>
+    <span class="k">if</span> <span class="n">s</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;.csv&#39;</span><span class="p">,</span> <span class="s1">&#39;.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;csv&#39;</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s1">&#39;Unsupported DASdb file extension </span><span class="si">{</span><span class="n">Path</span><span class="p">(</span><span class="n">file</span><span class="p">)</span><span class="o">.</span><span class="n">suffix</span><span class="si">!r}</span><span class="s1">; &#39;</span>
+        <span class="sa">f</span><span class="s2">&quot;expected one of &#39;.parquet&#39;, &#39;.parq&#39;, &#39;.csv&#39;, &#39;.txt&#39;&quot;</span>
+    <span class="p">)</span>
+
+
+<span class="c1"># Canonical ASN layout: raw_dir/YYYYMMDD/HHMMSS.hdf5, with a Santorini</span>
+<span class="c1"># variant that inserts a channel-name subdir (YYYYMMDD/&lt;ch&gt;/HHMMSS.hdf5)</span>
+<span class="c1"># — covered by the &#39;*/*.hdf5&#39; branch. OptaSense and Proc both flat-</span>
+<span class="c1"># glob &#39;*.h5&#39;.</span>
+<span class="n">_ASN_DAY_DIR_RE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;^\d</span><span class="si">{8}</span><span class="s1">$&#39;</span><span class="p">)</span>
+
+<span class="c1"># Both HDF5 spellings are in the archive, and some projects nest one level</span>
+<span class="c1"># under a date directory whose name is not the ASN `\d{8}` convention.</span>
+<span class="n">_H5</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;*.h5&#39;</span><span class="p">,</span> <span class="s1">&#39;*.hdf5&#39;</span><span class="p">)</span>
+<span class="n">_H5_NESTED</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;*/*.h5&#39;</span><span class="p">,</span> <span class="s1">&#39;*/*.hdf5&#39;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="list_das_files">
+<a class="viewcode-back" href="../../api.html#dasio.dasdb.list_das_files">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">list_das_files</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Path</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Enumerate candidate DAS files under `raw_dir` for `format`.</span>
+
+<span class="sd">    Pure filesystem work — no HDF5 opens. Paired with</span>
+<span class="sd">    `DASFile.metadata()` to drive incremental catalog refresh without</span>
+<span class="sd">    reopening files already in the DASdb.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># A glob pattern wins over every layout heuristic below: it says exactly</span>
+    <span class="c1"># which files are wanted, which is how the legacy DAS_db took its input.</span>
+    <span class="c1"># Quote it so the shell does not expand it first.</span>
+    <span class="k">if</span> <span class="n">_is_pattern</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">_glob_pattern</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">)</span>
+    <span class="n">raw_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s1">&#39;ASN&#39;</span><span class="p">:</span>
+        <span class="n">files</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">sub</span> <span class="ow">in</span> <span class="n">raw_dir</span><span class="o">.</span><span class="n">iterdir</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">sub</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span> <span class="ow">and</span> <span class="n">_ASN_DAY_DIR_RE</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">sub</span><span class="o">.</span><span class="n">name</span><span class="p">):</span>
+                <span class="n">files</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">list_data_files</span><span class="p">(</span><span class="n">sub</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;*.hdf5&#39;</span><span class="p">,</span> <span class="s1">&#39;*/*.hdf5&#39;</span><span class="p">)))</span>
+        <span class="c1"># Pointed below the day level — at one &lt;YYYYMMDD&gt; or straight at its</span>
+        <span class="c1"># channel subdir — there are no day folders to find, and requiring the</span>
+        <span class="c1"># exact root meant a single day could not be catalogued at all.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">files</span><span class="p">:</span>
+            <span class="n">files</span> <span class="o">=</span> <span class="n">list_data_files</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;*.hdf5&#39;</span><span class="p">,</span> <span class="s1">&#39;*/*.hdf5&#39;</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">files</span>
+    <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s1">&#39;Proc&#39;</span><span class="p">:</span>
+        <span class="c1"># Two layouts coexist: flat, and &lt;YYYYMMDD&gt;/ subdirectories, which</span>
+        <span class="c1"># keep readdir on Processed/ tractable at deployment scale. Both are</span>
+        <span class="c1"># walked; without the second, a Proc dasdb over it finds nothing.</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">list_data_files</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">,</span> <span class="n">_H5</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">sub</span> <span class="ow">in</span> <span class="n">raw_dir</span><span class="o">.</span><span class="n">iterdir</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">sub</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span> <span class="ow">and</span> <span class="n">_ASN_DAY_DIR_RE</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">sub</span><span class="o">.</span><span class="n">name</span><span class="p">):</span>
+                <span class="n">files</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">list_data_files</span><span class="p">(</span><span class="n">sub</span><span class="p">,</span> <span class="n">_H5</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">files</span> <span class="ow">or</span> <span class="n">list_data_files</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">,</span> <span class="n">_H5_NESTED</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">format</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;OptaSense&#39;</span><span class="p">,</span> <span class="s1">&#39;APSensing&#39;</span><span class="p">,</span> <span class="s1">&#39;Silixa&#39;</span><span class="p">):</span>
+        <span class="c1"># Flat is the common layout, but arcata_usgs nests by date</span>
+        <span class="c1"># (`2024-12-04/sensor_*.h5`) and south_korea_urban writes `.hdf5`.</span>
+        <span class="c1"># Both scanned to an empty catalog before this.</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">list_data_files</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">,</span> <span class="n">_H5</span><span class="p">)</span>
+                <span class="ow">or</span> <span class="n">list_data_files</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">,</span> <span class="n">_H5_NESTED</span><span class="p">))</span>
+    <span class="k">if</span> <span class="nb">format</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;Event&#39;</span><span class="p">,</span> <span class="s1">&#39;Basic&#39;</span><span class="p">):</span>
+        <span class="c1"># Both are flat products written one file per window; no vendor</span>
+        <span class="c1"># directory convention to honour.</span>
+        <span class="k">return</span> <span class="n">list_data_files</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;*.h5&#39;</span><span class="p">,</span> <span class="s1">&#39;*.hdf5&#39;</span><span class="p">))</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unknown format </span><span class="si">{</span><span class="nb">format</span><span class="si">!r}</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_is_pattern</span><span class="p">(</span><span class="n">p</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;True when the path carries shell-glob magic rather than naming a directory.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="n">c</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="s1">&#39;*?[&#39;</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_glob_pattern</span><span class="p">(</span><span class="n">pattern</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Path</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Expand a glob pattern to a sorted file list, `**` included.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">pattern</span><span class="p">),</span> <span class="n">recursive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">Path</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">is_file</span><span class="p">())</span>
+
+
+<div class="viewcode-block" id="detect_dir_format">
+<a class="viewcode-back" href="../../api.html#dasio.dasdb.detect_dir_format">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">detect_dir_format</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;On-disk format of the first DAS file found under `raw_dir`.</span>
+
+<span class="sd">    Depth 1 (flat Proc / OptaSense), 2 (dated Proc, plain ASN) and 3 (ASN with</span>
+<span class="sd">    a channel subdir: `&lt;YYYYMMDD&gt;/&lt;ch&gt;/&lt;HHMMSS&gt;.hdf5`). `glob` is lazy and</span>
+<span class="sd">    `next` stops at the first hit, so the deep patterns cost nothing on the</span>
+<span class="sd">    shallow layouts.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">_is_pattern</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">):</span>
+        <span class="n">probe</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">_glob_pattern</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">)),</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">raw_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">)</span>
+        <span class="n">probe</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">p</span> <span class="k">for</span> <span class="n">pat</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;*.h5&#39;</span><span class="p">,</span> <span class="s1">&#39;*.hdf5&#39;</span><span class="p">,</span> <span class="s1">&#39;*/*.h5&#39;</span><span class="p">,</span> <span class="s1">&#39;*/*.hdf5&#39;</span><span class="p">,</span>
+                            <span class="s1">&#39;*/*/*.h5&#39;</span><span class="p">,</span> <span class="s1">&#39;*/*/*.hdf5&#39;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">raw_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">pat</span><span class="p">)),</span>
+            <span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">probe</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;no .h5/.hdf5 files under </span><span class="si">{</span><span class="n">raw_dir</span><span class="si">}</span><span class="s1"> to detect the format from; &#39;</span>
+            <span class="s1">&#39;pass format= explicitly.&#39;</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">DASFile</span><span class="p">(</span><span class="n">probe</span><span class="p">)</span><span class="o">.</span><span class="n">format</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_read_metadata</span><span class="p">(</span><span class="n">file</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DASmeta</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Module-level worker for `_read_metadata_batch` process pool.</span>
+
+<span class="sd">    Lives at module scope (not as a closure) so it is picklable for</span>
+<span class="sd">    ProcessPoolExecutor; the local-closure form would fail with</span>
+<span class="sd">    &#39;Can&#39;t pickle local object&#39;.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">DASFile</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="nb">format</span><span class="p">)</span><span class="o">.</span><span class="n">metadata</span><span class="p">()</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_read_metadata_batch</span><span class="p">(</span>
+        <span class="n">files</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Path</span><span class="p">],</span> <span class="nb">format</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">workers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">progress</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">DASmeta</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read DASFile(f, format=format).metadata() for each file.</span>
+
+<span class="sd">    Parallelizes via ProcessPoolExecutor (HDF5 holds an internal</span>
+<span class="sd">    global lock that serializes thread-pool workers). progress=True</span>
+<span class="sd">    wraps the iteration with a tqdm bar; silently disabled when tqdm</span>
+<span class="sd">    is not installed so the flag stays safe to leave on in scripts.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_pbar</span><span class="p">(</span><span class="n">iterable</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">progress</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">iterable</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">tqdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
+        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="s1">&#39;[dasdb] --progress needs tqdm; continuing without bar&#39;</span><span class="p">,</span>
+                <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">iterable</span>
+        <span class="k">return</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">iterable</span><span class="p">,</span> <span class="n">total</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">),</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;file&#39;</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;scan&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">workers</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">metas</span> <span class="o">=</span> <span class="p">[</span><span class="n">_read_metadata</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="nb">format</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">_pbar</span><span class="p">(</span><span class="n">files</span><span class="p">)]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">concurrent.futures</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProcessPoolExecutor</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
+        <span class="n">worker</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">_read_metadata</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="nb">format</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">ProcessPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="n">workers</span><span class="p">)</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+            <span class="n">metas</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">_pbar</span><span class="p">(</span><span class="n">ex</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">worker</span><span class="p">,</span> <span class="n">files</span><span class="p">)))</span>
+
+    <span class="n">rows</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">DASmeta</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">metas</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">m</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">rows</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">m</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="k">else</span> <span class="p">[</span><span class="n">m</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">rows</span>
+
+
+<div class="viewcode-block" id="scan_metadata">
+<a class="viewcode-back" href="../../api.html#dasio.dasdb.scan_metadata">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">scan_metadata</span><span class="p">(</span>
+        <span class="n">raw_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">workers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">progress</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Scan `raw_dir` for all `format` files and return a DASmeta DataFrame.</span>
+
+<span class="sd">    Enumerates files via `list_das_files`, reads each through the</span>
+<span class="sd">    `DASFile.metadata()` facade, concatenates OptaSense RawDataTime</span>
+<span class="sd">    splits, and sorts by begin_time. Files that fail metadata read</span>
+<span class="sd">    are skipped (the vendor metadata readers emit a stderr warning).</span>
+<span class="sd">    `workers &gt; 1` parallelizes the per-file reads; `progress=True`</span>
+<span class="sd">    adds a tqdm bar.</span>
+
+<span class="sd">    `raw_dir` is resolved to an absolute path before enumeration so</span>
+<span class="sd">    every row&#39;s `file` field is absolute regardless of the caller&#39;s</span>
+<span class="sd">    cwd. Without this, a catalog written from a relative `--from`</span>
+<span class="sd">    would only resolve correctly when re-read from the same working</span>
+<span class="sd">    dir.</span>
+
+<span class="sd">    Raises ValueError when the first readable file is not `format`,</span>
+<span class="sd">    rather than opening thousands of them to produce an empty catalog.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">raw_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+    <span class="n">files</span> <span class="o">=</span> <span class="n">list_das_files</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">,</span> <span class="nb">format</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">probe</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">found</span> <span class="o">=</span> <span class="n">DASFile</span><span class="p">(</span><span class="n">probe</span><span class="p">)</span><span class="o">.</span><span class="n">format</span>
+        <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+            <span class="k">continue</span>                    <span class="c1"># unreadable: judge on the next one</span>
+        <span class="k">if</span> <span class="n">found</span> <span class="o">!=</span> <span class="nb">format</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">raw_dir</span><span class="si">}</span><span class="s1"> holds </span><span class="si">{</span><span class="n">found</span><span class="si">!r}</span><span class="s1"> files, not </span><span class="si">{</span><span class="nb">format</span><span class="si">!r}</span><span class="s1">; &#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;pass the right format, or omit it to detect from the files.&#39;</span>
+            <span class="p">)</span>
+        <span class="k">break</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="n">_read_metadata_batch</span><span class="p">(</span>
+        <span class="n">files</span><span class="p">,</span> <span class="nb">format</span><span class="p">,</span> <span class="n">workers</span><span class="o">=</span><span class="n">workers</span><span class="p">,</span> <span class="n">progress</span><span class="o">=</span><span class="n">progress</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="c1"># Readers return [] for a file that fails their signature check, so a</span>
+    <span class="c1"># mixed directory scans cleanly. Every file failing is a different thing:</span>
+    <span class="c1"># it means `format` is wrong, and the only symptom was an empty catalog.</span>
+    <span class="k">if</span> <span class="n">files</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">rows</span><span class="p">:</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;WARNING! scan_metadata: read </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">)</span><span class="si">}</span><span class="s1"> files under </span><span class="si">{</span><span class="n">raw_dir</span><span class="si">}</span><span class="s1"> &#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;as </span><span class="si">{</span><span class="nb">format</span><span class="si">!r}</span><span class="s1"> and none matched that format; the catalog is &#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;empty. Check --format, or omit it to detect from the files.&#39;</span><span class="p">,</span>
+            <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">df</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s1">&#39;begin_time&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">df</span></div>
+
+
+
+<span class="c1"># --- DASdb ---------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="DASdb">
+<a class="viewcode-back" href="../../api.html#dasio.dasdb.DASdb">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">DASdb</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Catalog of DAS file metadata rows, partitioned on the fly.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    df :</span>
+<span class="sd">        DataFrame with the `_DF_COLUMNS` schema (one row per</span>
+<span class="sd">        DASmeta). Missing columns fall back to NaN / 0 where a default</span>
+<span class="sd">        is meaningful.</span>
+<span class="sd">    format :</span>
+<span class="sd">        ``ASN``, ``OptaSense``, or ``Proc`` (matches the scanner used</span>
+<span class="sd">        to build ``df``).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">df</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="n">c</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">_DF_COLUMNS</span><span class="p">})</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="k">if</span> <span class="s1">&#39;first_sample&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="n">df</span><span class="p">[</span><span class="s1">&#39;first_sample&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">missing</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">_DF_COLUMNS</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">missing</span><span class="p">:</span>
+                <span class="n">df</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">_DF_COLUMNS</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">format</span> <span class="o">=</span> <span class="nb">format</span>
+
+    <span class="c1"># ------------------------------------------------------------------ repr</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;DASdb(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">format</span><span class="si">}</span><span class="s1">, empty)&#39;</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">)</span>
+        <span class="n">n_seg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_segments</span>
+        <span class="n">t0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;begin_time&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">t1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;end_time&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s1">&#39;DASdb(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">format</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s1"> files, </span><span class="si">{</span><span class="n">n_seg</span><span class="si">}</span><span class="s1"> segment&#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="s2">&quot;s&quot;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">n_seg</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">t0</span><span class="si">}</span><span class="s1"> .. </span><span class="si">{</span><span class="n">t1</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+
+    <span class="c1"># ------------------------------------------------------------- properties</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">n_files</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">n_segments</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Number of time-contiguous segments — recomputed on access.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">segments</span><span class="p">())</span>
+
+    <span class="c1"># --------------------------------------------------------- continuity</span>
+
+<div class="viewcode-block" id="DASdb.segments">
+<a class="viewcode-back" href="../../api.html#dasio.dasdb.DASdb.segments">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">segments</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">gap_factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.5</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Yield (begin_time-sorted) DataFrames of time-contiguous rows.</span>
+
+<span class="sd">        One segment = one continuous run of rows with no acquisition</span>
+<span class="sd">        gap. Break criteria between consecutive rows (prev → cur):</span>
+
+<span class="sd">        * timing break  — |cur.begin_time - prev.end_time - 1/fs| &gt;</span>
+<span class="sd">        gap_factor x 1/fs  (default tolerates roughly one sample of</span>
+<span class="sd">        jitter; raise gap_factor to fuse near-contiguous segments).</span>
+<span class="sd">        * fs or nx change — acquisition parameters changed.</span>
+<span class="sd">        * same file path — OptaSense intra-file RawDataTime breaks</span>
+<span class="sd">        always start a new segment regardless of gap size.</span>
+
+<span class="sd">        Recomputed on every call; DASdb never persists a segment_id.</span>
+
+<span class="sd">        Implementation note: the break-detection rules are evaluated</span>
+<span class="sd">        vectorized over the whole catalog with `Series.shift(1)` —</span>
+<span class="sd">        on Santorini&#39;s 1.13 M-row production catalog the 24 h slice</span>
+<span class="sd">        (~8.6 k rows) goes from ~1 s of GIL-held Python in the</span>
+<span class="sd">        pre-vectorize row-by-row loop to ~5 ms. The slow loop was</span>
+<span class="sd">        amplifying every /api/state poll&#39;s `_read_gaps_24h` call,</span>
+<span class="sd">        saturating one CPU and freezing the dashboard whenever a</span>
+<span class="sd">        user clicked the gaps tab. See</span>
+<span class="sd">        test/test_dasdb_segments_perf.py for the regression guard.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s1">&#39;begin_time&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">df</span>
+            <span class="k">return</span>
+        <span class="c1"># Treat fs=NaN as fs=0 so 1/fs falls back to 0 — matches the</span>
+        <span class="c1"># scalar reference&#39;s `if pd.notna(...) else 0.0` branch.</span>
+        <span class="n">fs_prev</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;fs&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shift</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+        <span class="k">with</span> <span class="n">np</span><span class="o">.</span><span class="n">errstate</span><span class="p">(</span><span class="n">divide</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="n">invalid</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">):</span>
+            <span class="n">expected</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">fs_prev</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">fs_prev</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="n">gap</span> <span class="o">=</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;begin_time&#39;</span><span class="p">]</span>
+                <span class="o">-</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;end_time&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shift</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+        <span class="c1"># `np.isclose` (array atol by broadcasting) rather than an `np.abs`</span>
+        <span class="c1"># comparison, so a NaN gap — an NaT `end_time` mid-stream — counts as</span>
+        <span class="c1"># not-close and breaks the segment instead of being swallowed.</span>
+        <span class="n">timing_break</span> <span class="o">=</span> <span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span>
+            <span class="n">gap</span><span class="p">,</span> <span class="n">expected</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="n">gap_factor</span> <span class="o">*</span> <span class="n">expected</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">fs_change</span> <span class="o">=</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;fs&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;fs&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shift</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+        <span class="n">nx_change</span> <span class="o">=</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;nx&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;nx&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shift</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+        <span class="n">same_file</span> <span class="o">=</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;file&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;file&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shift</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+        <span class="n">break_mask</span> <span class="o">=</span> <span class="n">fs_change</span> <span class="o">|</span> <span class="n">nx_change</span> <span class="o">|</span> <span class="n">same_file</span> <span class="o">|</span> <span class="n">timing_break</span>
+        <span class="c1"># Position 0 is NOT a break — it&#39;s the start of the first</span>
+        <span class="c1"># segment, never compared against a &quot;previous&quot; row in the</span>
+        <span class="c1"># scalar reference (the loop runs from i=1).</span>
+        <span class="n">break_mask</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">break_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flatnonzero</span><span class="p">(</span><span class="n">break_mask</span><span class="p">)</span>
+        <span class="n">starts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(([</span><span class="mi">0</span><span class="p">],</span> <span class="n">break_idx</span><span class="p">))</span>
+        <span class="n">ends</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">break_idx</span><span class="p">,</span> <span class="p">[</span><span class="n">n</span><span class="p">]))</span>
+        <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">e</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">starts</span><span class="p">,</span> <span class="n">ends</span><span class="p">):</span>
+            <span class="k">yield</span> <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">s</span><span class="p">):</span><span class="nb">int</span><span class="p">(</span><span class="n">e</span><span class="p">)]</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+    <span class="c1"># --------------------------------------------------------------- builders</span>
+
+<div class="viewcode-block" id="DASdb.from_dir">
+<a class="viewcode-back" href="../../api.html#dasio.dasdb.DASdb.from_dir">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_dir</span><span class="p">(</span>
+            <span class="bp">cls</span><span class="p">,</span> <span class="n">raw_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">workers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">progress</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DASdb&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Scan `raw_dir` and build a catalog for the given `format`.&quot;&quot;&quot;</span>
+        <span class="n">raw_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">format</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">format</span> <span class="o">=</span> <span class="n">detect_dir_format</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+            <span class="n">scan_metadata</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">,</span> <span class="nb">format</span><span class="p">,</span> <span class="n">workers</span><span class="o">=</span><span class="n">workers</span><span class="p">,</span> <span class="n">progress</span><span class="o">=</span><span class="n">progress</span><span class="p">),</span>
+            <span class="nb">format</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DASdb.from_csv">
+<a class="viewcode-back" href="../../api.html#dasio.dasdb.DASdb.from_csv">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_csv</span><span class="p">(</span>
+            <span class="bp">cls</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
+            <span class="nb">format</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DASdb&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load a legacy DAS_db CSV (whitespace-separated).</span>
+
+<span class="sd">        Translates legacy column names (begTime, endTime, nChannels,</span>
+<span class="sd">        dCh, GaugeLen, firstSample) into the internal snake_case</span>
+<span class="sd">        schema. Drops any `segment_id` or `format` columns the CSV</span>
+<span class="sd">        might carry — neither is part of the in-memory schema. If</span>
+<span class="sd">        `format` is given and the CSV has a `format` column, rows are</span>
+<span class="sd">        filtered to that format before the column is dropped.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;\s+&#39;</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s1">&#39;python&#39;</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">_CSV_TO_DF</span><span class="p">)</span>
+        <span class="c1"># format=&#39;ISO8601&#39; so rows with and without fractional seconds mix freely;</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;begin_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;begin_time&#39;</span><span class="p">],</span> <span class="n">utc</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;ISO8601&#39;</span><span class="p">)</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;end_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;end_time&#39;</span><span class="p">],</span> <span class="n">utc</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;ISO8601&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;format&#39;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">format</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;format&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="nb">format</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+                <span class="nb">format</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;format&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;format&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="nb">format</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;DASdb.from_csv: cannot infer format from </span><span class="si">{</span><span class="n">file</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> &quot;</span>
+                <span class="s2">&quot;(no `format` column and no `format=` kwarg). Pass &quot;</span>
+                <span class="s2">&quot;format=&#39;ASN&#39; | &#39;OptaSense&#39; | &#39;APSensing&#39; | &#39;Silixa&#39; | &#39;Proc&#39; &quot;</span>
+                <span class="s2">&quot;explicitly. Catalogs from desample.py are &#39;Proc&#39;.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;segment_id&#39;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;segment_id&#39;</span><span class="p">])</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s1">&#39;begin_time&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;first_sample&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">df</span><span class="p">[</span><span class="s1">&#39;first_sample&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">keep</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">_DF_COLUMNS</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">keep</span><span class="p">],</span> <span class="nb">format</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DASdb.to_csv">
+<a class="viewcode-back" href="../../api.html#dasio.dasdb.DASdb.to_csv">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_csv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Write a DAS_db CSV (whitespace-separated, one row per DASmeta).</span>
+
+<span class="sd">        Emits legacy column names (begTime, endTime, nChannels, dCh,</span>
+<span class="sd">        GaugeLen, firstSample) so external DAS-utilities tooling can</span>
+<span class="sd">        still read the output. Missing numeric fields get the legacy</span>
+<span class="sd">        -1 sentinel (rather than empty, which would collapse under</span>
+<span class="sd">        whitespace-separation). Sorted by begin_time; atomic write.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sorted_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s1">&#39;begin_time&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">sorted_df</span><span class="p">[</span><span class="n">_DF_COLUMNS</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">_DF_TO_CSV</span><span class="p">)</span>
+        <span class="n">out</span><span class="p">[</span><span class="s1">&#39;begTime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="s1">&#39;begTime&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span> <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">notna</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="k">else</span> <span class="s1">&#39;-1&#39;</span>
+        <span class="p">)</span>
+        <span class="n">out</span><span class="p">[</span><span class="s1">&#39;endTime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="s1">&#39;endTime&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span> <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">notna</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="k">else</span> <span class="s1">&#39;-1&#39;</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;fs&#39;</span><span class="p">,</span> <span class="s1">&#39;nt&#39;</span><span class="p">,</span> <span class="s1">&#39;nChannels&#39;</span><span class="p">,</span> <span class="s1">&#39;dCh&#39;</span><span class="p">,</span> <span class="s1">&#39;GaugeLen&#39;</span><span class="p">,</span> <span class="s1">&#39;firstSample&#39;</span><span class="p">):</span>
+            <span class="n">out</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">atomic_write</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">tmp</span><span class="p">:</span> <span class="n">out</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">tmp</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="DASdb.from_parquet">
+<a class="viewcode-back" href="../../api.html#dasio.dasdb.DASdb.from_parquet">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_parquet</span><span class="p">(</span>
+            <span class="bp">cls</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
+            <span class="nb">format</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DASdb&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load a DASdb Parquet file.</span>
+
+<span class="sd">        format is recovered from the b&#39;format&#39; file-level metadata</span>
+<span class="sd">        key written by to_parquet; the kwarg is a fallback for</span>
+<span class="sd">        foreign parquet files without that key, and a conflict</span>
+<span class="sd">        between the two raises.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">pyarrow.parquet</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pq</span>
+        <span class="n">file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+        <span class="n">meta</span> <span class="o">=</span> <span class="n">pq</span><span class="o">.</span><span class="n">read_schema</span><span class="p">(</span><span class="n">file</span><span class="p">)</span><span class="o">.</span><span class="n">metadata</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="n">meta_format</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;format&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">meta_format</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">format_in_file</span> <span class="o">=</span> <span class="n">meta_format</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">format</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">format</span> <span class="o">!=</span> <span class="n">format_in_file</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;DASdb.from_parquet: format kwarg </span><span class="si">{</span><span class="nb">format</span><span class="si">!r}</span><span class="s2"> &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;contradicts file metadata </span><span class="si">{</span><span class="n">format_in_file</span><span class="si">!r}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+            <span class="nb">format</span> <span class="o">=</span> <span class="n">format_in_file</span>
+        <span class="k">if</span> <span class="nb">format</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;DASdb.from_parquet: cannot infer format from </span><span class="si">{</span><span class="n">file</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> &quot;</span>
+                <span class="s2">&quot;(no &#39;format&#39; file metadata and no format= kwarg). Pass &quot;</span>
+                <span class="s2">&quot;format=&#39;ASN&#39; | &#39;OptaSense&#39; | &#39;APSensing&#39; | &#39;Silixa&#39; | &#39;Proc&#39; &quot;</span>
+                <span class="s2">&quot;explicitly.&quot;</span>
+            <span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s1">&#39;begin_time&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="nb">format</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DASdb.to_parquet">
+<a class="viewcode-back" href="../../api.html#dasio.dasdb.DASdb.to_parquet">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_parquet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Write a DASdb to a Parquet file (snake_case schema, snappy).</span>
+
+<span class="sd">        format rides along in file-level metadata under b&#39;format&#39;.</span>
+<span class="sd">        Sorted by begin_time; atomic write.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">pyarrow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pa</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">pyarrow.parquet</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pq</span>
+        <span class="n">sorted_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s1">&#39;begin_time&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">table</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">Table</span><span class="o">.</span><span class="n">from_pandas</span><span class="p">(</span><span class="n">sorted_df</span><span class="p">,</span> <span class="n">preserve_index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">existing</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">metadata</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="n">merged</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">existing</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;format&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)}</span>
+        <span class="n">table</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">replace_schema_metadata</span><span class="p">(</span><span class="n">merged</span><span class="p">)</span>
+        <span class="n">atomic_write</span><span class="p">(</span>
+            <span class="n">file</span><span class="p">,</span>
+            <span class="k">lambda</span> <span class="n">tmp</span><span class="p">:</span> <span class="n">pq</span><span class="o">.</span><span class="n">write_table</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">tmp</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="s1">&#39;snappy&#39;</span><span class="p">),</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DASdb.from_file">
+<a class="viewcode-back" href="../../api.html#dasio.dasdb.DASdb.from_file">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_file</span><span class="p">(</span>
+            <span class="bp">cls</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
+            <span class="nb">format</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DASdb&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load a catalog by path; format chosen from extension.&quot;&quot;&quot;</span>
+        <span class="n">reader</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_parquet</span> <span class="k">if</span> <span class="n">_catalog_format</span><span class="p">(</span><span class="n">file</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;parquet&#39;</span> <span class="k">else</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_csv</span>
+        <span class="k">return</span> <span class="n">reader</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="nb">format</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DASdb.to_file">
+<a class="viewcode-back" href="../../api.html#dasio.dasdb.DASdb.to_file">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Persist the catalog; format chosen from extension.&quot;&quot;&quot;</span>
+        <span class="n">writer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_parquet</span> <span class="k">if</span> <span class="n">_catalog_format</span><span class="p">(</span><span class="n">file</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;parquet&#39;</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_csv</span>
+        <span class="n">writer</span><span class="p">(</span><span class="n">file</span><span class="p">)</span></div>
+
+
+    <span class="c1"># --------------------------------------------------------- incremental</span>
+
+<div class="viewcode-block" id="DASdb.append">
+<a class="viewcode-back" href="../../api.html#dasio.dasdb.DASdb.append">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df_new</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Concatenate `df_new` rows into the catalog.</span>
+
+<span class="sd">        De-duplicates on (`file`, `first_sample`) — OptaSense emits</span>
+<span class="sd">        multiple rows per file (one per RawDataTime chunk), so `file`</span>
+<span class="sd">        alone is not unique. Sort order is preserved by `begin_time`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">df_new</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">df_new</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">combined</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">,</span> <span class="n">df_new</span><span class="p">],</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">combined</span> <span class="o">=</span> <span class="n">combined</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span>
+            <span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;file&#39;</span><span class="p">,</span> <span class="s1">&#39;first_sample&#39;</span><span class="p">],</span> <span class="n">keep</span><span class="o">=</span><span class="s1">&#39;last&#39;</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s1">&#39;begin_time&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df</span> <span class="o">=</span> <span class="n">combined</span><span class="p">[</span><span class="n">_DF_COLUMNS</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="DASdb.update_from_dir">
+<a class="viewcode-back" href="../../api.html#dasio.dasdb.DASdb.update_from_dir">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_from_dir</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">raw_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+            <span class="n">workers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">progress</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Incrementally add any new files from `raw_dir`.</span>
+
+<span class="sd">        Lists the candidate files on disk and only opens the ones</span>
+<span class="sd">        whose path isn&#39;t already in `self.df[&#39;file&#39;]` — turns a full</span>
+<span class="sd">        O(n_total) rescan into O(n_new) HDF5 opens. Safe to call on</span>
+<span class="sd">        every cron tick; continuity is recomputed on the fly by</span>
+<span class="sd">        `segments`, so gaps that open or close in the newly</span>
+<span class="sd">        discovered tail are reflected immediately. `workers &gt; 1`</span>
+<span class="sd">        parallelizes the per-file metadata reads; `progress=True`</span>
+<span class="sd">        wraps the iteration with a tqdm bar.</span>
+
+<span class="sd">        Returns the number of rows added (0 if nothing was new).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">raw_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+        <span class="n">known</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;file&#39;</span><span class="p">])</span> <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">empty</span> <span class="k">else</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">new_files</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">list_das_files</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">known</span>
+        <span class="p">]</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="n">_read_metadata_batch</span><span class="p">(</span>
+            <span class="n">new_files</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span><span class="p">,</span> <span class="n">workers</span><span class="o">=</span><span class="n">workers</span><span class="p">,</span> <span class="n">progress</span><span class="o">=</span><span class="n">progress</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">rows</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">rows</span><span class="p">))</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DASdb.load_or_build">
+<a class="viewcode-back" href="../../api.html#dasio.dasdb.DASdb.load_or_build">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_or_build</span><span class="p">(</span>
+            <span class="bp">cls</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">],</span> <span class="n">raw_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">workers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">progress</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DASdb&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load an existing catalog (+ update) or scan raw_dir fresh.</span>
+
+<span class="sd">        * file=None              — fresh scan, no persistence.</span>
+<span class="sd">        * file exists + !overwrite → load (csv or parquet by extension) + update_from_dir.</span>
+<span class="sd">        * file missing, or overwrite → fresh from_dir.</span>
+
+<span class="sd">        Never writes; caller persists via db.to_csv / db.to_parquet / db.to_file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">file</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">overwrite</span><span class="p">:</span>
+            <span class="n">db</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="nb">format</span><span class="p">)</span>
+            <span class="n">db</span><span class="o">.</span><span class="n">update_from_dir</span><span class="p">(</span><span class="n">raw_dir</span><span class="p">,</span> <span class="n">workers</span><span class="o">=</span><span class="n">workers</span><span class="p">,</span> <span class="n">progress</span><span class="o">=</span><span class="n">progress</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">db</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_dir</span><span class="p">(</span>
+            <span class="n">raw_dir</span><span class="p">,</span> <span class="nb">format</span><span class="p">,</span> <span class="n">workers</span><span class="o">=</span><span class="n">workers</span><span class="p">,</span> <span class="n">progress</span><span class="o">=</span><span class="n">progress</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+    <span class="c1"># ---------------------------------------------------------------- queries</span>
+
+<div class="viewcode-block" id="DASdb.select_window">
+<a class="viewcode-back" href="../../api.html#dasio.dasdb.DASdb.select_window">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">select_window</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">begin</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span>
+            <span class="n">pad</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">RawWindow</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;One RawWindow per segment intersecting [begin, end).</span>
+
+<span class="sd">        Rows whose `[begin_time, end_time]` intersects `[begin, end)`</span>
+<span class="sd">        are the target set. Pad files are added from the SAME segment</span>
+<span class="sd">        only — neighbours across a gap are never pulled in, so the</span>
+<span class="sd">        returned list makes each segment&#39;s own pad-before/pad-after</span>
+<span class="sd">        state explicit instead of silently dropping one.</span>
+
+<span class="sd">        Most callers (the `next_unprocessed` → `desample_window` path)</span>
+<span class="sd">        ask for a window that falls entirely in one segment and just</span>
+<span class="sd">        take `[0]`; multi-segment callers iterate.</span>
+
+<span class="sd">        Raises `RuntimeError` when no segment intersects.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;DASdb is empty&#39;</span><span class="p">)</span>
+
+        <span class="n">windows</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">RawWindow</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">seg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">segments</span><span class="p">():</span>
+            <span class="n">target_idx</span> <span class="o">=</span> <span class="n">seg</span><span class="o">.</span><span class="n">index</span><span class="p">[</span>
+                <span class="p">(</span><span class="n">seg</span><span class="p">[</span><span class="s1">&#39;begin_time&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">end</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">seg</span><span class="p">[</span><span class="s1">&#39;end_time&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">begin</span><span class="p">)</span>
+            <span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">target_idx</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">sel_idx</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">target_idx</span><span class="p">)</span>
+            <span class="n">has_pad_before</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">has_pad_after</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">pad</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">target_idx</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">sel_idx</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">target_idx</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="n">has_pad_before</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">if</span> <span class="n">target_idx</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">seg</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">sel_idx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">target_idx</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="n">has_pad_after</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">windows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">RawWindow</span><span class="p">(</span>
+                <span class="n">rows</span><span class="o">=</span><span class="n">seg</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">sel_idx</span><span class="p">]</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+                <span class="n">begin_time</span><span class="o">=</span><span class="n">begin</span><span class="p">,</span>
+                <span class="n">end_time</span><span class="o">=</span><span class="n">end</span><span class="p">,</span>
+                <span class="n">has_pad_before</span><span class="o">=</span><span class="n">has_pad_before</span><span class="p">,</span>
+                <span class="n">has_pad_after</span><span class="o">=</span><span class="n">has_pad_after</span><span class="p">,</span>
+            <span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">windows</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;No files in window [</span><span class="si">{</span><span class="n">begin</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">end</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">windows</span></div>
+
+
+<div class="viewcode-block" id="DASdb.read">
+<a class="viewcode-back" href="../../api.html#dasio.dasdb.DASdb.read">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">begin_time</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span>
+            <span class="n">end_time</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span>
+            <span class="n">min_ch</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="n">max_ch</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">fill_gap</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">with_factor</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DASdata</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read a concatenated DASdata covering [begin, end).</span>
+
+<span class="sd">        Vendor-agnostic time-range query. Walks every segment that</span>
+<span class="sd">        overlaps the window; for each intersecting row the exact</span>
+<span class="sd">        `first_sample` offset and `n_samples` count are computed from</span>
+<span class="sd">        the row&#39;s begin_time / fs / nt, so `DASFile.read` returns</span>
+<span class="sd">        only the samples that fall inside the window — no post-read</span>
+<span class="sd">        trim.</span>
+
+<span class="sd">        If the window straddles acquisition gaps:</span>
+
+<span class="sd">        * `fill_gap=True` (default) — each inter-segment gap is</span>
+<span class="sd">        filled with zeros so the returned data has a uniformly-</span>
+<span class="sd">        spaced time axis running from the first kept sample onward.</span>
+<span class="sd">        * `fill_gap=False` — gaps are dropped and the output is</span>
+<span class="sd">        shorter than `(end - begin) x fs`. `end_time` reports the</span>
+<span class="sd">        last sample&#39;s true timestamp, so callers can detect the</span>
+<span class="sd">        shortening.</span>
+
+<span class="sd">        `with_factor=True` (default) attaches the raw-&gt;physical conversion as</span>
+<span class="sd">        `physical_factor`, so `.to_physical()` reaches microstrain without a</span>
+<span class="sd">        re-read. It is not applied here: OptaSense counts must be `unwrap`ed</span>
+<span class="sd">        on the concatenated array first, and scaling before that would put the</span>
+<span class="sd">        2**32 rails at unrecognizable values.</span>
+
+<span class="sd">        Raises `RuntimeError` if no files intersect the window.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;DASdb is empty&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Plan first, read second. Knowing every slice up front lets the output</span>
+        <span class="c1"># be allocated once and filled in place; concatenating instead held each</span>
+        <span class="c1"># file&#39;s array alongside the joined copy (7.5 -&gt; 4.0 GB peak on a 3.7 GB</span>
+        <span class="c1"># window) and left the layout to whatever the readers returned.</span>
+        <span class="n">plan</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">datetime</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">seg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">segments</span><span class="p">():</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">seg</span><span class="p">[</span><span class="s1">&#39;begin_time&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">end_time</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">seg</span><span class="p">[</span><span class="s1">&#39;end_time&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">begin_time</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">seg</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+                <span class="n">row_dt</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;fs&#39;</span><span class="p">])</span>
+                <span class="n">row_begin</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;begin_time&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_pydatetime</span><span class="p">()</span>
+                <span class="n">row_end_exclusive</span> <span class="o">=</span> <span class="n">row_begin</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span>
+                    <span class="n">seconds</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;nt&#39;</span><span class="p">])</span> <span class="o">*</span> <span class="n">row_dt</span>
+                <span class="p">)</span>
+                <span class="n">clip_begin</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">begin_time</span><span class="p">,</span> <span class="n">row_begin</span><span class="p">)</span>
+                <span class="n">clip_end</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">end_time</span><span class="p">,</span> <span class="n">row_end_exclusive</span><span class="p">)</span>
+                <span class="n">offset</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span>
+                    <span class="p">(</span><span class="n">clip_begin</span> <span class="o">-</span> <span class="n">row_begin</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span> <span class="o">/</span> <span class="n">row_dt</span>
+                <span class="p">))</span>
+                <span class="n">n</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span>
+                    <span class="p">(</span><span class="n">clip_end</span> <span class="o">-</span> <span class="n">clip_begin</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span> <span class="o">/</span> <span class="n">row_dt</span>
+                <span class="p">))</span>
+                <span class="k">if</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">plan</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">Path</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;file&#39;</span><span class="p">]),</span>
+                                <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;first_sample&#39;</span><span class="p">])</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">clip_begin</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">plan</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;No files in window [</span><span class="si">{</span><span class="n">begin_time</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">end_time</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">_read</span><span class="p">(</span><span class="n">file</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">first_sample</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DASdata</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">DASFile</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">format</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">(</span>
+                <span class="n">min_ch</span><span class="o">=</span><span class="n">min_ch</span><span class="p">,</span> <span class="n">max_ch</span><span class="o">=</span><span class="n">max_ch</span><span class="p">,</span>
+                <span class="n">first_sample</span><span class="o">=</span><span class="n">first_sample</span><span class="p">,</span> <span class="n">n_samples</span><span class="o">=</span><span class="n">n</span><span class="p">,</span>
+                <span class="n">with_factor</span><span class="o">=</span><span class="n">with_factor</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="c1"># The first read fixes nx, dtype and the sample rate for the buffer.</span>
+        <span class="n">first_read</span> <span class="o">=</span> <span class="n">_read</span><span class="p">(</span><span class="o">*</span><span class="n">plan</span><span class="p">[</span><span class="mi">0</span><span class="p">][:</span><span class="mi">3</span><span class="p">])</span>
+        <span class="n">dt</span><span class="p">,</span> <span class="n">fs</span> <span class="o">=</span> <span class="n">first_read</span><span class="o">.</span><span class="n">dt</span><span class="p">,</span> <span class="n">first_read</span><span class="o">.</span><span class="n">fs</span>
+
+        <span class="c1"># With `fill_gap` each piece sits at its true time and the untouched</span>
+        <span class="c1"># samples between segments stay zero; without it they abut and the gaps</span>
+        <span class="c1"># close up. Either way the first piece starts at 0.</span>
+        <span class="k">if</span> <span class="n">fill_gap</span><span class="p">:</span>
+            <span class="n">t_ref</span> <span class="o">=</span> <span class="n">plan</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span>
+            <span class="n">pos</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">((</span><span class="n">cb</span> <span class="o">-</span> <span class="n">t_ref</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span> <span class="o">/</span> <span class="n">dt</span><span class="p">))</span> <span class="k">for</span> <span class="o">*</span><span class="n">_</span><span class="p">,</span> <span class="n">cb</span> <span class="ow">in</span> <span class="n">plan</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">([</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">n</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">plan</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="n">nt</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">p</span> <span class="o">+</span> <span class="n">n</span> <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">plan</span><span class="p">))</span>
+
+        <span class="n">nx</span> <span class="o">=</span> <span class="n">first_read</span><span class="o">.</span><span class="n">nx</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nx</span><span class="p">,</span> <span class="n">nt</span><span class="p">),</span> <span class="n">first_read</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="n">data</span><span class="p">[:,</span> <span class="p">:</span><span class="n">plan</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">]]</span> <span class="o">=</span> <span class="n">first_read</span><span class="o">.</span><span class="n">data</span>
+        <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">first_sample</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">plan</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
+            <span class="n">data</span><span class="p">[:,</span> <span class="n">p</span><span class="p">:</span><span class="n">p</span> <span class="o">+</span> <span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">_read</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">first_sample</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">data</span>
+
+        <span class="n">out_begin</span> <span class="o">=</span> <span class="n">first_read</span><span class="o">.</span><span class="n">begin_time</span>
+        <span class="n">out_end</span> <span class="o">=</span> <span class="n">out_begin</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="p">(</span><span class="n">nt</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">dt</span><span class="p">)</span> <span class="k">if</span> <span class="n">nt</span> <span class="k">else</span> <span class="n">out_begin</span>
+        <span class="k">return</span> <span class="n">DASdata</span><span class="p">(</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">fs</span><span class="o">=</span><span class="n">fs</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="n">dt</span><span class="p">,</span> <span class="n">nt</span><span class="o">=</span><span class="n">nt</span><span class="p">,</span> <span class="n">nx</span><span class="o">=</span><span class="n">nx</span><span class="p">,</span>
+            <span class="n">dx</span><span class="o">=</span><span class="n">first_read</span><span class="o">.</span><span class="n">dx</span><span class="p">,</span>
+            <span class="n">index_raw</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">min_ch</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">nx</span><span class="p">),</span>
+            <span class="n">begin_time</span><span class="o">=</span><span class="n">out_begin</span><span class="p">,</span> <span class="n">end_time</span><span class="o">=</span><span class="n">out_end</span><span class="p">,</span>
+            <span class="c1"># Format from the catalog, vendor from the file it read.</span>
+            <span class="n">gauge_length_m</span><span class="o">=</span><span class="n">first_read</span><span class="o">.</span><span class="n">gauge_length_m</span><span class="p">,</span>
+            <span class="nb">format</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">format</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="n">first_read</span><span class="o">.</span><span class="n">origin</span><span class="p">,</span>
+            <span class="n">raw_meta</span><span class="o">=</span><span class="n">first_read</span><span class="o">.</span><span class="n">raw_meta</span><span class="p">,</span>
+            <span class="n">units</span><span class="o">=</span><span class="n">first_read</span><span class="o">.</span><span class="n">units</span><span class="p">,</span>
+            <span class="n">physical_factor</span><span class="o">=</span><span class="n">first_read</span><span class="o">.</span><span class="n">physical_factor</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+    <span class="c1"># ------------------------------------------------------------- visualization</span>
+
+<div class="viewcode-block" id="DASdb.plot_timeline">
+<a class="viewcode-back" href="../../api.html#dasio.dasdb.DASdb.plot_timeline">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_timeline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">by_month</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Gantt-style coverage timeline. See `dasio.plot.plot_timeline`.</span>
+
+<span class="sd">        Lazy-imported so a bare `import dasio.dasdb` stays clear of matplotlib.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">.plot</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_timeline</span> <span class="k">as</span> <span class="n">_plot_timeline</span>
+        <span class="k">return</span> <span class="n">_plot_timeline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">by_month</span><span class="o">=</span><span class="n">by_month</span><span class="p">)</span></div>
+</div>
+
+
+
+
+
+<span class="c1"># --- CLI ---</span>
+
+<div class="viewcode-block" id="main">
+<a class="viewcode-back" href="../../api.html#dasio.dasdb.main">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">argv</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;`python -m dasio.dasdb` — build or update a DASdb catalog.</span>
+
+<span class="sd">    Format dispatch is by file extension: .parquet/.parq writes</span>
+<span class="sd">    parquet, .csv/.txt/no-suffix writes legacy whitespace CSV.</span>
+<span class="sd">    Default behaviour is incremental: if the target file already</span>
+<span class="sd">    exists we load it and only open the HDF5 files that are new on</span>
+<span class="sd">    disk. Pass --overwrite to force a full rescan.</span>
+
+<span class="sd">    One-shot format conversion of an existing catalog is a one-liner:</span>
+<span class="sd">        python -c &quot;from dasio.dasdb import DASdb; \\</span>
+<span class="sd">            DASdb.from_file(&#39;old.csv&#39;, format=&#39;ASN&#39;).to_file(&#39;new.parquet&#39;)&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">argparse</span>
+    <span class="n">ap</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">prog</span><span class="o">=</span><span class="s1">&#39;python -m dasio.dasdb&#39;</span><span class="p">)</span>
+    <span class="n">ap</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s1">&#39;--from&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;raw_dir&#39;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">Path</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;directory of raw DAS files to scan, or a glob pattern naming &#39;</span>
+            <span class="s2">&quot;them exactly (--from &#39;path/*/*.h5&#39;). Quote a pattern so the &quot;</span>
+            <span class="s1">&#39;shell does not expand it first. A pattern also skips the layout &#39;</span>
+            <span class="s1">&#39;guessing, and skips dot-prefixed files such as macOS ._ forks.&#39;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ap</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s1">&#39;--dasdb&#39;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">Path</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;catalog path (.parquet recommended for &gt;few-thousand-file &#39;</span>
+            <span class="s1">&#39;catalogs; .csv stays for legacy / human-inspection use). &#39;</span>
+            <span class="s1">&#39;Created on first run, updated incrementally on subsequent runs.&#39;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ap</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s1">&#39;--format&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;ASN&#39;</span><span class="p">,</span> <span class="s1">&#39;OptaSense&#39;</span><span class="p">,</span> <span class="s1">&#39;APSensing&#39;</span><span class="p">,</span> <span class="s1">&#39;Silixa&#39;</span><span class="p">,</span> <span class="s1">&#39;Proc&#39;</span><span class="p">,</span> <span class="s1">&#39;Event&#39;</span><span class="p">,</span> <span class="s1">&#39;Basic&#39;</span><span class="p">],</span>
+        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;on-disk format. Detected from the first file when omitted; pass &#39;</span>
+            <span class="s1">&#39;it to skip that open, or to force a format on a mixed directory.&#39;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ap</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s1">&#39;--overwrite&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;rescan raw_dir from scratch, ignoring any existing catalog&#39;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ap</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s1">&#39;--nworkers&#39;</span><span class="p">,</span> <span class="s1">&#39;-nW&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s1">&#39;N&#39;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;parallelize per-file HDF5 metadata reads across N &#39;</span>
+            <span class="s1">&#39;worker processes (default: 1 = in-process serial). Worth &#39;</span>
+            <span class="s1">&#39;raising to ~4-8 (or more on a network FS) for thousand-&#39;</span>
+            <span class="s1">&#39;plus-file catalogs.&#39;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ap</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s1">&#39;--progress&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;show a tqdm progress bar during the metadata scan &#39;</span>
+            <span class="s1">&#39;(silently disabled if tqdm is not installed)&#39;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ap</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s1">&#39;--plot&#39;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;?&#39;</span><span class="p">,</span> <span class="n">const</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s1">&#39;PATH&#39;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;also save `plot_timeline` as an image; without an &#39;</span>
+            <span class="s1">&#39;explicit path, writes &lt;dasdb&gt;.png next to the catalog&#39;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ap</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s1">&#39;--quiet&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;skip the end-of-run summary&#39;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">ap</span><span class="o">.</span><span class="n">parse_args</span><span class="p">(</span><span class="n">argv</span><span class="p">)</span>
+
+    <span class="c1"># Resolved here rather than left to from_dir: `to_csv` writes no format</span>
+    <span class="c1"># column, so the update path below cannot recover it from the catalog.</span>
+    <span class="n">fmt</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">format</span> <span class="ow">or</span> <span class="n">detect_dir_format</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">raw_dir</span><span class="p">)</span>
+
+    <span class="n">pre_existed</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">dasdb</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">pre_existed</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">args</span><span class="o">.</span><span class="n">overwrite</span><span class="p">:</span>
+        <span class="n">db</span> <span class="o">=</span> <span class="n">DASdb</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">dasdb</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="n">fmt</span><span class="p">)</span>
+        <span class="n">n_new</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">update_from_dir</span><span class="p">(</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">raw_dir</span><span class="p">,</span> <span class="n">workers</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">nworkers</span><span class="p">,</span> <span class="n">progress</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">progress</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">action</span><span class="p">,</span> <span class="n">tail</span> <span class="o">=</span> <span class="s1">&#39;updated&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;+</span><span class="si">{</span><span class="n">n_new</span><span class="si">}</span><span class="s1"> new&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">db</span> <span class="o">=</span> <span class="n">DASdb</span><span class="o">.</span><span class="n">from_dir</span><span class="p">(</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">raw_dir</span><span class="p">,</span> <span class="n">fmt</span><span class="p">,</span>
+            <span class="n">workers</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">nworkers</span><span class="p">,</span> <span class="n">progress</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">progress</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">action</span> <span class="o">=</span> <span class="s1">&#39;rebuilt&#39;</span> <span class="k">if</span> <span class="n">pre_existed</span> <span class="k">else</span> <span class="s1">&#39;created&#39;</span>
+        <span class="n">tail</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">db</span><span class="o">.</span><span class="n">n_files</span><span class="si">}</span><span class="s1"> files&#39;</span>
+
+    <span class="n">db</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">dasdb</span><span class="p">)</span>
+
+    <span class="n">plot_path</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">plot</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">plot_path</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">Path</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">plot</span><span class="p">)</span> <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">plot</span>
+            <span class="k">else</span> <span class="n">args</span><span class="o">.</span><span class="n">dasdb</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s1">&#39;.png&#39;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">plot_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1"># Force a headless backend for the CLI write path — autodetect</span>
+        <span class="c1"># blocks indefinitely when there&#39;s no $DISPLAY and Qt/Tk</span>
+        <span class="c1"># initialization stalls. Library callers of plot_timeline</span>
+        <span class="c1"># keep their own backend choice.</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span>
+        <span class="n">matplotlib</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s1">&#39;Agg&#39;</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">plot_timeline</span><span class="p">()</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">plot_path</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">ax</span><span class="o">.</span><span class="n">figure</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">args</span><span class="o">.</span><span class="n">quiet</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;[dasdb] </span><span class="si">{</span><span class="n">action</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">dasdb</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">db</span><span class="si">!r}</span><span class="s1">  </span><span class="si">{</span><span class="n">tail</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="k">if</span> <span class="n">plot_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;  [plot: </span><span class="si">{</span><span class="n">plot_path</span><span class="si">}</span><span class="s1">]&#39;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">return</span> <span class="mi">0</span></div>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">main</span><span class="p">())</span>
+</pre></div>
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2026, Jiaxuan Li
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="../../_static/sg-tags.js?v=d80f6fa4"></script>
+    </body>
+</html>

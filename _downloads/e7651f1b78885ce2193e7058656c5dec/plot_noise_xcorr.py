@@ -1,0 +1,64 @@
+"""
+Ambient-noise cross-correlation on the Ridgecrest South array
+=============================================================
+
+An hour of ambient noise on 600 channels, correlated against a virtual
+source at channel 7000 in 60 s segments, whitened over 1-2 Hz and stacked.
+Lab 1 of the DAS workshop. Needs the `noise` extra.
+
+Two 2.4 GB files from the AI4EPS dataset on HuggingFace, downloaded once to
+`~/.cache/dasio/`.
+"""
+# %%
+import os
+import urllib.request
+from datetime import timedelta
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+from dasio import DASdb
+from dasio.noise import common_shot_pairs, xcorr_dataset
+
+BASE = 'https://huggingface.co/datasets/AI4EPS/quakeflow_das/resolve/main/ridgecrest_south/data'
+FILES = (
+    'RidgeCrest-South-2026-01-02T133503Z.h5',
+    'RidgeCrest-South-2026-01-02T140503Z.h5',
+)
+CACHE = os.path.expanduser('~/.cache/dasio')
+CH0, CH1, SRC = 6700, 7300, 7000            # receiver range, virtual source
+
+# %%
+os.makedirs(CACHE, exist_ok=True)
+for name in FILES:
+    path = os.path.join(CACHE, name)
+    if not os.path.exists(path):
+        urllib.request.urlretrieve(f'{BASE}/{name}', path)
+
+# %%
+# Catalog the cache. The two files are one contiguous hour: the first segment.
+db = DASdb.from_dir(CACHE)
+seg = next(db.segments())
+begin = seg['begin_time'].iloc[0].to_pydatetime()
+end = seg['end_time'].iloc[-1].to_pydatetime() + timedelta(seconds=1 / seg['fs'].iloc[0])
+
+# %%
+ch1, ch2 = common_shot_pairs(SRC - CH0, CH1 - CH0)   # indices into [CH0, CH1)
+ccg = xcorr_dataset(
+    db, ch1, ch2, begin=begin, end=end, min_ch=CH0, max_ch=CH1,
+    seg_sec=60.0, max_lag_sec=4.0, window_sec=1800.0,
+    prep=dict(
+        freqmin=0.5, freqmax=10.0, norm_window_sec=0,
+        differentiate=True, detrend=False, subtract_common_mode=True,
+    ),
+    whiten=True, whiten_band=(1.0, 2.0),
+)
+
+# %%
+ax, im = ccg.plot(offsets=np.arange(CH0, CH1), perc=98, figsize=(10, 8))
+ax.axvline(SRC, color='k', ls='--', lw=1, label='virtual source')
+ax.set_xlabel('channel')
+ax.legend(loc='upper right')
+ax.set_title('Virtual-shot gather at channel 7000, ambient noise, 0.5-10 Hz')
+plt.show()
+
