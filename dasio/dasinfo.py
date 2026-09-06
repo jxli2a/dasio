@@ -1,7 +1,7 @@
 """Channel-metadata catalog for one snapshot of an instrument configuration.
 
 `DASinfo` wraps a pandas DataFrame indexed by `index_raw` (the row position
-in the reader's raw `(nx_raw, nt)` array). Each row has:
+in the reader's raw `(nx_raw, nt)` array). Each row has::
 
     fiber           'n' / 's' / 'c' / future 'e' / 'w'. 'u' marks an unknown
                     fiber (NaN rows in the CSV are mapped to 'u'). Single-

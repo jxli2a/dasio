@@ -26,3 +26,7 @@ mytest/
 
 # Claude Code, never committed
 .claude/
+
+# Sphinx output
+docs/_build/
+docs/auto_examples/
