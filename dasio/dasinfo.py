@@ -55,8 +55,41 @@ _RENAME_ALIASES = {
 
 @dataclass(frozen=True)
 class DASinfo:
-    """Immutable channel catalog. Construct via `from_csv` in production;
-    tests construct directly with a pre-normalized DataFrame."""
+    """Immutable channel catalog: `DASinfo(df)` or `DASinfo.from_csv(path)`.
+
+    Any channel table is normalized into the canonical schema on construction.
+
+    `select_taptest` needs `index_raw` and `taptest`; `plot`, `coord_lookup`
+    and `projection_origin` need `lat` (or `latitude`) and `lon` (or
+    `longitude`). Columns defaulted when absent:
+
+        fiber           defaults to 'n'.
+        taptest         defaults to 1.
+        quality         defaults to 1. Forced to 0 wherever taptest==0.
+        index_raw       defaults to row position (0..N-1).
+        index_taptest   computed per-fiber starting at 0 for
+                        taptest==1 rows when missing.
+
+    Rename aliases (source column dropped after rename):
+
+        index                   -> index_raw
+        ichan_before_taptest    -> index_raw
+        ichan_after_taptest     -> index_taptest
+        taptest_channel_index   -> index_taptest
+        status                  -> taptest (string 'good' / 'bad'
+                                converted to 1 / 0)
+        spiky                   -> quality (polarity-flipped:
+                                spiky=0 -> quality=1; spiky=1 -> 0)
+        latitude                -> lat
+        longitude               -> lon
+        elevation               -> ele
+        azimuth                 -> azi
+        dipping angle           -> dip
+
+    Production LF / EQ deployment CSVs (Iceland + Santorini) load
+    directly through these aliases — no CSV mutation needed before
+    consumers migrate to `DASinfo.from_csv`.
+        """
 
     df: pd.DataFrame
 
@@ -64,46 +97,17 @@ class DASinfo:
 
     @classmethod
     def from_csv(cls, path: Union[str, Path]) -> "DASinfo":
-        """Read a CSV in the canonical DASinfo schema.
+        return cls(pd.read_csv(path))
 
-        Required columns: `lat` (or `latitude`), `lon` (or `longitude`).
-        Optional columns (defaulted when absent):
-
-            fiber           defaults to 'n'.
-            taptest         defaults to 1.
-            quality         defaults to 1. Forced to 0 wherever taptest==0.
-            index_raw       defaults to row position (0..N-1).
-            index_taptest   computed per-fiber starting at 0 for
-                            taptest==1 rows when missing.
-
-        Rename aliases (source column dropped after rename):
-
-            index                   -> index_raw
-            ichan_before_taptest    -> index_raw
-            ichan_after_taptest     -> index_taptest
-            taptest_channel_index   -> index_taptest
-            status                  -> taptest (string 'good' / 'bad'
-                                    converted to 1 / 0)
-            spiky                   -> quality (polarity-flipped:
-                                    spiky=0 -> quality=1; spiky=1 -> 0)
-            latitude                -> lat
-            longitude               -> lon
-            elevation               -> ele
-            azimuth                 -> azi
-            dipping angle           -> dip
-
-        Production LF / EQ deployment CSVs (Iceland + Santorini) load
-        directly through these aliases — no CSV mutation needed before
-        consumers migrate to `DASinfo.from_csv`.
-        """
-        df = pd.read_csv(path)
-        df = cls._apply_rename_aliases(df)
-        df = cls._set_fiber(df)
-        df = cls._set_taptest_quality(df)
-        df = cls._set_index_taptest(df)
-        df = cls._set_index_raw(df)
-        df = cls._reorder_columns(df)
-        return cls(df=df)
+    def __post_init__(self):
+        # Any channel table in; a frame that is already canonical (a subset's)
+        # comes through unchanged.
+        df = self._apply_rename_aliases(self.df)
+        df = self._set_fiber(df)
+        df = self._set_taptest_quality(df)
+        df = self._set_index_taptest(df)
+        df = self._set_index_raw(df)
+        object.__setattr__(self, "df", self._reorder_columns(df))
 
     # ---- subsetting -----------------------------------------------------
 
@@ -356,6 +360,8 @@ class DASinfo:
 
     @staticmethod
     def _set_index_raw(df: pd.DataFrame) -> pd.DataFrame:
+        if df.index.name == "index_raw":
+            return df
         df = df.copy()
         if "index_raw" not in df.columns:
             df = df.reset_index(drop=True)
