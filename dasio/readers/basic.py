@@ -33,8 +33,10 @@ from ..utils import iso_timestamp, parse_iso
 # deliberately not kept, and `format` is written as the literal 'Basic' rather
 # than copied from the DASdata — the file IS Basic whatever it was read from,
 # and stamping a source 'Proc' there would make it undetectable.
-_ATTRS = ('fs', 'dt', 'dx', 'gauge_length_m', 'origin',
-          't0_sec', 'ch0', 'dch', 'units', 'physical_factor', 'channel_axis_name')
+_ATTRS = (
+    'fs', 'dt', 'dx', 'gauge_length_m', 'origin',
+    't0_sec', 'ch0', 'dch', 'units', 'physical_factor',
+)
 
 
 def _text(v, default: str = 'unknown') -> str:
@@ -70,12 +72,9 @@ def read_basic(
             int(min_ch):int(max_ch),
             int(first_sample):int(first_sample) + int(n_samples),
         ]
-        # Per-row labels when the writer stored them; a (ch0, dch) ramp cannot
+        # Per-row numbers when the writer stored them; a (ch0, dch) ramp cannot
         # express a gappy axis, which is what `select` leaves behind.
-        stored = {
-            k: v[int(min_ch):int(max_ch)]
-            for k, v in f.get('channels', {}).items()
-        }
+        stored = f['channels/raw'][int(min_ch):int(max_ch)] if 'channels' in f else None
 
     data = np.ascontiguousarray(data)
     nx, nt = data.shape
@@ -95,11 +94,10 @@ def read_basic(
         origin=_text(attrs.get('origin')),
         raw_meta=None,
         t0_sec=float(attrs.get('t0_sec', 0.0)) + int(first_sample) * dt,
-        channels=stored or {'raw': int(attrs.get('ch0', 0))
-                            + (int(min_ch) + np.arange(nx)) * dch},
-        # which axis was active, so a saved taptest window does not silently
-        # come back reporting raw channel numbers
-        channel_axis_name=_text(attrs.get('channel_axis_name'), 'raw'),
+        index_raw=(
+            int(attrs.get('ch0', 0)) + (int(min_ch) + np.arange(nx)) * dch
+            if stored is None else stored
+        ),
         units=normalize_unit(_text(attrs.get('units'))),
         physical_factor=float(attrs.get('physical_factor', 1.0)),
     )
@@ -136,14 +134,11 @@ def write_basic(
             # h5py has no null attr; NaN is the sentinel `read_basic` maps back
             # to None, matching how read_metadata_proc handles a missing dx.
             dset.attrs[k] = np.nan if v is None else v
-        # `ch0`/`dch` describe a ramp; anything else needs the labels themselves.
+        # `ch0`/`dch` describe a ramp; anything else needs the numbers themselves.
         # Written only then, so a plain read still produces a byte-identical file
         # and an older reader loses nothing it could have used.
-        axis = d.channels['raw']
-        if not np.array_equal(axis, d.ch0 + np.arange(d.nx) * d.dch):
-            g = f.create_group('channels')
-            for name, arr in (d.channels or {}).items():
-                g.create_dataset(name, data=np.asarray(arr))
+        if not np.array_equal(d.index_raw, d.ch0 + np.arange(d.nx) * d.dch):
+            f.create_dataset('channels/raw', data=np.asarray(d.index_raw))
     tmp.replace(file)
     return file
 

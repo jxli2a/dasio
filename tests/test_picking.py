@@ -123,7 +123,7 @@ def test_picks_carry_the_channel_anchor(mocked):
     row position stays available as `channel_index` because it indexes
     `scores`."""
     d = _d()
-    d.channels = {'raw': 2000 + np.arange(d.nx) * 4}
+    d.index_raw = 2000 + np.arange(d.nx) * 4
     res = pk.pick_phases(d, device="cpu")
     assert res.df["channel_index"].tolist() == [2, 5]
     assert res.df["channel"].tolist() == [2008, 2020]
@@ -134,7 +134,7 @@ def test_picks_plot_uses_channel_numbers(mocked):
 
     matplotlib.use("Agg")
     d = _d()
-    d.channels = {'raw': 2000 + np.arange(d.nx) * 4}
+    d.index_raw = 2000 + np.arange(d.nx) * 4
     ax = pk.pick_phases(d, device="cpu").plot()
     xs = sorted(c.get_offsets()[0][0] for c in ax.collections)
     assert xs == [2008, 2020]

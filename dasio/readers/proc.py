@@ -132,7 +132,7 @@ def read_data_proc(
         format='Proc', origin=origin,
         raw_meta=raw_meta,
         units=units,
-        channels={'raw': int(min_ch) + np.arange(int(max_ch - min_ch))},
+        index_raw=int(min_ch) + np.arange(int(max_ch - min_ch)),
     )
 
 

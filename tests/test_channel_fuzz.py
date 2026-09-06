@@ -5,6 +5,7 @@ between `channels` and `data` shows up as a payload mismatch rather than as a
 plausible-looking wrong number.
 """
 import random
+from dataclasses import replace
 from datetime import datetime, timezone
 
 import numpy as np
@@ -33,16 +34,14 @@ def fresh():
     return DASdata(
         data=np.repeat(opt[:, None].astype(np.float32), NT, axis=1),
         fs=100.0, dt=0.01, nt=NT, nx=NX, dx=2.0, begin_time=T0, end_time=T0,
-        units="strain/s", channels={"raw": opt},
+        units="strain/s", index_raw=opt,
     )
 
 
 def check(d, where):
-    opt = d.channels["raw"]
+    opt = d.index_raw
     assert len(opt) == d.nx, f"{where}: {len(opt)} labels for {d.nx} rows"
-    assert len(d.channel_axis) == d.nx, f"{where}: active axis length"
-    for name, arr in (d.channels or {}).items():
-        assert len(arr) == d.nx, f"{where}: {name!r} length"
+    assert len(d.channels()) == d.nx, f"{where}: active axis length"
     if d.nx:
         np.testing.assert_array_equal(
             d.data[:, 0], opt.astype(np.float32),
@@ -55,14 +54,14 @@ def test_labels_follow_the_rows_through_random_chains(seed, info):
     r = random.Random(seed)
 
     def rng_range(d, via_truncate):
-        ax = d.channel_axis
+        ax = d.channels()
         lo = int(r.choice(ax.tolist()))
         hi = lo + r.randint(1, max(2, len(ax) // 2))
         return (d.truncate(ch_range=(lo, hi)) if via_truncate
                 else d.select(ch_range=(lo, hi)))
 
     def rng_index(d):
-        ax = d.channel_axis.tolist()
+        ax = d.channels().tolist()
         picks = r.sample(ax, r.randint(1, min(len(ax), 8)))
         if r.random() < 0.3:
             r.shuffle(picks)
@@ -75,9 +74,9 @@ def test_labels_follow_the_rows_through_random_chains(seed, info):
 
     ops = [
         ("select_taptest", lambda d: d.select_taptest(info)),
-        ("set raw", lambda d: d.set_channel_axis("raw")),
-        ("set taptest", lambda d: d.set_channel_axis("taptest")
-         if "taptest" in (d.channels or {}) else d),
+        ("set raw", lambda d: replace(d, channel_type="raw")),
+        ("set taptest", lambda d: (
+            replace(d, channel_type="taptest") if d.dasinfo is not None else d)),
         ("ch_range", lambda d: rng_range(d, False)),
         ("truncate", lambda d: rng_range(d, True)),
         ("ch_index", rng_index),

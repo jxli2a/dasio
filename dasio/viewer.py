@@ -161,14 +161,14 @@ def window_bounds(d, t_lo, t_hi, ch_lo, ch_hi):
 
     Returns `(i0, i1, a0, a1)` — half-open, always at least one sample and one
     channel wide. `t_lo`/`t_hi` are seconds in `d`'s own frame and
-    `ch_lo`/`ch_hi` are channel numbers in whatever axis `channel_axis_name` selects,
-    looked up on `channel_axis` rather than mapped through `ch0`/`dch` — the
+    `ch_lo`/`ch_hi` are channel numbers in whatever axis `channel_type` selects,
+    looked up on `channels()` rather than mapped through `ch0`/`dch` — the
     two agree only while the rows are a uniform ramp, and `select_taptest`
     leaves an axis that is neither the raw axis nor evenly spaced.
     """
     i0 = max(0, int(round((t_lo - d.t0_sec) / d.dt)))
     i1 = min(d.nt, int(round((t_hi - d.t0_sec) / d.dt)))
-    axis = d.channel_axis
+    axis = d.channels()
     a0 = max(0, min(int(np.searchsorted(axis, ch_lo, 'left')), d.nx - 1))
     a1 = max(a0 + 1, min(int(np.searchsorted(axis, ch_hi, 'left')), d.nx))
     return i0, max(i0 + 1, i1), a0, a1
@@ -282,7 +282,7 @@ def datetime_ticks(begin_time, t0_sec, t_lo, t_hi):
 def _axis_step(d):
     """Mean spacing of the active channel axis — the one number a texture or an
     `imshow` extent can use, since neither can be placed on a gappy axis."""
-    axis = d.channel_axis
+    axis = d.channels()
     if axis.size < 2:
         return 1.0
     return float(axis[-1] - axis[0]) / (axis.size - 1)
@@ -295,7 +295,7 @@ def sample_at(d, t_sec, channel):
     indexes the in-memory array directly — no GPU readback, no texture lookup.
     Returns `(row, col, amplitude)`.
     """
-    axis = d.channel_axis
+    axis = d.channels()
     col = int(round((t_sec - d.t0_sec) / d.dt))
     if not (0 <= col < d.nt) or axis.size == 0:
         return None
@@ -481,7 +481,7 @@ def view(
     # ---- widgets -----------------------------------------------------------
     t0 = w.FloatText(value=round(base.t0_sec, 3), **_NUM)
     t1 = w.FloatText(value=round(t_end, 3), **_NUM)
-    _ax0, _ax1 = int(base.channel_axis[0]), int(base.channel_axis[-1]) + 1
+    _ax0, _ax1 = int(base.channels()[0]), int(base.channels()[-1]) + 1
     c0 = w.IntText(value=_ax0, **_NUM)
     c1 = w.IntText(value=_ax1, **_NUM)
     zoom_btn = w.Button(description='Zoom', button_style='info',
@@ -558,7 +558,7 @@ def view(
         p = state['proc']
         step = max(1, int(trace_stride.value))
         _, _, a0, _ = _bounds()
-        axis = p.channel_axis
+        axis = p.channels()
         amp = 0.5 * step * _axis_step(p) * wig_gain.value
         for i, g in enumerate(state['stack'].graphics):
             ch = float(axis[a0 + i * step])
@@ -578,7 +578,7 @@ def view(
         budget; press Zoom to come back to full detail for a window.
         """
         p = state['proc']
-        axis = p.channel_axis
+        axis = p.channels()
         i0, i1, a0, a1 = _bounds()
         panning = pan_on.value
         step = max(1, int(trace_stride.value))
@@ -691,9 +691,9 @@ def view(
                         f"{a1 - a0} ch | {px}{state['proc'].units}</code>")
 
     def _full(_=None):
-        # Read the axis now, not at construction: `set_channel_axis` can have
-        # flipped it since, and the boxes would then hold the other axis.
-        ax = base.channel_axis
+        # Read the axis now, not at construction: `channel_type` can have
+        # changed since, and the boxes would then hold the other axis.
+        ax = base.channels()
         t0.value, t1.value = round(base.t0_sec, 3), round(t_end, 3)
         c0.value, c1.value = int(ax[0]), int(ax[-1]) + 1
         _draw()
@@ -720,9 +720,10 @@ def view(
                 bandpass=((f0.value, f1.value, order.value, zph.value)
                           if bp_on.value else None),
                 integrate=in_on.value,
-                common_mode=(tuple(np.searchsorted(
-                                 base.channel_axis, [cm0.value, cm1.value]))
-                             if cm_on.value else None),
+                common_mode=(
+                    tuple(np.searchsorted(base.channels(), [cm0.value, cm1.value]))
+                    if cm_on.value else None
+                ),
             )
         except ValueError as e:                    # bad corner, inverted band…
             status.value = f"<span style='color:#c00'>{e}</span>"
@@ -787,7 +788,7 @@ def view(
         t_end_ = p.t0_sec + p.nt * p.dt
         t0.value = round(max(p.t0_sec, min(t_lo, t_end_)), 3)
         t1.value = round(max(p.t0_sec, min(t_hi, t_end_)), 3)
-        ch_min, ch_max = float(p.channel_axis[0]), float(p.channel_axis[-1])
+        ch_min, ch_max = float(p.channels()[0]), float(p.channels()[-1])
         c0.value = int(round(max(ch_min, min(c_lo, ch_max))))
         c1.value = int(round(max(ch_min, min(c_hi, ch_max))))
 

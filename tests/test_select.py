@@ -90,29 +90,29 @@ def test_skip_step_le_one_is_noop():
 
 # --- selecting by channel number, on an axis that does not start at 0 --------
 #
-# `channel_axis` is the authority on which fiber channel a row holds, so it is
+# `channels()` is the authority on which fiber channel a row holds, so it is
 # also what `select` matches against. Both halves used to be broken
 # once `ch0`/`dch` moved off (0, 1): the argument was read as a row index, and
 # the result inherited the parent's anchor, which described the wrong channels.
 
 def offset_make(nx=6, ch0=2000, dch=5):
     d = make(nx=nx)
-    d.channels = {'raw': ch0 + np.arange(nx) * dch}
+    d.index_raw = ch0 + np.arange(nx) * dch
     return d
 
 
 def test_select_takes_channel_numbers_not_row_indices():
-    d = offset_make()                            # channel_axis 2000, 2005, ... 2025
+    d = offset_make()                            # channels() 2000, 2005, ... 2025
     out = d.select(ch_index=[2005, 2015])
     assert list((out.data[:, 0] // 1000).astype(int)) == [1, 3]   # rows 1 and 3
-    np.testing.assert_array_equal(out.channel_axis, [2005, 2015])
+    np.testing.assert_array_equal(out.channels(), [2005, 2015])
 
 
 def test_select_preserves_the_requested_order():
     d = offset_make()
     out = d.select(ch_index=[2025, 2000, 2010])
     assert list((out.data[:, 0] // 1000).astype(int)) == [5, 0, 2]
-    np.testing.assert_array_equal(out.channel_axis, [2025, 2000, 2010])
+    np.testing.assert_array_equal(out.channels(), [2025, 2000, 2010])
 
 
 def test_select_rejects_a_channel_the_array_does_not_hold():
@@ -128,12 +128,12 @@ def test_uniform_pick_retunes_ch0_dch_to_the_pick():
     stale parent stride would stretch the picture over the wrong channels."""
     out = offset_make().select(ch_index=[2000, 2010, 2020])
     assert (out.ch0, out.dch) == (2000, 10)
-    np.testing.assert_array_equal(out.channel_axis, [2000, 2010, 2020])
+    np.testing.assert_array_equal(out.channels(), [2000, 2010, 2020])
 
 
 def test_non_uniform_pick_keeps_the_exact_axis():
     out = offset_make().select(ch_index=[2000, 2010, 2025])
-    np.testing.assert_array_equal(out.channel_axis, [2000, 2010, 2025])
+    np.testing.assert_array_equal(out.channels(), [2000, 2010, 2025])
     # ch0/dch survive only as the ramp through the same span, for consumers
     # that can draw nothing else — deliberately not the exact axis.
     assert out.ch0 == 2000
@@ -143,16 +143,16 @@ def test_non_uniform_pick_keeps_the_exact_axis():
 def test_truncate_and_skip_ch_carry_a_non_uniform_axis_through():
     d = offset_make().select(ch_index=[2000, 2010, 2025])
     np.testing.assert_array_equal(
-        d.truncate(ch_range=(2010, 2026)).channel_axis, [2010, 2025])
-    np.testing.assert_array_equal(d.skip_ch(2).channel_axis, [2000, 2025])
-    np.testing.assert_array_equal(d.select(ch_index=[2025]).channel_axis, [2025])
+        d.truncate(ch_range=(2010, 2026)).channels(), [2010, 2025])
+    np.testing.assert_array_equal(d.skip_ch(2).channels(), [2000, 2025])
+    np.testing.assert_array_equal(d.select(ch_index=[2025]).channels(), [2025])
 
 
 def test_boolean_mask_stays_positional():
     """A mask is one entry per row, so it cannot be read as channel numbers."""
     d = offset_make()
     out = d.select(ch_index=np.array([True, False, True, False, False, True]))
-    np.testing.assert_array_equal(out.channel_axis, [2000, 2010, 2025])
+    np.testing.assert_array_equal(out.channels(), [2000, 2010, 2025])
     with pytest.raises(ValueError, match="one entry per channel"):
         d.select(ch_index=np.array([True, False]))
 
@@ -163,4 +163,4 @@ def test_default_anchor_selection_is_unchanged():
     d = make()
     out = d.select(ch_index=[5, 0, 2])
     assert list((out.data[:, 0] // 1000).astype(int)) == [5, 0, 2]
-    np.testing.assert_array_equal(out.channel_axis, [5, 0, 2])
+    np.testing.assert_array_equal(out.channels(), [5, 0, 2])

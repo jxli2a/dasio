@@ -96,9 +96,9 @@ def imshow(
     nx_full = sub.nx
     # Channel numbers of the first and last row, captured before `skip_ch`
     # below multiplies `dch`. On a min_ch=2000 read these are 2000 and up, so
-    # the axis labels the fiber rather than the array. From `channel_axis`, the
+    # the axis labels the fiber rather than the array. From `channels()`, the
     # authority — `ch0 + i*dch` only matches it while the rows are a ramp.
-    ch_axis = sub.channel_axis
+    ch_axis = sub.channels()
     ch_lo, ch_hi = int(ch_axis[0]), int(ch_axis[-1])
     if usedatetime:
         dt_axis = sub.times(type='datetime')
@@ -228,7 +228,7 @@ def wiggle(
         t_step = 1
 
     # Rows select the traces; channel numbers place them on the axis.
-    ch_vals = sub.channel_axis[ch_indices]
+    ch_vals = sub.channels()[ch_indices]
     data = sub.data[ch_indices][:, ::t_step]
     if normalize:
         peak = np.maximum(np.abs(data).max(axis=1, keepdims=True), 1e-30)

@@ -189,7 +189,7 @@ def test_sample_at_returns_the_underlying_value_not_a_display_value():
 def test_sample_at_honours_the_channel_origin():
     from dasio.viewer import sample_at
     d = _make(nx=6, nt=10)
-    d.channels = {'raw': 2000 + np.arange(d.nx)}
+    d.index_raw = 2000 + np.arange(d.nx)
     d.data[3, 4] = 1.25
     assert sample_at(d, t_sec=4 * d.dt, channel=2003)[2] == pytest.approx(1.25)
 
@@ -275,7 +275,7 @@ def test_window_bounds_maps_fiber_channels_through_ch0_and_dch():
     from dasio.viewer import window_bounds
 
     d = _make(nx=100, nt=1000)
-    d.channels = {'raw': 2000 + np.arange(d.nx) * 4}                       # rows 0..99 are channels 2000..2396
+    d.index_raw = 2000 + np.arange(d.nx) * 4                       # rows 0..99 are channels 2000..2396
     i0, i1, a0, a1 = window_bounds(d, 0.0, 2.0, 2040, 2080)
     assert (a0, a1) == (10, 20)
     assert (i0, i1) == (0, 200)
@@ -423,7 +423,7 @@ def test_view_builds_and_draws_the_first_frame(style, panels):
     from dasio.viewer import view
 
     d = _make(nx=200, nt=2000)
-    d.channels = {'raw': 2000 + np.arange(d.nx) * 4}
+    d.index_raw = 2000 + np.arange(d.nx) * 4
     view(d, style=style, panels=panels)   # raises if any of the above is broken
 
 
@@ -589,12 +589,12 @@ def test_channel_lookup_survives_a_non_ramp_axis(tmp_path):
     d = DASdata(
         data=np.random.default_rng(0).standard_normal((60, 100)).astype(np.float32),
         fs=100.0, dt=0.01, nt=100, nx=60, dx=2.0, begin_time=t0, end_time=t0,
-        channels={"raw": 2000 + np.arange(60)},
+        index_raw=2000 + np.arange(60),
     ).select_taptest(DASinfo.from_csv(path))
 
-    assert d.channel_axis_name == "taptest" and d.ch0 == 2000     # axes disagree
+    assert d.channel_type == "taptest" and d.ch0 == 2000     # axes disagree
     for ch in (0, 5, 20, d.nx - 1):
         row = window_bounds(d, 0.0, 1.0, ch, ch + 1)[2]
-        assert row == int(np.flatnonzero(d.channel_axis == ch)[0])
+        assert row == int(np.flatnonzero(d.channels() == ch)[0])
         assert sample_at(d, 0.5, ch)[0] == row
     assert sample_at(d, 0.5, 9999) is None                 # past the axis

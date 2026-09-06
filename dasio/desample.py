@@ -309,7 +309,7 @@ def desample_window(
         out_chunks.append(data.astype(np.float32, copy=False))
         # this chunk covers c0..c1; the labels have to be concatenated with it,
         # not taken from the first chunk, which holds at most `nchbuffer` of them
-        axis_chunks.append(reads[0].channels['raw'])
+        axis_chunks.append(reads[0].index_raw)
         if first_data is None:
             first_data = reads[0]
 
@@ -331,7 +331,7 @@ def desample_window(
         # after one generation, and filtering/decimating never changes units.
         format=format, origin=first_data.origin,
         units=first_data.units,
-        channels={'raw': np.concatenate(axis_chunks)} if axis_chunks else None,
+        index_raw=np.concatenate(axis_chunks) if axis_chunks else None,
     )
 
 

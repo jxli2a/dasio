@@ -5,6 +5,8 @@ from typing import Optional, Tuple, TypedDict, Union
 
 import numpy as np
 
+from .dasinfo import DASinfo
+
 
 # What `to_physical` turns each unit into. Everything lands on microstrain, so
 # a window's unit never depends on which instrument recorded it, and seismic
@@ -97,15 +99,17 @@ class DASdata:
     # radian/s->strain/s; 1.0 for ASN, already strain). Attached by
     # `DASFile.read(with_factor=True)`; `to_physical` applies it with the 1e6.
     physical_factor: float = 1.0
-    # Channel number of every row, `{name: array}`. 'raw' is `index_raw` and is
-    # always present; `select_taptest` adds 'taptest'. `ch0`/`dch` derive from it.
-    channels:        Optional[dict] = None
-    channel_axis_name: str = 'raw'   # which label `channel_axis` reports
+    # Interrogator channel number of every row. `ch0`/`dch` derive from it.
+    index_raw:       Optional[np.ndarray] = None
+    # The survey catalog, attached by `select_taptest`; taptest numbers are
+    # looked up in it by `index_raw`.
+    dasinfo:         Optional[DASinfo] = None
+    channel_type:    str = 'raw'   # which numbering `channels()` reports by default
 
     def __post_init__(self):
         # So no caller ever has to ask whether the axis was filled in.
-        if self.channels is None:
-            self.channels = {'raw': np.arange(self.nx)}
+        if self.index_raw is None:
+            self.index_raw = np.arange(self.nx)
 
     # ---- Read-only accessors ----------------------------------------------
 
@@ -155,39 +159,30 @@ class DASdata:
     def reftime(self, when: datetime):
         self.t0_sec = (self.begin_time - when).total_seconds()
 
-    @property
-    def channel_axis(self) -> np.ndarray:
-        """Channel number of every row, in the axis `channel_axis_name` selects.
-        This is what `select`'s `ch_range` and `ch_index` match against.
-        """
-        return self.channels[self.channel_axis_name]
+    def channels(self, type: Optional[str] = None) -> np.ndarray:
+        """Channel number of every row.
 
-    def set_channel_axis(self, name: str) -> 'DASdata':
-        """Switch `channel_axis` to the `name` labels. Mutates, returns self.
         Args:
-            name: 'raw' (the reader's index, always present) or a label
-                `select_taptest` attached, i.e. 'taptest'.
-        Returns:
-            self.
+            type: 'raw' (the interrogator's numbering) or 'taptest' (the
+                catalog's, after `select_taptest`). Default is `channel_type`,
+                which is also what `select`'s `ch_range` and `ch_index` match.
         Raises:
-            ValueError: if `name` was never attached.
-        Unlike `truncate` or `skip_ch` this changes no samples, so it mutates
-        rather than returning a copy — `d.set_channel_axis('taptest')` as a bare
-        statement has to work.
+            ValueError: 'taptest' asked for before a catalog was attached.
         """
-        if name not in self.channels:
-            raise ValueError(
-                f'no {name!r} channel labels on this DASdata '
-                f'(have {sorted(self.channels)}). '
-                f'`select_taptest(dasinfo)` is what attaches them.'
-            )
-        self.channel_axis_name = name
-        return self
+        type = type or self.channel_type
+        if type == 'raw':
+            return self.index_raw.copy()
+        if type == 'taptest' and self.dasinfo is not None:
+            return self.dasinfo.df.loc[self.index_raw, 'index_taptest'].to_numpy()
+        raise ValueError(
+            f'no {type!r} channel numbers on this DASdata; '
+            f'`select_taptest(dasinfo)` is what attaches taptest.'
+        )
 
     @property
     def ch0(self) -> int:
-        """Optical channel of row 0, read off `channels['raw']`."""
-        axis = self.channels['raw']
+        """Optical channel of row 0, read off `index_raw`."""
+        axis = self.index_raw
         return int(axis[0]) if axis.size else 0
 
     @property
@@ -197,7 +192,7 @@ class DASdata:
         Kept because a texture and an `imshow` extent can only be placed on a
         uniform grid, so they need one spacing rather than a list.
         """
-        axis = self.channels['raw']
+        axis = self.index_raw
         if axis.size < 2:
             return 1
         return max(1, int(round(float(np.diff(axis).mean()))))
@@ -219,7 +214,7 @@ class DASdata:
         """Cut a time window and / or pick channels, in one call.
         Args:
             ch_range: `(min_ch, max_ch)`, max exclusive, in the channel numbers
-                `channel_axis` reports. Ends outside the array are clipped.
+                `channels()` reports. Ends outside the array are clipped.
             ch_index: explicit channel numbers, in the order wanted, or a
                 length-`nx` boolean mask (which selects by row position). A
                 number the array does not hold raises.
@@ -236,7 +231,7 @@ class DASdata:
         by `ch_index` but excluded by `ch_range` is dropped rather than raising
         — that is what the pair is for.
         """
-        axis = self.channel_axis
+        axis = self.channels()
         rows = np.arange(self.nx)
         if ch_index is not None:
             req = np.asarray(ch_index)
@@ -260,15 +255,15 @@ class DASdata:
                     raise ValueError(
                         f"{len(bad)} channel(s) not in this DASdata: {bad[:8]}"
                         f"{'...' if len(bad) > 8 else ''} "
-                        f"(channel_axis spans {axis.min()}..{axis.max()})"
+                        f"(channels() spans {axis.min()}..{axis.max()})"
                     )
         if ch_range is not None:
             lo, hi = ch_range
             rows = rows[(axis[rows] >= lo) & (axis[rows] < hi)]
         if self.nx and rows.size == 0:
             raise ValueError(
-                f'no channel selected (ch_range={ch_range}); {self.channel_axis_name} '
-                f'channel_axis spans {axis.min()}..{axis.max()}'
+                f'no channel selected (ch_range={ch_range}); {self.channel_type} '
+                f'channels() spans {axis.min()}..{axis.max()}'
             )
         # Time range -> sample-index bounds, in self's seconds frame
         if t_range is None:
@@ -294,7 +289,7 @@ class DASdata:
             self, data=new_data, nx=new_data.shape[0], nt=new_nt,
             begin_time=new_begin, end_time=new_end,
             t0_sec=self.t0_sec + t0_idx * self.dt,
-            channels={k: v[rows] for k, v in self.channels.items()},
+            index_raw=self.index_raw[rows],
         )
 
     def truncate(self, ch_range=None, t_range=None) -> 'DASdata':
@@ -308,26 +303,18 @@ class DASdata:
             dasinfo: the catalog. Pass `dasinfo.active()` to drop bad-quality
                 channels too; `located()` on that subset is a no-op.
         Returns:
-            A fresh DASdata carrying both 'raw' and 'taptest' labels, with
-            `channel_axis` already switched to 'taptest'.
+            A fresh DASdata with `dasinfo` attached and `channel_type` set
+            to 'taptest'.
 
         Intersected, not demanded: a catalog covers the whole deployment and
         this window holds a part of it.
         """
-        info = dasinfo.located()
-        raw = self.channels['raw']
-        want = np.asarray(info.index_raw, dtype=np.int64)
-        rows = np.flatnonzero(np.isin(raw, want))
-        # `index_taptest` is in the catalog's row order; reindex onto ours
-        tap = info.df['index_taptest'].to_numpy()
-        at = {int(r): i for i, r in enumerate(want)}
-        labels = {k: v[rows] for k, v in self.channels.items()}
-        labels['taptest'] = np.array([tap[at[int(c)]] for c in raw[rows]])
-        out = replace(
+        rows = np.flatnonzero(np.isin(self.index_raw, dasinfo.located().index_raw))
+        return replace(
             self, data=np.ascontiguousarray(self.data[rows]),
-            nx=rows.size, channels=labels
+            nx=rows.size, index_raw=self.index_raw[rows],
+            dasinfo=dasinfo, channel_type='taptest',
         )
-        return out.set_channel_axis('taptest')
 
     def skip_ch(self, step: int) -> 'DASdata':
         """Keep every `step`-th channel (uniform decimation), updating `dx`.
@@ -346,7 +333,7 @@ class DASdata:
         new_dx = self.dx * step if self.dx is not None else None
         return replace(
             self, data=new_data, nx=new_data.shape[0], dx=new_dx,
-            channels={k: v[::step] for k, v in self.channels.items()},
+            index_raw=self.index_raw[::step],
         )
 
     def skip_t(self, step: int) -> 'DASdata':

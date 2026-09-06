@@ -28,7 +28,7 @@ def test_read_payload_and_axes(silixa_file):
     assert np.isclose(d.dx, 4.0 * 1.02)
     assert d.begin_time == T0 and d.end_time == T0 + timedelta(seconds=2.55)
     assert d.format == "Silixa" and d.origin == "Silixa" and d.units == "count/s"
-    assert list(d.channels["raw"]) == [0, 1, 2, 3]
+    assert list(d.index_raw) == [0, 1, 2, 3]
 
 
 def test_time_from_gps_string_without_iso_attr(silixa_file):
@@ -40,7 +40,7 @@ def test_time_from_gps_string_without_iso_attr(silixa_file):
 def test_subset_kwargs(silixa_file):
     d = DASFile(silixa_file).read(min_ch=1, max_ch=3, first_sample=10, n_samples=20)
     assert d.data.shape == (2, 20)
-    assert list(d.channels["raw"]) == [1, 2]
+    assert list(d.index_raw) == [1, 2]
     assert d.begin_time == T0 + timedelta(seconds=0.1)
 
 

@@ -742,7 +742,7 @@ class DASdb:
         return DASdata(
             data=data, fs=fs, dt=dt, nt=nt, nx=nx,
             dx=first_read.dx,
-            channels={'raw': int(min_ch) + np.arange(nx)},
+            index_raw=int(min_ch) + np.arange(nx),
             begin_time=out_begin, end_time=out_end,
             # Format from the catalog, vendor from the file it read.
             gauge_length_m=first_read.gauge_length_m,

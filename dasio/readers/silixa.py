@@ -76,7 +76,7 @@ def read_silixa_raw(
     begin_time = _begin_time(attrs) + timedelta(seconds=first_sample * dt)
     return DASdata(
         data=data,
-        channels={'raw': int(min_ch) + np.arange(nx)},
+        index_raw=int(min_ch) + np.arange(nx),
         fs=fs, dt=dt, nt=nt, nx=nx, dx=_dx(attrs),
         begin_time=begin_time,
         end_time=begin_time + timedelta(seconds=(nt - 1) * dt),

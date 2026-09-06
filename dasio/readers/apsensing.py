@@ -140,7 +140,7 @@ def read_apsensing_raw(
 
     return DASdata(
         data=data,
-        channels={'raw': int(min_ch) + np.arange(nx)},
+        index_raw=int(min_ch) + np.arange(nx),
         fs=fs, dt=dt, nt=nt, nx=nx, dx=dx,
         begin_time=begin_time, end_time=end_time,
         gauge_length_m=gauge_length_m, format='APSensing', origin='APSensing',

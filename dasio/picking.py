@@ -62,7 +62,7 @@ class Picks:
     nt: int
     t0_sec: float = 0.0  # seconds-axis value at sample 0, matching DASdata.times()
     # `channel_index` is the row position, so it indexes `scores`; `channel` is
-    # the active `channel_axis` value, which joins to a DASinfo.
+    # the active `channels()` value, which joins to a DASinfo.
     scores: Optional[np.ndarray] = None
 
     def __repr__(self):
@@ -144,7 +144,7 @@ def pick_phases(
         device=device,
     )
     # A lookup, not `ch0 + row*dch`: a `select` can leave the axis gappy.
-    axis = d.channel_axis
+    axis = d.channels()
     cols = ["channel_index", "channel", "phase_index", "phase_type",
             "phase_time", "phase_score"]
     if raw:

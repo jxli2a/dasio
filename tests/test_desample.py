@@ -36,10 +36,10 @@ def test_desample_window_preserves_the_channel_axis(procs):
     out = ds.desample_window(rw, format="Proc", min_ch=4, max_ch=12)
 
     assert out.nx == 8
-    np.testing.assert_array_equal(out.channel_axis, np.arange(4, 12))
+    np.testing.assert_array_equal(out.channels(), np.arange(4, 12))
     assert out.ch0 == 4 and out.dch == 1
     # the labels must be exactly one per row, or every downstream lookup slides
-    assert len(out.channels['raw']) == out.nx
+    assert len(out.index_raw) == out.nx
 
 
 def test_proc_read_records_min_ch(procs):
@@ -50,7 +50,7 @@ def test_proc_read_records_min_ch(procs):
     from dasio.dasfile import DASFile
     d = DASFile(procs[0], format="Proc").read(min_ch=4, max_ch=12)
     assert d.nx == 8
-    np.testing.assert_array_equal(d.channel_axis, np.arange(4, 12))
+    np.testing.assert_array_equal(d.channels(), np.arange(4, 12))
 
 
 def test_channel_axis_survives_chunked_reads(procs):
@@ -66,5 +66,5 @@ def test_channel_axis_survives_chunked_reads(procs):
 
     out = ds.desample_window(rw, format="Proc", min_ch=2, max_ch=14, nchbuffer=3)
     assert out.nx == 12                                  # 4 chunks of 3
-    assert len(out.channels["raw"]) == out.nx        # one label per row
-    np.testing.assert_array_equal(out.channel_axis, np.arange(2, 14))
+    assert len(out.index_raw) == out.nx        # one label per row
+    np.testing.assert_array_equal(out.channels(), np.arange(2, 14))
