@@ -62,7 +62,7 @@ d = d.to_physical()                          # vendor units -> microstrain (or /
 
 Readers return the instrument's own units (OptaSense counts, AP Sensing
 radian/s, Silixa iDAS counts, ASN strain/s); `to_physical()` is the one conversion step, and a no-op
-if already converted. Raw OptaSense can roll over at 2**32 — call `d.unwrap()`
+if already converted. Raw OptaSense can roll over at 2**32 — call `d.unwrap_int32()`
 first, on the concatenated window rather than per file.
 
 ## Command line

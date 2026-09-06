@@ -12,8 +12,8 @@ dist/
 .mypy_cache/
 .ruff_cache/
 
-# Spec / design / planning documents — never committed (code only)
-docs/superpowers/
+# Private notes, specs and planning -- never committed. docs/ is for Sphinx.
+docs_local/
 
 # SDD workspace
 .superpowers/
@@ -23,3 +23,6 @@ docs/superpowers/
 
 # Local scratch: ad-hoc scripts and figures against the local archive
 mytest/
+
+# Claude Code, never committed
+.claude/
